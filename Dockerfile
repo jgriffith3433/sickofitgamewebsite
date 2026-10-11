@@ -24,15 +24,12 @@ COPY icons/ /usr/share/nginx/html/icons/
 COPY offline.html /usr/share/nginx/html/offline.html
 COPY manifest.json /usr/share/nginx/html/manifest.json
 COPY sw.js /usr/share/nginx/html/sw.js
-COPY umami-game-events.js /usr/share/nginx/html/umami-game-events.js
 COPY favicon.ico /usr/share/nginx/html/favicon.ico
 COPY images/ /usr/share/nginx/html/images/
 COPY blog/ /usr/share/nginx/html/blog/
 COPY music/ /usr/share/nginx/html/music/
 COPY shorts/ /usr/share/nginx/html/shorts/
 COPY videos/ /usr/share/nginx/html/videos/
-COPY TakeGame/ /usr/share/nginx/html/TakeGame/
-COPY BuyGame/ /usr/share/nginx/html/BuyGame/
 
 CMD ["nginx", "-g", "daemon off;"]
 
@@ -45,15 +42,12 @@ COPY icons/ /usr/share/nginx/html/icons/
 COPY offline.html /usr/share/nginx/html/offline.html
 COPY manifest.json /usr/share/nginx/html/manifest.json
 COPY sw.js /usr/share/nginx/html/sw.js
-COPY umami-game-events.js /usr/share/nginx/html/umami-game-events.js
 COPY favicon.ico /usr/share/nginx/html/favicon.ico
 COPY images/ /usr/share/nginx/html/images/
 COPY blog/ /usr/share/nginx/html/blog/
 COPY music/ /usr/share/nginx/html/music/
 COPY shorts/ /usr/share/nginx/html/shorts/
 COPY videos/ /usr/share/nginx/html/videos/
-COPY TakeGame/ /usr/share/nginx/html/TakeGame/
-COPY BuyGame/ /usr/share/nginx/html/BuyGame/
 COPY index.html /usr/share/nginx/html/index.html
 COPY PreGame/ /usr/share/nginx/html/PreGame/
 COPY Game/ /usr/share/nginx/html/Game/

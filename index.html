@@ -11,9 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sick Of It</title>
-    <!-- Umami Analytics -->
-    <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
-    <script src="/umami-game-events.js"></script>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="/icons/icon-192.svg">
@@ -784,40 +781,6 @@
         document.body.appendChild(script);
       }
 
-      // Check if user has already purchased the game
-      (async function checkUserAccess() {
-        try {
-          const response = await fetch('/paywall/check-access', {
-            method: 'GET',
-            credentials: 'include'
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data.hasAccess && data.tier !== 'free') {
-              // Paid users go straight to the full game
-              const startButton = document.getElementById('start-button');
-              startButton.textContent = 'Game';
-              
-              // Remove the Unity loading click handler
-              startButton.removeEventListener('click', loadUnityGame);
-              
-              // Add navigation to /Game instead
-              startButton.addEventListener('click', function() {
-                window.location.href = '/Game/';
-              });
-            }
-            // Free-tier users (data.tier === 'free') keep the default PreGame behaviour
-          }
-          // If request fails or hasAccess is false, keep default behavior of loading PreGame
-        } catch (error) {
-          console.log('Auth check failed, showing demo version');
-          // Keep default behavior on error
-        }
-      })();
-
-      // Attach click handler to start button (may be replaced by checkUserAccess)
       document.getElementById('start-button').addEventListener('click', loadUnityGame);
 
       window.addEventListener('unhandledrejection', function(event) {
