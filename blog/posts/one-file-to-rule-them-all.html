@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>One File to Rule Them All - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+    code { color: #e685b5; }
+    .blog-img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 576px) {
+      .before-after { grid-template-columns: 1fr; }
+    }
+    .before-box, .after-box {
+      padding: 1.25rem;
+      border-radius: 8px;
+    }
+    .before-box {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    .after-box {
+      background: rgba(25, 135, 84, 0.1);
+      border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    .rule-card {
+      background: rgba(13, 110, 253, 0.08);
+      border: 1px solid rgba(13, 110, 253, 0.25);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .rule-card h5 {
+      color: var(--bs-primary);
+      margin-bottom: 0.5rem;
+    }
+    blockquote {
+      border-left: 3px solid var(--bs-primary);
+      padding: 0.75rem 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+    }
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    .stat-box {
+      text-align: center;
+      padding: 1rem 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      min-width: 120px;
+    }
+    .stat-box .number {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--bs-primary);
+      line-height: 1;
+    }
+    .stat-box .label {
+      font-size: 0.8rem;
+      color: var(--bs-secondary);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md border-bottom border-secondary mb-5">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../Game/">Play</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 800px;">
+    <article>
+      <header class="mb-5">
+        <p class="text-muted">March 1, 2026 • Development</p>
+        <h1 class="display-5 fw-bold mb-3">One File to Rule Them All</h1>
+        <p class="lead text-secondary">I built a Unity game where an AI edits a single YAML file and I press one button. That's the entire workflow. Here's why that's unusual and why it works.</p>
+      </header>
+
+      <!-- The Pitch -->
+      <section class="mb-5">
+        <h2>The Weird Part</h2>
+        <p>Most Unity games are built by dragging things around in the Editor. You place enemies in a scene. You wire up references by hand. You tweak values on Inspector panels. If you want to change the player's speed, you click through a hierarchy, find the right component, change the number, save the scene.</p>
+        <p>I don't do any of that anymore.</p>
+        <p>My entire game — every enemy, every level, every projectile, every cutscene, every UI screen — is defined in a single text file. An AI reads that file, understands the entire game, makes changes to it, and then I press <strong>one button</strong> in the Unity menu bar. That button generates every prefab, every animation controller, every scene, every Addressable group. From scratch. Every time.</p>
+        <p>The file is <code>GameDefinition.asset</code>. It's 1,200 lines of YAML. It <em>is</em> the game.</p>
+      </section>
+
+      <!-- What does an AI session look like -->
+      <section class="mb-5">
+        <h2>What a Session Actually Looks Like</h2>
+        <p>Here's how I work now. I open VS Code. I open a chat with an AI. The AI has instructions that say: <em>read the architecture docs first, then look at GameDefinition.asset.</em></p>
+        <p>The AI reads one file and knows:</p>
+        <ul>
+          <li>The player's speed, jump force, health, sprite sheet, and full animation state machine</li>
+          <li>Every enemy type — their AI behavior, stats, attack patterns, sprites, and sound effects</li>
+          <li>Every level — which enemies spawn where, at what time, with what health overrides</li>
+          <li>Every cutscene — the sprite frame data, audio, and experience events</li>
+          <li>Every projectile — damage, speed, lifetime, pool size</li>
+          <li>Every UI screen — the main menu, level selection, upgrade shop</li>
+        </ul>
+        <p>Then I say something like "make the enemies smaller" or "add a new level with 5 Shooters" or "change the Chaser's chase range to 8." The AI edits the YAML. I press <strong>SickOfIt → Generate Project</strong>. Done.</p>
+        <p>No scene editing. No prefab dragging. No Inspector clicking. The AI never needs to understand Unity's GUI. It just needs to understand a text file.</p>
+      </section>
+
+      <!-- Why text -->
+      <section class="mb-5">
+        <h2>Why This Works for AI</h2>
+        <p>AI is <em>really good</em> at editing text files. It's <em>terrible</em> at operating GUIs.</p>
+        <p>Think about what an AI agent would need to do to place an enemy in a traditional Unity project: open a scene, find the hierarchy, instantiate a prefab, set the position in the Transform component, wire up health references, configure the AI settings on the right MonoBehaviour, save the scene, mark it dirty. Every step is a potential failure point. Every step requires understanding Unity's serialization model.</p>
+        <p>Now think about what it needs to do in this project:</p>
+
+<pre class="bg-dark p-3 rounded"><code>  - type: Chaser
+    position: {x: 5, y: -2.33}
+    spawnTime: 4
+    healthOverride: 0</code></pre>
+
+        <p>That's it. Four lines of text. The AI appends them to the enemies list in a level config. The generator handles the rest — instantiating the prefab, setting the position, wiring the health component, configuring the AI, connecting the object pool, attaching rewind components, registering with the timeline.</p>
+        <p>The gap between "what the AI writes" and "what exists in the running game" is closed entirely by the generator. The AI never touches a Unity scene. It never touches a prefab. It edits data and the generator turns data into a game.</p>
+      </section>
+
+      <!-- The instructions file -->
+      <section class="mb-5">
+        <h2>Teaching the AI the Rules</h2>
+        <p>There's a file in the repo called <code>.github/copilot-instructions.md</code>. Every AI session starts by reading it. It contains the rules of the project — not suggestions, <em>rules</em>. Things the AI must know to avoid breaking the build:</p>
+
+        <div class="rule-card">
+          <h5>GameDefinition is the Source of Truth</h5>
+          <p class="mb-0">Never hardcode a value that should come from config. If you need to change how the game behaves, change the config. The generators and runtimes read from it. That's the contract.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>Everything is Generated</h5>
+          <p class="mb-0">Prefabs, animations, scenes — all generated. Never edit them by hand. If the AI tries to modify <code>Level.unity</code> directly, it's wrong. Edit the config, press the button, get a new scene.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>The Dual-Update Rule</h5>
+          <p class="mb-0">Unity's serialization has a trap: C# field defaults only apply to <em>new</em> entries. Existing YAML values override them. So when changing a default, the AI must update both the C# class and every existing YAML entry. We learned this the hard way — changed a scale value in code, ran the game, nothing changed. The YAML still had the old number.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>No Bypass Fields</h5>
+          <p class="mb-0">No <code>animatorController</code> field that lets you skip the generator. No <code>defaultSprite</code> that lets you hardcode an asset. The generator creates everything from config. There are no escape hatches, because escape hatches are where consistency goes to die.</p>
+        </div>
+
+        <p>These rules exist because an AI will take the path of least resistance. If there's a shortcut that technically works but violates the architecture, it'll use it. The instructions file eliminates those shortcuts before the session begins. The AI doesn't have to figure out the right approach — it's told the right approach upfront.</p>
+      </section>
+
+      <!-- Generate Project -->
+      <section class="mb-5">
+        <h2>One Button: Generate Project</h2>
+        <p>This is the part that's genuinely unusual. In the Unity menu bar there's a single menu item: <strong>SickOfIt → Generate Project</strong>. When you click it, the following happens in order:</p>
+        <ol>
+          <li><strong>Cleanup</strong> — Every generated asset is deleted. Prefabs, animations, scenes. All of it.</li>
+          <li><strong>Projectile prefabs</strong> — Generated from <code>ProjectileConfig[]</code>. Sprite, collider, damage, pool size, sounds.</li>
+          <li><strong>Pickup prefabs</strong> — Diamond prefab from <code>PickupConfig</code>.</li>
+          <li><strong>Platform prefabs</strong> — Generated from platform config.</li>
+          <li><strong>Player prefab</strong> — Character.prefab from <code>PlayerConfig</code>. Sprite sheet, animation state machine, physics, combat components.</li>
+          <li><strong>Enemy prefabs</strong> — Enemy_Chaser.prefab, Enemy_Fighter.prefab, etc. Each from its <code>EnemyTypeConfig</code> — sprite, animation, AI, health, drops.</li>
+          <li><strong>Gameplay scenes</strong> — Video.unity, Level.unity, Death.unity. Camera, UI, runtime scripts, all wired up via <code>SerializedObject</code>.</li>
+          <li><strong>UI scenes</strong> — MainMenu.unity, LevelSelection.unity, VideoSelection.unity, UpgradeShop.unity.</li>
+          <li><strong>Addressable groups</strong> — Every generated asset is tagged and bundled for WebGL loading.</li>
+        </ol>
+        <p>The whole thing takes a few seconds. And it's <strong>idempotent</strong> — run it twice, get identical output. There's no accumulated state, no "well this scene has a slightly different setup because someone tweaked it three weeks ago." The config is the truth. The generated output is disposable.</p>
+        <p>This means the AI can make changes fearlessly. It can't corrupt a scene. It can't leave a prefab in a half-configured state. It can't break a reference that was manually wired. Because none of those things exist. The only thing that persists is the config file, and the config file is plain text that's trivial to validate, diff, and roll back.</p>
+      </section>
+
+      <!-- What GameDefinition contains -->
+      <section class="mb-5">
+        <h2>What's In the File</h2>
+        <p>One file. 1,200 lines of YAML. This is the entire game:</p>
+
+<pre class="bg-dark p-3 rounded" style="font-size: 0.85rem;"><code>GameDefinition.asset
+├── PlayerConfig
+│   ├── spriteSheet, animationFps, spriteScale
+│   ├── animationConfig (states, transitions, parameters)
+│   └── walkSpeed, jumpForce, health, doubleJumpCost
+├── EnemyTypeConfig[] (Chaser, Fighter, Sentinel, Shooter)
+│   ├── spriteSheet, animationFps, spriteScale
+│   ├── animationConfig (per-type states and transitions)
+│   ├── moveSpeed, health, damage, knockback
+│   ├── AI settings (chaseRange, stopDistance, attackCooldown)
+│   └── drop config (diamonds, XP)
+├── LevelConfig[] (4 levels)
+│   ├── enemies[] (type, position, spawnTime, healthOverride)
+│   ├── platforms[] (position, scale)
+│   ├── barriers[] (position, scale)
+│   ├── music, duration, cameraFollowSpeed
+│   └── playerSpawnPosition
+├── VideoConfig[] (cutscenes)
+│   ├── spriteFramesData, audioClip
+│   └── experience timeline events
+├── DeathConfig[] (death animations)
+├── ProjectileConfig[] (Player, Enemy, Laser)
+│   ├── spriteSheet, scale, damage, speed, lifetime
+│   └── poolSize, sounds
+├── PickupConfig (Diamond)
+│   ├── sprite, spriteScale, colliderRadius
+│   └── popForce, gravity, lifetime
+└── UI Scene Configs
+    ├── MainMenuConfig
+    ├── SelectionSceneConfig (level/video selection)
+    └── UpgradeShopConfig</code></pre>
+
+        <p>Everything the game needs to know about itself is here. The generators read it and produce Unity assets. The runtime reads it and configures gameplay. There is no other source of truth.</p>
+      </section>
+
+      <!-- What this enables -->
+      <section class="mb-5">
+        <h2>What This Actually Enables</h2>
+        <p>Today, in a single session, an AI agent did all of this by editing one file:</p>
+        <ul>
+          <li>Moved four enemy types from separate ScriptableObject assets into the config — collapsing a dozen files into one</li>
+          <li>Replaced the win condition from "reach coordinates" to "kill all enemies" — config change plus a few lines of runtime code</li>
+          <li>Added staggered enemy spawn timing across all four levels — pure data, 23 spawn entries with specific times</li>
+          <li>Rebalanced the scale of every entity in the game — player, enemies, projectiles, pickups — by editing YAML values</li>
+        </ul>
+        <p>None of that required opening the Unity Editor. None of it required understanding Unity's scene hierarchy, or prefab overrides, or asset references. The AI edited text. I pressed a button. The game changed.</p>
+        <p>That's the point. The entire complexity of Unity — its serialization, its prefab system, its scene management, its Addressables pipeline — is hidden behind the generator. The surface area that anyone needs to interact with, human or AI, is a text file and a menu item.</p>
+      </section>
+
+      <!-- The pipeline -->
+      <section class="mb-5">
+        <h2>The Full Pipeline</h2>
+        <p>To put it all together, here's the full content pipeline from idea to running game:</p>
+
+        <div class="rule-card">
+          <h5>1. AI generates character art</h5>
+          <p class="mb-0">Using the <a href="from-prompt-to-prefab.html">prompt-to-prefab pipeline</a> — text prompt → concept art → animation → sprite sheet. ~3 minutes, ~$0.10.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>2. AI edits GameDefinition.asset</h5>
+          <p class="mb-0">Adds an enemy type entry with the sprite sheet, stats, AI behavior, animation config. Or adds a level config with enemy positions and spawn timing. Or tweaks existing values.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>3. Human presses Generate Project</h5>
+          <p class="mb-0">One click. Prefabs, animations, scenes, Addressables — all rebuilt from the config. A few seconds.</p>
+        </div>
+
+        <div class="rule-card">
+          <h5>4. Play</h5>
+          <p class="mb-0">The game reads the config at runtime. Enemies spawn at the configured times. The player has the configured stats. Everything just works.</p>
+        </div>
+
+        <p>From text prompt to playable game content. The AI never opens Unity. It never drags a prefab. It never wires a reference. It writes text and the system does the rest.</p>
+      </section>
+
+      <!-- Why a single config matters -->
+      <section class="mb-5">
+        <h2>Why a Single Config Matters</h2>
+        <p>I could have kept things "normal." ScriptableObjects for enemies. Hand-built scenes for levels. Manually wired prefabs. That's how most Unity projects work and it works fine — for humans, working alone, at human speed.</p>
+        <p>But I'm not working alone. I'm working with an AI. And an AI's biggest limitation isn't intelligence — it's <strong>context</strong>. The more files it needs to understand, the more likely it is to miss something. The more places a value can live, the more likely it is to change one place and forget another. The more manual steps between "edit" and "result," the more opportunities for things to silently break.</p>
+        <p>A single config file eliminates all of that:</p>
+        <ul>
+          <li><strong>One file to read</strong> — The AI understands the entire game by reading 1,200 lines of YAML</li>
+          <li><strong>One file to edit</strong> — Every change happens in one place. No cross-file reference tracking</li>
+          <li><strong>One button to validate</strong> — Generate Project either succeeds or fails. There's no "it generated half the assets correctly"</li>
+          <li><strong>One file to diff</strong> — Want to see what changed between sessions? <code>git diff GameDefinition.asset</code></li>
+          <li><strong>One file to roll back</strong> — Something went wrong? <code>git checkout GameDefinition.asset</code> and regenerate</li>
+        </ul>
+        <p>This isn't how Unity games are typically built. Most tutorials, most open-source projects, most professional studios use Inspector-driven workflows with dozens or hundreds of ScriptableObject assets and hand-built scenes. That works great for teams of humans using the Unity Editor.</p>
+        <p>But if your collaborator is an AI that reads and writes text? You want your entire game to <em>be</em> text.</p>
+        <blockquote>The best game architecture for human-AI collaboration is one where the game is a text file and everything else is generated from it.</blockquote>
+      </section>
+
+      <!-- What's next -->
+      <section class="mb-5">
+        <h2>What's Next</h2>
+        <p>The config can grow. More enemy types, more levels, boss encounters, new mechanics — they're all just new entries or new config sections. The generators can grow to handle them. The runtime can grow to interpret them.</p>
+        <p>But the workflow doesn't change. AI edits the config. I press the button. The game rebuilds. That's it. That's the whole process. And it's fast enough that iteration feels instant — change a number, regenerate, play, decide if it's better. Repeat.</p>
+        <p>I don't think this is how everyone should build games. But if you're building with AI as your primary collaborator? This is the architecture you want. Make your game a text file. Make everything else disposable. Let the AI do what it's good at — editing text — and let the generator do the rest.</p>
+      </section>
+
+      <!-- Back link -->
+      <div class="mt-5 pt-4 border-top border-secondary">
+        <a href="../" class="text-decoration-none">← Back to Blog</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="border-top border-secondary mt-5 py-4">
+    <div class="container text-center text-muted">
+      <small>© 2026 Sick Of It. All rights reserved.</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

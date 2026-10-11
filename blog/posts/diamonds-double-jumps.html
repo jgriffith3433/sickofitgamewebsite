@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Diamonds, Double Jumps, and Cascading Health - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="../stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <article class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          <a href="../index.html" class="btn btn-outline-secondary btn-sm mb-3">← Back to Blog</a>
+          <h1 class="display-4 fw-bold mb-3">Diamonds, Double Jumps, and Cascading Health</h1>
+          <div class="text-muted mb-4">
+            <span class="me-3">February 22, 2026</span>
+            <span>Development</span>
+          </div>
+        </div>
+
+        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="post:diamonds-double-jumps#intro">
+          <div class="card-body">
+            <p class="lead mb-0">You can now find diamonds in the world — and yes, Yooba's earned every one of his double jumps.</p>
+          </div>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:diamonds-double-jumps#diamonds">
+          <h2 class="h3 mb-3">Diamonds & Double Jumps</h2>
+          <p>
+            Diamonds are in.
+          </p>
+          <p>
+            Yooba doesn't get double jumps for free — he has to earn them. Think of it as a 'lite' run benefit: progress carries some perks, but you still have to work for them.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:diamonds-double-jumps#health">
+          <h2 class="h3 mb-3">The Health System (and my oops moment)</h2>
+          <p>
+            I accidentally made the game much tougher by changing how health works: health now cascades between levels.
+            You start Level 1 with full health. If you get hurt during a level, you will begin the next level with whatever health you had left.
+          </p>
+          <p>
+            The annoying part: yes, that makes mistakes sting more. The good part: you can replay earlier levels to improve your health delta and let that improvement flow forward.
+            Replay a previous stage, take less damage, and the better health carries forward — helping you clear levels you couldn't before.
+          </p>
+          <p>
+            So while I may have cranked up the difficulty by removing instant health resets, the system rewards going back, grinding a bit, and getting smarter about your routes.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:diamonds-double-jumps#final">
+          <h2 class="h3 mb-3">What This Means</h2>
+          <ul>
+            <li>Diamonds are collectible and useful — double jumps cost <strong>100 diamonds</strong>.</li>
+            <li>Health carries forward between levels (cascades) — replaying earlier levels helps you build up a better health baseline.</li>
+            <li>It creates a light persistent progression: you keep some consequences, but can recover via replay.</li>
+          </ul>
+        </div>
+
+        <div class="text-muted small mt-5 pt-4 border-top border-secondary">
+          <p>
+            <strong>Remember:</strong> Yooba loves diamonds. He earned every double jump. He will keep earning them. Diamonds are his thing now.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

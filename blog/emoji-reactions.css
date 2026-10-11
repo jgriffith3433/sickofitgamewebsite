@@ -1,0 +1,204 @@
+/* ── Emoji Reactions Styles ──────────────────────────────────────── */
+
+/* ── Add Reaction Button ─────────────────────────────────────────── */
+.emoji-add-btn {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 1.15rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  z-index: 10;
+  white-space: nowrap;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.emoji-add-btn:hover {
+  background: rgba(13, 110, 253, 0.35);
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(13, 110, 253, 0.3);
+}
+.emoji-add-plus {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  margin-left: 1px;
+}
+
+/* Card variant: top-right on hover */
+.emoji-add-btn-card {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+[data-reaction-target]:hover > .emoji-add-btn-card,
+[data-reaction-target]:hover > .card > .emoji-add-btn-card {
+  display: inline-flex;
+}
+
+/* Inline variant: right-aligned at end of element */
+.emoji-add-btn-inline {
+  position: absolute;
+  top: 4px;
+  right: -4px;
+}
+[data-reaction-target]:hover > .emoji-add-btn-inline {
+  display: inline-flex;
+}
+
+/* ── Emoji Picker ─────────────────────────────────────────────────── */
+.emoji-picker {
+  position: absolute;
+  z-index: 9999;
+  width: 340px;
+  max-height: 420px;
+  background: #1a1d23;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: emojiPickerIn 0.15s ease-out;
+}
+@keyframes emojiPickerIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Tabs */
+.emoji-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.emoji-tabs::-webkit-scrollbar { display: none; }
+.emoji-tab {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.emoji-tab:hover {
+  background: rgba(255,255,255,0.08);
+}
+.emoji-tab.active {
+  background: rgba(13, 110, 253, 0.25);
+}
+
+/* Grid */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 8px 10px 12px;
+  overflow-y: auto;
+  max-height: 280px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.emoji-grid::-webkit-scrollbar { width: 6px; }
+.emoji-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+.emoji-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.35rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.12s;
+  padding: 0;
+}
+.emoji-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.2);
+}
+.emoji-btn.reacted {
+  background: rgba(13, 110, 253, 0.2);
+  border-radius: 6px;
+}
+
+/* ── Reaction Badges ──────────────────────────────────────────────── */
+.emoji-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 0;
+}
+.emoji-badges:empty {
+  margin-top: 0;
+}
+.emoji-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 3px 10px 3px 6px;
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.04);
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.emoji-badge:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  transform: scale(1.05);
+}
+.emoji-badge.user-reacted {
+  background: rgba(13, 110, 253, 0.18);
+  border-color: rgba(13, 110, 253, 0.4);
+  color: #8bb8ff;
+}
+.emoji-badge-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+.emoji-badge-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ── Reaction wrapper (for non-card elements) ─────────────────────── */
+.emoji-reaction-wrap {
+  margin-bottom: 8px;
+}
+
+/* ── Mobile adjustments ──────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .emoji-picker {
+    width: calc(100vw - 24px);
+    left: 12px !important;
+    max-height: 380px;
+  }
+  .emoji-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .emoji-add-btn-card {
+    display: inline-flex;
+  }
+  .emoji-add-btn-inline {
+    display: inline-flex;
+  }
+}

@@ -1,0 +1,90 @@
+services:
+  web:
+    image: jgriffith3433/sickofitgame:latest
+    container_name: sickofitgame
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - game-network
+    environment:
+      - TZ=UTC
+    labels:
+      - "com.docker.compose.project=sickofitgame"
+    depends_on:
+      - paywall
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  paywall:
+    image: jgriffith3433/sickofitgame-paywall:latest
+    container_name: paywall
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - SITE_URL=${SITE_URL}
+      - SITE_NAME=${SITE_NAME:-Sick Of It}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-}
+      - SESSION_EXPIRY_DAYS=${SESSION_EXPIRY_DAYS:-365}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM=${RESEND_FROM:-support@sickofitgame.com}
+      - DB_PATH=/data/paywall.db
+      - PRODUCTS=${PRODUCTS:-}
+      - PROTECTED_PATHS=${PROTECTED_PATHS:-}
+      - CLEANUP_SECRET=${CLEANUP_SECRET}
+      - UMAMI_API_URL=http://umami:3000
+      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
+    volumes:
+      - paywall-data:/data
+    networks:
+      - game-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/paywall/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  umami-db:
+    image: postgres:15-alpine
+    container_name: umami-postgres
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:-change_this_secure_password}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - game-network
+    restart: always
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: umami
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:-change_this_secure_password}@umami-db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET:-change_this_to_random_32_char_secret}
+    depends_on:
+      - umami-db
+    networks:
+      - game-network
+    restart: always
+
+volumes:
+  umami-db-data:
+  paywall-data:
+
+networks:
+  game-network:
+    driver: bridge

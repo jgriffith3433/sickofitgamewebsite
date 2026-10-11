@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Tearing It All Down - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+    code { color: #e685b5; }
+    .blog-img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 576px) {
+      .before-after { grid-template-columns: 1fr; }
+    }
+    .before-box, .after-box {
+      padding: 1.25rem;
+      border-radius: 8px;
+    }
+    .before-box {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    .after-box {
+      background: rgba(25, 135, 84, 0.1);
+      border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    .timeline-entry {
+      border-left: 3px solid var(--bs-primary);
+      padding-left: 1.5rem;
+      margin-left: 0.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .timeline-entry::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bs-primary);
+    }
+    .timeline-entry.error::before { background: var(--bs-danger); }
+    .timeline-entry.error { border-left-color: var(--bs-danger); }
+    .timeline-entry.success::before { background: var(--bs-success); }
+    .timeline-entry.success { border-left-color: var(--bs-success); }
+    .damage-counter {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--bs-danger);
+      text-align: center;
+      line-height: 1;
+    }
+    .damage-label {
+      text-align: center;
+      color: var(--bs-secondary);
+      font-size: 0.9rem;
+    }
+    blockquote {
+      border-left: 3px solid var(--bs-primary);
+      padding: 0.75rem 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md border-bottom border-secondary mb-5">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../Game/">Play</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 800px;">
+    <article>
+      <header class="mb-5">
+        <p class="text-muted">March 1, 2026 • Development</p>
+        <h1 class="display-5 fw-bold mb-3">Tearing It All Down</h1>
+        <p class="lead text-secondary">How I destroyed a working Unity game to make it config-driven, fought with AI tooling all evening, and ended up in a better place. Probably.</p>
+      </header>
+
+      <!-- The Feeling -->
+      <section class="mb-5">
+        <h2>The Honest Part</h2>
+        <p>I'm going to be real: today felt like starting over. I had a game that <em>worked</em>. 15 scenes. Enemies that spawned. Videos that played. A build pipeline that shipped to production. Version 97 is live on the website right now.</p>
+        <p>And I tore all of it apart.</p>
+        <p>Not because it was broken. Because it wasn't <strong>scalable</strong>. Every time I wanted to add a level, I had to manually build a scene, drag in prefabs, wire up PlayableDirectors, configure Addressable groups by hand, copy-paste enemies, tweak positions in the editor. It was slow, error-prone, and completely dependent on me doing everything manually in the Unity Editor.</p>
+        <p>So I made the decision: make the game entirely data-driven. One config file defines everything. One button regenerates the whole project.</p>
+        <p>What I didn't anticipate was how painful the transition would be.</p>
+      </section>
+
+      <!-- The Damage -->
+      <section class="mb-5">
+        <h2>The Damage Report</h2>
+        <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+          <div class="col text-center">
+            <div class="damage-counter">15</div>
+            <div class="damage-label">Scenes deleted</div>
+          </div>
+          <div class="col text-center">
+            <div class="damage-counter">0</div>
+            <div class="damage-label">PlayableDirectors remaining</div>
+          </div>
+          <div class="col text-center">
+            <div class="damage-counter">30+</div>
+            <div class="damage-label">Editor tools removed</div>
+          </div>
+          <div class="col text-center">
+            <div class="damage-counter">7</div>
+            <div class="damage-label">Hours of pain</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Problem with MCP -->
+      <section class="mb-5">
+        <h2>Unity MCP: The Tool That Wasn't</h2>
+        <p>Part of the vision was using <strong>Unity MCP</strong> — a bridge that lets AI agents control the Unity Editor remotely via WebSocket. Execute menu items, read console logs, modify scenes. In theory, it's incredible.</p>
+        <p>In practice? It disconnected <em>constantly</em>.</p>
+        <p>Every time we tried to execute a menu item — which is how you trigger editor scripts from outside Unity — the MCP connection would drop. We'd send the command, wait for results, and get nothing back. The operation might have succeeded, or it might have silently failed. No way to know without manually checking the Unity console.</p>
+        <p>Domain reloads killed it. Heavy operations killed it. Sometimes it just died for no reason. We had a monitor script that tried to auto-restart it every 5 seconds, and even that wasn't enough.</p>
+        <p>The result? Half the session was spent blind. The AI would write a script, try to execute it via MCP, get disconnected, write a <em>different</em> script, try again, get disconnected again. We went through at least 5 iterations of "fix and consolidate" scripts because we could never confirm what actually ran.</p>
+        <blockquote>If your AI tooling can't reliably tell you whether it succeeded, you're not automating — you're gambling.</blockquote>
+      </section>
+
+      <!-- Before/After -->
+      <section class="mb-5">
+        <h2>Before vs After</h2>
+        <div class="before-after mb-4">
+          <div class="before-box">
+            <h5 class="text-danger">❌ Before</h5>
+            <ul class="mb-0">
+              <li>15 individual scenes</li>
+              <li>PlayableDirectors for video playback</li>
+              <li>Manually placed enemies in each scene</li>
+              <li>30+ context menu tools</li>
+              <li>Scene-specific code everywhere</li>
+              <li>Add a level = build a whole scene by hand</li>
+              <li>Enemies, cameras, UI wired per-scene</li>
+            </ul>
+          </div>
+          <div class="after-box">
+            <h5 class="text-success">✅ After</h5>
+            <ul class="mb-0">
+              <li>3 generated scenes (Video, Level, Death)</li>
+              <li>SpriteFramePlayer + GameClock for playback</li>
+              <li>All enemies defined in config with positions</li>
+              <li>1 menu item: Generate Project</li>
+              <li>Config-driven everything</li>
+              <li>Add a level = add an entry to GameDefinition</li>
+              <li>UI/camera prefabs defined once in config</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Architecture -->
+      <section class="mb-5">
+        <h2>The New Architecture</h2>
+        <p>Everything flows from one file: <code>GameDefinition.asset</code></p>
+
+<pre class="bg-dark p-3 rounded"><code>GameDefinition.asset
+├── PlayerConfig (prefab, speed, health, upgrades)
+├── LevelConfig[] (enemies, platforms, music, duration, barriers)
+├── VideoConfig[] (sprite frames data, audio, flow)
+├── DeathConfig[] (animation data, audio, reload delay)
+├── EnemyTemplate[] (prefab, stats, sounds, drops)
+└── Scene Prefabs (camera, UI for each scene type)</code></pre>
+
+        <p>When you press <strong>Generate Project</strong>, the system reads this config and produces fully-wired Unity scenes. The generators use <code>SerializedObject</code> to connect every reference at edit-time — the Character prefab is instantiated and wired to LevelRuntime, the camera prefab is placed and wired to the canvas, the AudioSource is connected to the music clip.</p>
+
+        <p>At runtime, <code>LevelRuntime</code> reads the level number from PlayerPrefs, looks up the config, and spawns enemies, platforms, and barriers dynamically. <code>VideoRuntime</code> does the same for videos. <code>DeathRuntime</code> for deaths.</p>
+
+        <p>The scenes are output. The config is the game.</p>
+      </section>
+
+      <!-- Why This Matters -->
+      <section class="mb-5">
+        <h2>Why I Did This</h2>
+        <p>Three days ago I built an <a href="from-prompt-to-prefab.html">AI pipeline that generates enemy characters from text prompts</a>. Concept art → animation → sprite sheet → Unity prefab in about 3 minutes, $0.10 per character.</p>
+        <p>But the pipeline ended at the prefab. Getting that character into an actual level still required manual scene editing. Place the prefab, set the position, configure health, wire up the spawn timing. For every single instance.</p>
+        <p>Now? I add an entry to the enemies list in the config:</p>
+
+<pre class="bg-dark p-3 rounded"><code>- type: Chaser
+  position: {x: 3, y: -2}
+  spawnTime: 5
+  healthOverride: 10</code></pre>
+
+        <p>That's it. The pipeline now goes all the way from text prompt to in-game enemy. No manual scene editing. No drag and drop. No "open Level3.unity and place the prefab at these coordinates."</p>
+        <p>This is what pipeline-ready means. Every piece of content — enemies, levels, videos, death animations — is just data. And data can be generated, modified, and deployed by scripts, AI agents, or a simple YAML edit.</p>
+      </section>
+
+      <!-- The Rewind System -->
+      <section class="mb-5">
+        <h2>The Rewind System Survived</h2>
+        <p>One thing that came through the refactor intact: the <strong>rewind system</strong>. We replaced Unity's Timeline with a custom <code>GameClock</code> that can run time forward or backward. A <code>StateRecorder</code> takes snapshots of the entire game state — player position, enemy positions, health values, camera position — at regular intervals. When you hold the rewind button, the GameClock reverses, and snapshots are restored in reverse order.</p>
+        <p>This is one of the reasons we killed PlayableDirectors. Timeline only goes forward. GameClock goes both ways. Every system in the game — sprite playback, experience events, enemy spawning — reads from GameClock instead of <code>Time.time</code>. Rewind isn't a special mode. It's just time going the other direction.</p>
+      </section>
+
+      <!-- What's Left -->
+      <section class="mb-5">
+        <h2>What's Left</h2>
+        <p>The game is "closer" — but it's also clearly broken in new ways. Video playback needs debugging. The SpriteFramePlayer loads chunks via Addressables but may not be advancing frames correctly. The project generator creates simple scenes but the individual generators create richer ones — those need to be reconciled.</p>
+        <p>But the foundation is right. The architecture is right. And for the first time, the game is truly data-driven.</p>
+        <p>Sometimes you have to tear everything down to build it back correctly.</p>
+        <p>I just wish it didn't take 6 hours and a slowly depleting credit balance to get here.</p>
+      </section>
+
+      <!-- Bonus -->
+      <section class="mb-5">
+        <h2>Bonus: Watching the AI Think</h2>
+        <p>I don't know if I'm doing this right, but this is what I use to follow Claw's reasoning while it's deployed in a Docker container. It tails the latest session log, filters for assistant messages, and extracts the text and thinking content in real-time:</p>
+
+<pre class="bg-dark p-3 rounded" style="font-size: 0.8rem; overflow-x: auto;"><code>@echo off
+docker exec -it claw-docker-openclaw-gateway-1 bash -c ^
+  "tail -f $(ls -t /home/node/.openclaw/agents/main/sessions/*.jsonl | head -1) ^
+  | grep --line-buffered '\"role\":\"assistant\"' ^
+  | jq --unbuffered -r '.message.content[] ^
+  | select(.type==\"text\" or .type==\"thinking\") | .text'"</code></pre>
+
+        <p>Seems to work really well with Opus. You can watch it reason through problems, plan its approach, catch its own mistakes. It's genuinely fascinating to see the thought process unfold in real-time.</p>
+        <p>With Sonnet? Falls completely flat. The reasoning is shallow, it misses context, and it keeps making the same mistakes in circles. Tonight was a perfect example — switched from Sonnet to Opus mid-session and the difference was night and day.</p>
+        <p>If you're running OpenClaw in Docker and want to see what your AI is actually thinking, give that one-liner a try.</p>
+      </section>
+
+      <!-- Back link -->
+      <div class="mt-5 pt-4 border-top border-secondary">
+        <a href="../" class="text-decoration-none">← Back to Blog</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="border-top border-secondary mt-5 py-4">
+    <div class="container text-center text-muted">
+      <small>© 2026 Sick Of It. All rights reserved.</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Key - Sick Of It</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+
+                <!-- First visit: show the key -->
+                <div id="first-visit">
+                    <div class="text-center mb-4">
+                        <h1 class="display-5 fw-bold mb-2">Free Game Key</h1>
+                        <p class="text-secondary">Here's your complimentary access code</p>
+                    </div>
+
+                    <div class="card bg-secondary bg-opacity-10 border-secondary mb-4">
+                        <div class="card-body p-4 text-center">
+                            <div class="small text-muted text-uppercase mb-2">Product Key</div>
+                            <div class="fs-4 fw-bold text-primary mb-2"
+                                 id="cdKey"
+                                 onclick="copyCode()"
+                                 style="cursor: pointer; font-family: 'Courier New', monospace; user-select: all;">
+                                SICK-0F1T-FR33-2026
+                            </div>
+                            <div class="small text-success" id="copyFeedback" style="opacity: 0; transition: opacity 0.3s;">Copied to clipboard</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <strong class="d-block mb-2">How to redeem:</strong>
+                        <ol class="mb-0">
+                            <li class="mb-2">Click the key above to copy it</li>
+                            <li class="mb-2">Visit the <a href="/paywall/redeem" class="text-decoration-none">redemption page</a></li>
+                            <li class="mb-2">Paste your key and activate</li>
+                            <li>Start playing immediately</li>
+                        </ol>
+                    </div>
+
+                    <p class="text-center text-muted fst-italic mb-4">
+                        This key is provided free of charge. No payment required.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <a href="/paywall/redeem?code=SICK-0F1T-FR33-2026" class="btn btn-primary btn-lg">Redeem Key Now</a>
+                        <a href="/paywall/redeem" class="btn btn-outline-secondary btn-lg">I have a paid access code</a>
+                        <a href="/" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+                    </div>
+                </div>
+
+                <!-- Return visit: already took the free game -->
+                <div id="return-free" style="display: none;">
+                    <div class="text-center mb-4">
+                        <h1 class="display-5 fw-bold mb-2">You already took the game, you Bork.</h1>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="/Game/" class="btn btn-primary btn-lg">Take me to the game</a>
+                        <a href="/paywall/redeem" class="btn btn-outline-secondary btn-lg">I have a paid access code</a>
+                        <a href="/" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+                    </div>
+                </div>
+
+                <!-- Return visit: already bought the game -->
+                <div id="return-paid" style="display: none;">
+                    <div class="text-center mb-4">
+                        <h1 class="display-5 fw-bold mb-2">You already bought the game!</h1>
+                        <p class="text-secondary">Redeem your access code to get in.</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="/paywall/redeem" class="btn btn-primary btn-lg">Redeem Your Code</a>
+                        <a href="/Game/" class="btn btn-outline-secondary btn-lg">Go to Game</a>
+                        <a href="/" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+            return match ? decodeURIComponent(match[1]) : null;
+        }
+
+        var existingTier = getCookie('game_tier');
+
+        if (existingTier) {
+            document.getElementById('first-visit').style.display = 'none';
+            if (existingTier === 'free') {
+                document.getElementById('return-free').style.display = 'block';
+            } else {
+                document.getElementById('return-paid').style.display = 'block';
+            }
+        }
+        // No else – don't set the cookie here. It gets set by the backend
+        // on actual redemption so we only show the return screen to users
+        // who have genuinely redeemed the game.
+
+        function copyCode() {
+            var codeElement = document.getElementById('cdKey');
+            var feedback = document.getElementById('copyFeedback');
+            navigator.clipboard.writeText(codeElement.textContent.trim()).then(function() {
+                feedback.style.opacity = '1';
+                setTimeout(function() { feedback.style.opacity = '0'; }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy:', err);
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

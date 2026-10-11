@@ -1,0 +1,15 @@
+services:
+  web:
+    image: jgriffith3433/sickofitgame:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: sickofitgame-prod
+
+  paywall:
+    image: jgriffith3433/sickofitgame-paywall:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: paywall-prod

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Shorts - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="emoji-reactions.css">
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 600;
+    }
+    .video-player {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding: 2rem;
+    }
+    
+    .video-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #videoPlayer {
+      width: 100%;
+      max-height: 500px;
+      border-radius: 8px;
+      background: #000;
+    }
+    
+    .video-info {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .video-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .video-description {
+      color: #888;
+      font-size: 1rem;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+    
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .control-btn.play-btn {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .volume-slider {
+      flex: 1;
+    }
+    
+    .playlist {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .playlist-item {
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+    
+    .playlist-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .playlist-item.active {
+      background: rgba(13, 110, 253, 0.2);
+      border-color: #0d6efd;
+    }
+    
+    .playlist-item-title {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .playlist-item-description {
+      font-size: 0.875rem;
+      color: #888;
+    }
+    
+    @media (max-width: 768px) {
+      .video-player {
+        padding: 1rem;
+      }
+      
+      .video-title {
+        font-size: 1.25rem;
+      }
+      
+      .control-btn {
+        width: 45px;
+        height: 45px;
+      }
+      
+      .control-btn.play-btn {
+        width: 55px;
+        height: 55px;
+      }
+      
+      #videoPlayer {
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link active" href="shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <header class="text-center mb-5 p-5 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+      <h1 class="display-3 fw-bold mb-3">Game Shorts</h1>
+      <p class="lead text-secondary">Watch short gameplay clips from Sick Of It</p>
+    </header>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="video-player">
+          <div class="video-container">
+            <video id="videoPlayer" controls></video>
+          </div>
+          
+          <div class="video-info">
+            <div class="video-title" id="videoTitle">Select a short</div>
+            <div class="video-description" id="videoDescription">Sick Of It Shorts</div>
+          </div>
+          
+          <div class="controls">
+            <button class="control-btn" id="prevBtn" title="Previous">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M8.354 11.854a.5.5 0 0 0 0-.708L5.707 8.5 8.354 5.854a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708 0z"/>
+              </svg>
+            </button>
+            
+            <button class="control-btn play-btn" id="playBtn" title="Play">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16" id="playIcon">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/>
+              </svg>
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16" id="pauseIcon" style="display:none;">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M5 6.25a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0v-3.5zm3.5 0a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0v-3.5z"/>
+              </svg>
+            </button>
+            
+            <button class="control-btn" id="nextBtn" title="Next">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M7.646 11.854a.5.5 0 0 1 0-.708L10.293 8.5 7.646 5.854a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0z"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="volume-control">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+              <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+              <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707z"/>
+              <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+            </svg>
+            <input type="range" class="form-range volume-slider" min="0" max="100" value="70" id="volumeSlider">
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <h3 class="h5 mb-3">Playlist</h3>
+          <div class="playlist" id="playlist">
+            <div class="alert alert-info">
+              <strong>Coming Soon!</strong> Short video clips will be added here. The player is ready and fully functional on both desktop and mobile devices.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="emoji-reactions.js"></script>
+  <script>
+    // Video Player Implementation
+    const video = document.getElementById('videoPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const videoTitle = document.getElementById('videoTitle');
+    const videoDescription = document.getElementById('videoDescription');
+    const playlistEl = document.getElementById('playlist');
+    
+    // Playlist - add your video files here
+    const playlist = [
+      { title: 'Smile', description: 'Sick Of It', file: '../shorts/Smile.mp4' },
+      { title: 'Diamonds', description: 'Sick Of It', file: '../shorts/Diamonds.mp4' }
+    ];
+    
+    let currentVideo = 0;
+    let isPlaying = false;
+    
+    // Load video
+    function loadVideo(index) {
+      if (playlist.length === 0) return;
+      
+      currentVideo = index;
+      const videoItem = playlist[currentVideo];
+      video.src = videoItem.file;
+      videoTitle.textContent = videoItem.title;
+      videoDescription.textContent = videoItem.description;
+      
+      // Update playlist active state
+      document.querySelectorAll('.playlist-item').forEach((item, i) => {
+        item.classList.toggle('active', i === index);
+      });
+    }
+    
+    // Play/Pause
+    function togglePlay() {
+      if (playlist.length === 0) {
+        alert('No shorts available yet. Check back soon!');
+        return;
+      }
+      
+      if (isPlaying) {
+        video.pause();
+      } else {
+        video.play();
+      }
+    }
+    
+    video.addEventListener('play', () => {
+      isPlaying = true;
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    });
+    
+    video.addEventListener('pause', () => {
+      isPlaying = false;
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    });
+    
+    // Previous video
+    function previousVideo() {
+      if (playlist.length === 0) return;
+      currentVideo = (currentVideo - 1 + playlist.length) % playlist.length;
+      loadVideo(currentVideo);
+      video.play();
+    }
+    
+    // Next video
+    function nextVideo() {
+      if (playlist.length === 0) return;
+      currentVideo = (currentVideo + 1) % playlist.length;
+      loadVideo(currentVideo);
+      video.play();
+    }
+    
+    // Volume
+    volumeSlider.addEventListener('input', (e) => {
+      video.volume = e.target.value / 100;
+    });
+    video.volume = 0.7;
+    
+    // Auto-play next video
+    video.addEventListener('ended', nextVideo);
+    
+    // Event listeners
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', previousVideo);
+    nextBtn.addEventListener('click', nextVideo);
+    
+    // Build playlist UI
+    function buildPlaylist() {
+      if (playlist.length === 0) return;
+      
+      playlistEl.innerHTML = '';
+      playlist.forEach((videoItem, index) => {
+        const item = document.createElement('div');
+        item.className = 'playlist-item';
+        item.setAttribute('data-reaction-target', `short:${videoItem.title.toLowerCase().replace(/\s+/g, '-')}`);
+        if (index === 0) item.classList.add('active');
+        item.innerHTML = `
+          <div class="playlist-item-title">${videoItem.title}</div>
+          <div class="playlist-item-description">${videoItem.description}</div>
+        `;
+        item.addEventListener('click', () => {
+          currentVideo = index;
+          loadVideo(index);
+          video.play();
+        });
+        playlistEl.appendChild(item);
+      });
+    }
+    
+    // Initialize
+    if (playlist.length > 0) {
+      loadVideo(0);
+      buildPlaylist();
+      // Initialize emoji reactions on dynamically-created playlist items
+      if (window.emojiReactionsInit) window.emojiReactionsInit(playlistEl);
+    }
+  </script>
+</body>
+</html>
