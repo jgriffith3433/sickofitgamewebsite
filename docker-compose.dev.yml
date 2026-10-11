@@ -12,8 +12,6 @@ services:
       # Mount for live development - update files without rebuilding
       - ./Game:/usr/share/nginx/html/Game
       - ./PreGame:/usr/share/nginx/html/PreGame
-      - ./TakeGame:/usr/share/nginx/html/TakeGame
-      - ./BuyGame:/usr/share/nginx/html/BuyGame
       - ./blog:/usr/share/nginx/html/blog
       - ./music:/usr/share/nginx/html/music
       - ./shorts:/usr/share/nginx/html/shorts
@@ -49,14 +47,12 @@ services:
       - COOKIE_DOMAIN=
       - SESSION_EXPIRY_DAYS=${SESSION_EXPIRY_DAYS:-365}
       - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-dev-secret-key}
-      - RESEND_API_KEY=${RESEND_API_KEY:-re_hGXrNoih_AnXMUe32uaxLGdjuSek8ufdR}
+      - RESEND_API_KEY=${RESEND_API_KEY}
       - RESEND_FROM=${RESEND_FROM:-support@sickofitgame.com}
       - DB_PATH=/data/paywall.db
       - PRODUCTS=${PRODUCTS:-}
       - PROTECTED_PATHS=${PROTECTED_PATHS:-}
       - CLEANUP_SECRET=${CLEANUP_SECRET:-dev-cleanup}
-      - UMAMI_API_URL=http://umami:3000
-      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
     volumes:
       - ./backend:/app
       - paywall-data-dev:/data
@@ -70,36 +66,7 @@ services:
       retries: 3
       start_period: 10s
 
-  umami-db:
-    image: postgres:15-alpine
-    container_name: umami-postgres-dev
-    environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami_dev_password
-    volumes:
-      - umami-db-data:/var/lib/postgresql/data
-    networks:
-      - game-network
-    restart: unless-stopped
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    container_name: umami-dev
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://umami:umami_dev_password@umami-db:5432/umami
-      DATABASE_TYPE: postgresql
-      APP_SECRET: random_dev_secret_key_12345678901234567890
-    depends_on:
-      - umami-db
-    networks:
-      - game-network
-    restart: unless-stopped
-
 volumes:
-  umami-db-data:
   paywall-data-dev:
 
 networks:
