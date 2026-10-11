@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy - Sick Of It</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold mb-2">Buy Sick Of It</h1>
+                    <p class="text-secondary">One-time purchase. No account required.</p>
+                </div>
+
+                <div class="card bg-secondary bg-opacity-10 border-secondary mb-4">
+                    <div class="card-body p-4 text-center">
+                        <div class="display-4 fw-bold text-primary mb-1">$1.00</div>
+                        <div class="text-muted small">USD &mdash; one time</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <strong class="d-block mb-2">How it works:</strong>
+                    <ol class="mb-0">
+                        <li class="mb-2">Click Buy Now below &mdash; you'll go to Stripe Checkout</li>
+                        <li class="mb-2">Pay with any card (it's secure, handled entirely by Stripe)</li>
+                        <li class="mb-2">An access code lands in your email immediately</li>
+                        <li class="mb-2">Come back and redeem it to unlock the full game</li>
+                        <li>That's it. No subscription, no account, no nonsense.</li>
+                    </ol>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="/paywall/checkout/default" class="btn btn-primary btn-lg">Buy Now</a>
+                    <a href="/paywall/redeem" class="btn btn-outline-secondary btn-lg">I already have an access code</a>
+                    <a href="/" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clear the free-tier cookie so the paywall flow treats this user
+        // as unauthenticated and a successful purchase sets game_tier=paid.
+        document.cookie = 'game_tier=; path=/; max-age=0; SameSite=Lax';
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>My AI Makes Art Now - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 600;
+    }
+    code {
+      color: #e685b5;
+    }
+    .blog-img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    audio {
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="../stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <article class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          <a href="../index.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Blog</a>
+          <h1 class="display-4 fw-bold mb-3">My AI Makes Art Now</h1>
+          <div class="text-muted mb-4">
+            <span class="me-3">February 27, 2026</span>
+            <span>Development</span>
+          </div>
+        </div>
+
+        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="post:ai-content-pipeline#intro">
+          <div class="card-body">
+            <p class="lead mb-0">
+              I was supposed to be fixing bugs. Instead I spent the day teaching my AI to generate images and explode things.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:ai-content-pipeline#images">
+          <h2 class="h3 mb-3">Images</h2>
+          <p>
+            I can't draw. You know this. Every sprite in the game comes from a text prompt. Until now that meant going to some web UI, typing words, downloading a PNG, dragging it into Unity. Terrible workflow.
+          </p>
+          <p>
+            Now my AI does it. I say "make me a thing." It makes a thing. Here's the first thing it made:
+          </p>
+          <div class="text-center my-4">
+            <img src="../images/comfyui-first-gen.png" alt="First AI-generated image from the content pipeline" class="blog-img">
+            <p class="text-muted small mt-2">"a pixel art warrior standing in a burning village at night"</p>
+          </div>
+          <p>
+            Is it good? No. Is it generated entirely inside Docker containers talking to each other through JSON? Yes. That's the point right now.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:ai-content-pipeline#how">
+          <h2 class="h3 mb-3">How</h2>
+          <p>
+            <a href="https://github.com/comfyanonymous/ComfyUI" class="text-info">ComfyUI</a> runs in one Docker container. My AI runs in another. They talk through an API. ComfyUI takes a workflow JSON &mdash; a graph of nodes that says "load this model, encode this text, run this sampler" &mdash; and spits out images.
+          </p>
+          <p>
+            The problem: ComfyUI workflows reference model files by name. Just a filename. <code>AOM3A1_orangemixs.safetensors</code>. No URL. No hint where on the internet this 2GB file lives. You're supposed to just <em>know</em>.
+          </p>
+          <p>
+            So we built a model resolver. It checks five sources in order: a local override file, the ComfyUI-Manager community list (488 models), HuggingFace, Civitai, and finally just asks you. When it finds something, it saves the URL locally so next time it's instant.
+          </p>
+          <p>
+            On first boot, the container reads every workflow that ships with the image, figures out what models are missing, downloads them. <code>docker compose up</code> and walk away.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:ai-content-pipeline#sounds">
+          <h2 class="h3 mb-3">Sounds</h2>
+          <p>
+            While I was at it. <a href="https://elevenlabs.io" class="text-info">ElevenLabs</a> can generate sound effects from text. Not pulling from a library. Generating them. I told my AI "make an explosion" and it did.
+          </p>
+          <div class="my-3">
+            <audio controls preload="metadata">
+              <source src="../audio/explosion-sfx.mp3" type="audio/mpeg">
+              Your browser doesn't support audio.
+            </audio>
+            <p class="text-muted small">"10 second dramatic explosion with debris and fire crackling"</p>
+          </div>
+          <p>
+            Beats <code>explosion_final_v3_REAL.wav</code> from the free SFX sites. And I didn't leave my chat window.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:ai-content-pipeline#the-stack">
+          <h2 class="h3 mb-3">The Stack</h2>
+          <p>
+            Three Docker containers and a prayer:
+          </p>
+          <ul class="text-secondary">
+            <li><strong>OpenClaw</strong> &mdash; AI agent, talks to everything via MCP</li>
+            <li><strong>ComfyUI</strong> &mdash; image generation, custom Dockerfile, auto-downloads models</li>
+            <li><strong>ElevenLabs</strong> &mdash; sound effects and voice via API</li>
+          </ul>
+          <p>
+            Plus Unity MCP and GitHub MCP from before. The AI can now see my editor, edit my code, generate art, generate audio, commit, push, and write blog posts about it. I just sit here and say "make it more dramatic."
+          </p>
+          <p>
+            Creative director who doesn't create anything. That's me now.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:ai-content-pipeline#reality">
+          <h2 class="h3 mb-3">The Catch</h2>
+          <p>
+            It's running on CPU. That image took 10 minutes. That's not a pipeline, that's a microwave.
+          </p>
+          <p>
+            But the infrastructure is there. Add a GPU and it's real-time. The workflows are basic. The custom nodes folder is empty. This is version 0.1. Yesterday it couldn't make pictures. Today it can.
+          </p>
+        </div>
+
+        <div class="text-muted small mt-5 pt-4 border-top border-secondary">
+          <p>
+            <strong>Models downloaded:</strong> 2.13 GB. <strong>Bugs fixed:</strong> 0.
+          </p>
+        </div>
+
+        <div class="mt-3">
+          <a href="../index.html" class="btn btn-outline-secondary">&larr; Back to Blog</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

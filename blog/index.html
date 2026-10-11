@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Blog - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="emoji-reactions.css">
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 600;
+    }
+    .hover-card {
+      transition: border-left 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .hover-card:hover {
+      border-left: 3px solid var(--bs-primary);
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link active" href="index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <header class="text-center mb-5 p-5 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+      <h1 class="display-3 fw-bold mb-3">Sick Of It Blog</h1>
+      <p class="lead text-secondary">Development updates, lore, and game music</p>
+    </header>
+
+    <section class="mb-5">
+      <h2 class="h3 mb-4 pb-2 border-bottom border-secondary">Latest Post</h2>
+      <div class="card border-secondary mb-4">
+        <div class="card-body bg-secondary bg-opacity-10">
+          <h3 class="h4 mb-3">One File to Rule Them All</h3>
+          <div class="text-muted mb-3 small">
+            <span class="me-3">March 1, 2026</span>
+            <span>Development</span>
+          </div>
+          <p>
+            I built a Unity game where an AI edits a single YAML file and I press one button. That's the entire workflow. Here's why that's unusual and why it works.
+          </p>
+          <a href="posts/one-file-to-rule-them-all.html" class="btn btn-primary">Read This</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-5">
+      <h2 class="h3 mb-4 pb-2 border-bottom border-secondary">Recent Posts</h2>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        <div class="col">
+          <a href="posts/one-file-to-rule-them-all.html" class="text-decoration-none" data-reaction-target="card:posts/one-file-to-rule-them-all">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">March 1, 2026 • Development</p>
+                <h5 class="card-title">One File to Rule Them All</h5>
+                <p class="card-text text-secondary">An AI edits a YAML file. I press one button. The entire game rebuilds. Here's why that's unusual and why it works.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/tearing-it-all-down.html" class="text-decoration-none" data-reaction-target="card:posts/tearing-it-all-down">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">March 1, 2026 • Development</p>
+                <h5 class="card-title">Tearing It All Down</h5>
+                <p class="card-text text-secondary">Destroyed a working game to make it config-driven. 15 scenes deleted, 30+ tools removed, 7 hours of pain. Worth it. Probably.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/from-prompt-to-prefab.html" class="text-decoration-none" data-reaction-target="card:posts/from-prompt-to-prefab">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 28, 2026 • Development</p>
+                <h5 class="card-title">From Prompt to Prefab</h5>
+                <p class="card-text text-secondary">AI-generated enemy character pipeline. Concept → animation → sprite sheet → Unity prefab. Zero websites. Zero manual tools.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/ai-content-pipeline.html" class="text-decoration-none" data-reaction-target="card:posts/ai-content-pipeline">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 27, 2026 • Development</p>
+                <h5 class="card-title">My AI Makes Art Now</h5>
+                <p class="card-text text-secondary">ComfyUI for images. ElevenLabs for explosions. Three Docker containers and a prayer.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/openclaw-pipeline.html" class="text-decoration-none" data-reaction-target="card:posts/openclaw-pipeline">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 26, 2026 • Development</p>
+                <h5 class="card-title">An AI Wrote This Blog Post</h5>
+                <p class="card-text text-secondary">An AI built the game, deployed the site, fixed git, committed, pushed, and wrote this post. One session. $20 in tokens.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/sprite-video-player.html" class="text-decoration-none" data-reaction-target="card:posts/sprite-video-player">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 26, 2026 • Development</p>
+                <h5 class="card-title">I Built a Video Player Out of Sprite Sheets</h5>
+                <p class="card-text text-secondary">Rolled my own 30fps video player with sprite sheets and Addressables. A 50MB mp4 became 357MB of bundles.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/i-dont-know-what-im-doing.html" class="text-decoration-none" data-reaction-target="card:posts/i-dont-know-what-im-doing">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 23, 2026 • Development</p>
+                <h5 class="card-title">I Don't Know What I'm Doing</h5>
+                <p class="card-text text-secondary">The game is too hard, not fun yet, all AI art, and I'm over the music. An honest update.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/bork-fire-rate.html" class="text-decoration-none" data-reaction-target="card:posts/bork-fire-rate">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 23, 2026 • Development</p>
+                <h5 class="card-title">Bork Shoots Less (And The Game Became Kind)</h5>
+                <p class="card-text text-secondary">Lowered Bork's fire rate on the first enemy — the level breathes again.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/diamonds-double-jumps.html" class="text-decoration-none" data-reaction-target="card:posts/diamonds-double-jumps">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 22, 2026 • Development</p>
+                <h5 class="card-title">Diamonds, Double Jumps, and Cascading Health</h5>
+                <p class="card-text text-secondary">Diamonds are collectible, double jumps cost 100 diamonds, and health now cascades between levels.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/diamonds.html" class="text-decoration-none" data-reaction-target="card:posts/diamonds">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 21, 2026 • Shorts</p>
+                <h5 class="card-title">New Short: Diamonds</h5>
+                <p class="card-text text-secondary">A quick look at the treasures scattered throughout the world of Sick Of It.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/resend-saved-my-sanity.html" class="text-decoration-none" data-reaction-target="card:posts/resend-saved-my-sanity">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 18, 2026 • Development</p>
+                <h5 class="card-title">I Just Wanted To Send An Email</h5>
+                <p class="card-text text-secondary">Tried to consolidate everything with AWS. They said no twice. So I had to... resend.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="lore/worlds/quiet-village.html" class="text-decoration-none" data-reaction-target="card:lore/worlds/quiet-village">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 16, 2026 • Lore</p>
+                <h5 class="card-title">Quiet Village</h5>
+                <p class="card-text text-secondary">Rolling hills. Dense forests. Good land. Then came fire. Now only ruins remain.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="lore/characters/yooba.html" class="text-decoration-none" data-reaction-target="card:lore/characters/yooba">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 15, 2026 • Lore</p>
+                <h5 class="card-title">Meet Yooba: The Survivor</h5>
+                <p class="card-text text-secondary">Yooba's village got destroyed. Now he's sick of it and coming for the Overlord.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a href="posts/welcome-to-development.html" class="text-decoration-none" data-reaction-target="card:posts/welcome-to-development">
+            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary hover-card">
+              <div class="card-body">
+                <p class="text-muted small">February 10, 2026 • Development</p>
+                <h5 class="card-title">Welcome to the Journey</h5>
+                <p class="card-text text-secondary">I'm making a game. Built with Unity 6.3, WebGL, hosted in the cloud. This is where I talk about it.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="emoji-reactions.js"></script>
+</body>
+</html>

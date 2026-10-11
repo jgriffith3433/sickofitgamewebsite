@@ -1,0 +1,107 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Use the development target so dev differs from prod (live mounts)
+      target: development
+    container_name: sickofitgame-dev
+    ports:
+      - "80:80"
+    volumes:
+      # Mount for live development - update files without rebuilding
+      - ./Game:/usr/share/nginx/html/Game
+      - ./PreGame:/usr/share/nginx/html/PreGame
+      - ./TakeGame:/usr/share/nginx/html/TakeGame
+      - ./BuyGame:/usr/share/nginx/html/BuyGame
+      - ./blog:/usr/share/nginx/html/blog
+      - ./music:/usr/share/nginx/html/music
+      - ./shorts:/usr/share/nginx/html/shorts
+      - ./images:/usr/share/nginx/html/images
+      - ./favicon.ico:/usr/share/nginx/html/favicon.ico
+      - ./index.html:/usr/share/nginx/html/index.html
+      # Optional: mount nginx.conf for live nginx edits
+      # - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - game-network
+    restart: unless-stopped
+    depends_on:
+      - paywall
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  paywall:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: paywall-dev
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_xxx}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_xxx}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_xxx}
+      - SITE_URL=${SITE_URL:-http://localhost}
+      - SITE_NAME=${SITE_NAME:-Sick Of It}
+      - COOKIE_SECURE=false
+      - COOKIE_DOMAIN=
+      - SESSION_EXPIRY_DAYS=${SESSION_EXPIRY_DAYS:-365}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-dev-secret-key}
+      - RESEND_API_KEY=${RESEND_API_KEY:-re_hGXrNoih_AnXMUe32uaxLGdjuSek8ufdR}
+      - RESEND_FROM=${RESEND_FROM:-support@sickofitgame.com}
+      - DB_PATH=/data/paywall.db
+      - PRODUCTS=${PRODUCTS:-}
+      - PROTECTED_PATHS=${PROTECTED_PATHS:-}
+      - CLEANUP_SECRET=${CLEANUP_SECRET:-dev-cleanup}
+      - UMAMI_API_URL=http://umami:3000
+      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
+    volumes:
+      - ./backend:/app
+      - paywall-data-dev:/data
+    networks:
+      - game-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/paywall/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  umami-db:
+    image: postgres:15-alpine
+    container_name: umami-postgres-dev
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami_dev_password
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - game-network
+    restart: unless-stopped
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: umami-dev
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami_dev_password@umami-db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: random_dev_secret_key_12345678901234567890
+    depends_on:
+      - umami-db
+    networks:
+      - game-network
+    restart: unless-stopped
+
+volumes:
+  umami-db-data:
+  paywall-data-dev:
+
+networks:
+  game-network:
+    driver: bridge

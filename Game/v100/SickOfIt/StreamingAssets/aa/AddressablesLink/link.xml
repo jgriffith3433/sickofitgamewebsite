@@ -1,0 +1,131 @@
+<linker>
+  <assembly fullname="nappin.MobileControllerFramework, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="MobileControllerFramework.Analog" preserve="all" />
+    <type fullname="MobileControllerFramework.Button" preserve="all" />
+    <type fullname="MobileControllerFramework.Heatmap" preserve="all" />
+    <type fullname="MobileControllerFramework.TouchRegionAnalog" preserve="all" />
+  </assembly>
+  <assembly fullname="SickOfIt.Combat, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SickOfIt.Combat.Damage.DamageDealer" preserve="all" />
+    <type fullname="SickOfIt.Combat.Effects.GlitchEffect" preserve="all" />
+    <type fullname="SickOfIt.Combat.Health.PlayerHealth" preserve="all" />
+    <type fullname="SickOfIt.Combat.Health.PointsUI" preserve="all" />
+    <type fullname="SickOfIt.Combat.Health.RewindableHealth" preserve="all" />
+  </assembly>
+  <assembly fullname="SickOfIt.Core, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SickOfIt.Core.Device.AspectRatioController" preserve="all" />
+    <type fullname="SickOfIt.Core.Device.SafeAreaHandler" preserve="all" />
+    <type fullname="SickOfIt.Core.Flow.SceneContentController" preserve="all" />
+    <type fullname="SickOfIt.Core.GameClock" preserve="all" />
+    <type fullname="SickOfIt.Core.Input.GameInputManager" preserve="all" />
+    <type fullname="SickOfIt.Core.Input.GlobalTapJump" preserve="all" />
+    <type fullname="SickOfIt.Core.Input.LetterboxInputExtender" preserve="all" />
+    <type fullname="SickOfIt.Core.Input.MusicCycler" preserve="all" />
+    <type fullname="SickOfIt.Core.Input.PlayerController" preserve="all" />
+    <type fullname="SickOfIt.Core.ObjectPool" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.ProjectileLifetime" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.RewindableAnimator" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.RewindableGameObject" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.RewindableRigidbody2D" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.RewindableTransform" preserve="all" />
+    <type fullname="SickOfIt.Core.Rewind.RewindTimeline" preserve="all" />
+    <type fullname="SickOfIt.Core.RewindableAudioSource" preserve="all" />
+    <type fullname="SickOfIt.Core.RewindableScore" preserve="all" />
+  </assembly>
+  <assembly fullname="SickOfIt.Core.Progression, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SickOfIt.Core.Progression.DeathRuntime" preserve="all" />
+    <type fullname="SickOfIt.Core.Progression.LevelRuntime" preserve="all" />
+    <type fullname="SickOfIt.Core.Progression.RewindController" preserve="all" />
+    <type fullname="SickOfIt.Core.Progression.VideoRuntime" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.InputSystem, Version=1.18.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.InputSystem.InputActionAsset" preserve="all" />
+    <type fullname="UnityEngine.InputSystem.InputActionReference" preserve="all" />
+    <type fullname="UnityEngine.InputSystem.UI.InputSystemUIInputModule" preserve="all" />
+    <type fullname="UnityEngine.InputSystem.InputAction" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.InputSystem.InputActionMap" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.InputSystem.InputBinding" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.InputSystem.InputControlScheme" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.InputSystem.InputControlScheme/DeviceRequirement" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="TMPro.TextMeshProUGUI" preserve="all" />
+    <type fullname="TMPro.TMP_FontAsset" preserve="all" />
+    <type fullname="TMPro.FaceInfo_Legacy" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.FontAssetCreationSettings" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.KerningTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_Character" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontFeatureTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontWeightPair" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.VertexGradient" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AnimationClip" preserve="all" />
+    <type fullname="UnityEngine.Animator" preserve="all" />
+    <type fullname="UnityEngine.RuntimeAnimatorController" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AudioClip" preserve="all" />
+    <type fullname="UnityEngine.AudioListener" preserve="all" />
+    <type fullname="UnityEngine.AudioSource" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Camera" preserve="all" />
+    <type fullname="UnityEngine.Cubemap" preserve="all" />
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.LightmapSettings" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.MonoBehaviour" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.RectTransform" preserve="all" />
+    <type fullname="UnityEngine.RenderSettings" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.Sprite" preserve="all" />
+    <type fullname="UnityEngine.SpriteRenderer" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.UnityEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.UnityEvent`1" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.RectOffset" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.BoxCollider2D" preserve="all" />
+    <type fullname="UnityEngine.CircleCollider2D" preserve="all" />
+    <type fullname="UnityEngine.Rigidbody2D" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Font" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.EventSystems.EventSystem" preserve="all" />
+    <type fullname="UnityEngine.UI.CanvasScaler" preserve="all" />
+    <type fullname="UnityEngine.UI.GraphicRaycaster" preserve="all" />
+    <type fullname="UnityEngine.UI.HorizontalLayoutGroup" preserve="all" />
+    <type fullname="UnityEngine.UI.Image" preserve="all" />
+    <type fullname="UnityEngine.UI.MaskableGraphic/CullStateChangedEvent" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Canvas" preserve="all" />
+    <type fullname="UnityEngine.CanvasGroup" preserve="all" />
+    <type fullname="UnityEngine.CanvasRenderer" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextCoreFontEngineModule">
+    <type fullname="UnityEngine.TextCore.FaceInfo" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Glyph" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphMetrics" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphRect" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphPairAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphValueRecord" preserve="nothing" serialized="true" />
+  </assembly>
+</linker>

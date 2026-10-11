@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Sick Of It</title>
+    <!-- Umami Analytics -->
+    <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+    <script src="/umami-game-events.js"></script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        /* Prevent text size adjustment on orientation change */
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000;
+        position: fixed;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+        touch-action: none;
+      }
+
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: default;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #unity-loading-bar {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        z-index: 1500;
+      }
+
+      #unity-logo {
+        width: 154px;
+        height: 130px;
+        background: url('PreGame/vp6/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background-size: contain;
+        margin: 0 auto 20px;
+      }
+
+      #unity-progress-bar-empty {
+        width: 300px;
+        height: 18px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 9px;
+      }
+
+      #unity-progress-bar-full {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #4a90e2, #2ecc71);
+        border-radius: 9px;
+        transition: width 0.3s ease;
+      }
+
+      #unity-warning {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        max-width: 80%;
+      }
+
+      #unity-warning > div {
+        background: rgba(255, 0, 0, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin: 5px 0;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+      }
+
+      #unity-warning > div.warning {
+        background: rgba(255, 193, 7, 0.9);
+        color: #000;
+      }
+
+      #start-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        cursor: pointer;
+      }
+
+      #start-overlay h1 {
+        color: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 48px;
+        margin-bottom: 30px;
+        text-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+      }
+
+      #button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+      }
+
+      #start-button {
+        background: linear-gradient(135deg, #4a90e2, #2ecc71);
+        color: white;
+        border: none;
+        padding: 20px 60px;
+        font-size: 24px;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
+      }
+
+      #start-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(46, 204, 113, 0.6);
+      }
+
+      #start-button:active {
+        transform: translateY(0);
+      }
+
+      .secondary-button {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 15px 50px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 3px 15px rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .secondary-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+      }
+
+      .secondary-button:active {
+        transform: translateY(0);
+      }
+
+      @media (max-width: 768px) {
+        #start-overlay h1 {
+          font-size: 36px;
+          margin-bottom: 20px;
+        }
+
+        #button-container {
+          gap: 15px;
+          width: 90%;
+        }
+
+        #start-button {
+          padding: 15px 40px;
+          font-size: 20px;
+          width: 100%;
+          max-width: 300px;
+        }
+
+        .secondary-button {
+          padding: 12px 35px;
+          font-size: 18px;
+          width: 100%;
+          max-width: 300px;
+          text-align: center;
+        }
+      }
+
+      #rotate-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+      }
+
+      #rotate-overlay.show {
+        display: flex;
+      }
+
+      #rotate-icon {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+        animation: rotate-pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes rotate-pulse {
+        0%, 100% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(90deg) scale(1.1); }
+      }
+
+      #rotate-message {
+        color: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+        text-align: center;
+        padding: 0 20px;
+      }
+
+      body {
+        overscroll-behavior-y: contain;
+      }
+
+      /* Install banner styling */
+      #install-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(30, 30, 30, 0.98);
+        padding: 12px 20px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 5000;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        font-family: Arial, sans-serif;
+        gap: 15px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      #install-banner.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      #install-banner.fade-out {
+        opacity: 0;
+      }
+
+      #install-banner-text {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        margin: 0;
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+      }
+
+      #install-banner-text strong {
+        font-weight: bold;
+        color: #fff;
+      }
+
+      #install-banner-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      #install-banner button {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: Arial, sans-serif;
+        white-space: nowrap;
+      }
+
+      #install-banner button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-1px);
+      }
+
+      #dismiss-banner {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 6px 15px;
+        font-size: 16px;
+      }
+
+      #dismiss-banner:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      @media (max-width: 600px) {
+        #install-banner {
+          padding: 10px 15px;
+        }
+        #install-banner-text {
+          font-size: 12px;
+        }
+        #install-banner button {
+          font-size: 12px;
+          padding: 6px 15px;
+        }
+      }
+
+      /* Version display styling */
+      #version-display {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        font-weight: bold;
+        pointer-events: auto;
+        user-select: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      #version-display:hover {
+        background: rgba(0, 0, 0, 0.9);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+
+      @media (max-width: 600px) {
+        #version-display {
+          font-size: 10px;
+          padding: 4px 8px;
+          top: 5px;
+          left: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Version Display -->
+    <div id="version-display">vp6</div>
+    <div id="install-banner">
+      <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
+      <div id="install-banner-buttons">
+        <button id="install-button">Install</button>
+        <button id="dismiss-banner">×</button>
+      </div>
+    </div>
+    <div id="rotate-overlay">
+      <svg id="rotate-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="10" width="60" height="80" rx="5" stroke="white" stroke-width="3" fill="none"/>
+        <path d="M40 30 L60 30" stroke="white" stroke-width="2"/>
+        <circle cx="50" cy="75" r="5" fill="white"/>
+        <path d="M70 45 L85 45 L85 25 M85 25 L80 30 M85 25 L90 30" stroke="#4a90e2" stroke-width="2" fill="none"/>
+      </svg>
+      <div id="rotate-message">Please rotate your device to landscape</div>
+    </div>
+    <div id="start-overlay">
+      <h1>Sick Of It</h1>
+      <div id="button-container">
+        <button id="start-button">CLICK TO START</button>
+        <a href="blog/index.html" class="secondary-button">Blog</a>
+      </div>
+    </div>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+    <script>
+      // Console log capture system
+      var consoleLogs = [];
+      var originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info
+      };
+
+      function captureLog(type, args) {
+        var timestamp = new Date().toISOString();
+        var message = Array.from(args).map(function(arg) {
+          if (typeof arg === 'object') {
+            try { return JSON.stringify(arg); }
+            catch(e) { return String(arg); }
+          }
+          return String(arg);
+        }).join(' ');
+        consoleLogs.push('[' + timestamp + '] [' + type.toUpperCase() + '] ' + message);
+      }
+
+      console.log = function() {
+        captureLog('log', arguments);
+        originalConsole.log.apply(console, arguments);
+      };
+      console.warn = function() {
+        captureLog('warn', arguments);
+        originalConsole.warn.apply(console, arguments);
+      };
+      console.error = function() {
+        captureLog('error', arguments);
+        originalConsole.error.apply(console, arguments);
+      };
+      console.info = function() {
+        captureLog('info', arguments);
+        originalConsole.info.apply(console, arguments);
+      };
+
+      var canvas = document.querySelector("#unity-canvas");
+      var container = document.querySelector("#unity-container");
+      
+      // Enhanced mobile detection that includes iPads with iPadOS 13+
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || // iPad with iPadOS 13+
+                     ('ontouchstart' in window); // Any touch-capable device
+      
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad with iPadOS 13+
+
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        if (type == 'warning') div.className = 'warning';
+        warningBanner.appendChild(div);
+        if (type == 'error') {
+          div.style = 'background: rgba(255, 0, 0, 0.9); padding: 10px;';
+        } else {
+          if (type == 'warning') div.style = 'background: rgba(255, 193, 7, 0.9); color: #000; padding: 10px;';
+          setTimeout(function() {
+            if (warningBanner.contains(div)) {
+              warningBanner.removeChild(div);
+            }
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var gameName = "SickOfIt";
+      var gameVersion = "vp6"; // Update this when you publish a new game build
+      
+      // Update version display
+      var versionDisplay = document.getElementById('version-display');
+      versionDisplay.textContent = gameVersion;
+      
+      // Add click handler to copy console logs to clipboard
+      versionDisplay.addEventListener('click', function() {
+        if (consoleLogs.length === 0) {
+          alert('No console logs to copy!');
+          return;
+        }
+        
+        var logText = consoleLogs.join('\n');
+        
+        // Try to copy to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(logText).then(function() {
+            var originalText = versionDisplay.textContent;
+            versionDisplay.textContent = 'Copied!';
+            setTimeout(function() {
+              versionDisplay.textContent = originalText;
+            }, 1000);
+          }).catch(function(err) {
+            console.error('Failed to copy logs:', err);
+            alert('Failed to copy logs to clipboard');
+          });
+        } else {
+          // Fallback for older browsers
+          var textarea = document.createElement('textarea');
+          textarea.value = logText;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy');
+            var originalText = versionDisplay.textContent;
+            versionDisplay.textContent = 'Copied!';
+            setTimeout(function() {
+              versionDisplay.textContent = originalText;
+            }, 1000);
+          } catch (err) {
+            console.error('Failed to copy logs:', err);
+            alert('Failed to copy logs to clipboard');
+          }
+          document.body.removeChild(textarea);
+        }
+      });
+      
+      // Load from /PreGame instead of relative path
+      var buildUrl = "/PreGame/vp6/" + gameName + "/Build/" + gameName;
+      var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + ".data.gz?v=" + gameVersion,
+        frameworkUrl: buildUrl + ".framework.js.gz?v=" + gameVersion,
+        codeUrl: buildUrl + ".wasm.gz?v=" + gameVersion,
+        streamingAssetsUrl: "/PreGame/vp6/" + gameName + "/StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Sick Of It",
+        productVersion: gameVersion,
+        showBanner: unityShowBanner,
+        errorHandler: function(message, filename, lineno) {
+          // Log all errors to console instead of showing alerts
+          console.error('Unity Error:', message);
+          if (filename) console.error('File:', filename);
+          if (lineno) console.error('Line:', lineno);
+          return true; // Suppress alert
+        }
+      };
+
+      if (isMobile) {
+        document.addEventListener('touchmove', function(e) {
+          if (e.target === canvas || e.target === container) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+
+        document.body.addEventListener('touchstart', function(e) {
+          if (e.target === canvas) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+        
+        // Prevent any scrolling that might trigger zoom
+        window.addEventListener('scroll', function() {
+          window.scrollTo(0, 0);
+        }, { passive: true });
+      }
+
+      function resizeCanvas() {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        
+        if (isMobile && window.visualViewport) {
+          width = window.visualViewport.width;
+          height = window.visualViewport.height;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      
+      if (isMobile) {
+        var orientationChangeHandler = function() {
+          // Force scroll to top to prevent zoom issues
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+          
+          // Force a hard viewport reset
+          var viewport = document.querySelector('meta[name=viewport]');
+          if (viewport) {
+            // Temporarily remove and re-add viewport meta tag to force browser reset
+            var content = viewport.getAttribute('content');
+            viewport.setAttribute('content', 'width=1');
+            
+            // Use requestAnimationFrame to ensure browser processes the change
+            requestAnimationFrame(function() {
+              viewport.setAttribute('content', content);
+              
+              // Force another scroll to top after viewport reset
+              window.scrollTo(0, 0);
+              
+              // Wait for browser to settle, then resize canvas
+              setTimeout(function() {
+                window.scrollTo(0, 0); // One more time for good measure
+                resizeCanvas();
+              }, 200);
+            });
+          } else {
+            setTimeout(resizeCanvas, 200);
+          }
+        };
+        
+        // Listen to both orientationchange and resize for better coverage
+        window.addEventListener('orientationchange', orientationChangeHandler);
+        
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', resizeCanvas);
+        }
+      }
+      
+      resizeCanvas();
+
+      // Orientation handling for mobile devices
+      var rotateOverlay = document.getElementById('rotate-overlay');
+      
+      function checkOrientation() {
+        if (!isMobile) return;
+        
+        var isPortrait = window.innerHeight > window.innerWidth;
+        
+        // Show rotate message if in portrait mode
+        if (isPortrait) {
+          rotateOverlay.classList.add('show');
+        } else {
+          rotateOverlay.classList.remove('show');
+        }
+      }
+      
+      async function lockOrientationToLandscape() {
+        if (!isMobile) return;
+        
+        try {
+          // Try to lock to landscape (works in fullscreen on supported browsers)
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('landscape');
+            console.log('Orientation locked to landscape');
+          }
+        } catch (error) {
+          console.log('Orientation lock not supported or requires fullscreen:', error.message);
+        }
+      }
+      
+      // Check orientation on load and when it changes
+      if (isMobile) {
+        checkOrientation();
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+      }
+
+      // Wait for user to click start button before loading
+      function loadUnityGame() {
+        // Hide start overlay
+        document.getElementById('start-overlay').style.display = 'none';
+        
+        // Show loading bar
+        document.querySelector("#unity-loading-bar").style.display = 'block';
+        
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = function() {
+          createUnityInstance(canvas, config, function(progress) {
+            document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+          }).then(function(unityInstance) {
+            document.querySelector("#unity-loading-bar").style.display = "none";
+            window.unityInstance = unityInstance;
+            
+            function tryFullscreen() {
+              if (isIOS) {
+                console.log('iOS detected - skipping fullscreen request (not fully supported)');
+                return;
+              }
+
+              var elem = container;
+              if (elem.requestFullscreen) {
+                elem.requestFullscreen().then(function() {
+                  // Try to lock orientation when entering fullscreen (most reliable)
+                  lockOrientationToLandscape();
+                }).catch(function(err) {
+                  console.log("Fullscreen request failed:", err);
+                });
+              } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+                // Webkit doesn't return a promise, so try locking after a short delay
+                setTimeout(lockOrientationToLandscape, 100);
+              } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+                setTimeout(lockOrientationToLandscape, 100);
+              }
+            }
+
+            if (!isIOS) {
+              tryFullscreen();
+            }
+
+            var canvasElement = canvas;
+            var needsPointerLockReacquire = false;
+
+            document.addEventListener('pointerlockchange', function() {
+              if (document.pointerLockElement !== canvasElement) {
+                needsPointerLockReacquire = true;
+              } else {
+                needsPointerLockReacquire = false;
+              }
+            });
+
+            function reacquirePointerLock() {
+              if (needsPointerLockReacquire && document.pointerLockElement !== canvasElement) {
+                canvasElement.requestPointerLock = canvasElement.requestPointerLock ||
+                                                    canvasElement.mozRequestPointerLock ||
+                                                    canvasElement.webkitRequestPointerLock;
+                if (canvasElement.requestPointerLock) {
+                  canvasElement.requestPointerLock();
+                }
+              }
+            }
+
+            if (!isMobile) {
+              canvasElement.addEventListener('mousedown', reacquirePointerLock);
+              canvasElement.addEventListener('click', reacquirePointerLock);
+            } else {
+              canvasElement.addEventListener('touchstart', function(e) {
+                // Mobile touch handling
+              }, { passive: false });
+            }
+
+          }).catch(function(message) {
+            unityShowBanner(message, 'error');
+          });
+        };
+
+        script.onerror = function() {
+          unityShowBanner("Failed to load Unity game. Please check your connection and try again.", 'error');
+        };
+
+        document.body.appendChild(script);
+      }
+
+      // Check if user has already purchased the game
+      (async function checkUserAccess() {
+        try {
+          const response = await fetch('/paywall/check-access', {
+            method: 'GET',
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data.hasAccess && data.tier !== 'free') {
+              // Paid users go straight to the full game
+              const startButton = document.getElementById('start-button');
+              startButton.textContent = 'Game';
+              
+              // Remove the Unity loading click handler
+              startButton.removeEventListener('click', loadUnityGame);
+              
+              // Add navigation to /Game instead
+              startButton.addEventListener('click', function() {
+                window.location.href = '/Game/';
+              });
+            }
+            // Free-tier users (data.tier === 'free') keep the default PreGame behaviour
+          }
+          // If request fails or hasAccess is false, keep default behavior of loading PreGame
+        } catch (error) {
+          console.log('Auth check failed, showing demo version');
+          // Keep default behavior on error
+        }
+      })();
+
+      // Attach click handler to start button (may be replaced by checkUserAccess)
+      document.getElementById('start-button').addEventListener('click', loadUnityGame);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && event.reason.name === 'NotAllowedError' && 
+            event.reason.message && event.reason.message.includes('Pointer Lock')) {
+          event.preventDefault();
+          console.log('Pointer lock will be re-acquired on next interaction');
+        }
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('Service worker registered.', reg);
+            
+            // Check for updates on visibility change and periodically (every 60 seconds)
+            let updateCheckInterval;
+            
+            const checkForUpdates = () => {
+              if (document.visibilityState === 'visible') {
+                reg.update();
+              }
+            };
+            
+            // Check on visibility change
+            document.addEventListener('visibilitychange', checkForUpdates);
+            
+            // Also check every 60 seconds when visible
+            updateCheckInterval = setInterval(checkForUpdates, 60000);
+            
+            // Handle service worker updates
+            reg.addEventListener('updatefound', function() {
+              const newWorker = reg.installing;
+              console.log('Service worker update found!');
+              
+              newWorker.addEventListener('statechange', function() {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New service worker is installed, prompt user to refresh
+                  console.log('New version available! Activating...');
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                }
+              });
+            });
+          }).catch(function(err) {
+            console.error('Service worker registration failed:', err);
+          });
+          
+          // Reload page when new service worker takes control
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            if (refreshing) return;
+            refreshing = true;
+            console.log('Service worker updated, reloading page...');
+            window.location.reload();
+          });
+        });
+      }
+    </script>
+    <script>
+      // Install banner logic
+      (function() {
+        var installBanner = document.getElementById('install-banner');
+        var installButton = document.getElementById('install-button');
+        var dismissButton = document.getElementById('dismiss-banner');
+        var deferredPrompt;
+        var autoFadeTimeout;
+        
+        // Check if user already dismissed the banner
+        var dismissed = localStorage.getItem('pwa-install-dismissed');
+        
+        // Detect platform
+        var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        function showBanner() {
+          installBanner.classList.add('show');
+          // Auto-fade after 10 seconds
+          autoFadeTimeout = setTimeout(function() {
+            hideBanner(false); // false = don't save to localStorage on auto-fade
+          }, 10000);
+        }
+        
+        function hideBanner(remember) {
+          clearTimeout(autoFadeTimeout);
+          installBanner.classList.add('fade-out');
+          setTimeout(function() {
+            installBanner.classList.remove('show', 'fade-out');
+          }, 500);
+          if (remember) {
+            localStorage.setItem('pwa-install-dismissed', 'true');
+          }
+        }
+        
+        // Listen for beforeinstallprompt event (Chrome/Edge/Android)
+        window.addEventListener('beforeinstallprompt', function(e) {
+          e.preventDefault();
+          deferredPrompt = e;
+          
+          if (!dismissed) {
+            showBanner();
+          }
+        });
+        
+        // Show banner for iOS (no beforeinstallprompt support)
+        if (isIOS && !dismissed && !navigator.standalone) {
+          setTimeout(function() {
+            showBanner();
+          }, 1500);
+        }
+        
+        // For desktop browsers, show banner even without beforeinstallprompt
+        // This helps users know they can install via browser menu
+        if (!isIOS && !dismissed) {
+          setTimeout(function() {
+            showBanner();
+          }, 2000);
+        }
+        
+        // Install button click
+        installButton.addEventListener('click', function() {
+          if (deferredPrompt) {
+            // Native install prompt
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User installed the app');
+              }
+              deferredPrompt = null;
+              hideBanner(true);
+            });
+          } else {
+            // For iOS or browsers without native prompt, show alert with instructions
+            if (isIOS) {
+              alert('To install:\n1. Tap the Share button (□ with ↑)\n2. Scroll and tap "Add to Home Screen"\n3. Tap "Add"');
+            } else {
+              alert('To install:\nLook for the install icon in your browser address bar, or check your browser menu for "Install" or "Add to Home screen".');
+            }
+            hideBanner(true);
+          }
+        });
+        
+        // Dismiss button
+        dismissButton.addEventListener('click', function() {
+          hideBanner(true);
+        });
+      })();
+    </script>
+  </body>
+</html>

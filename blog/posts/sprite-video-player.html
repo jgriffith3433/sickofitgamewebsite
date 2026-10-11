@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>I Built a Video Player Out of Sprite Sheets - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="../stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <article class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          <a href="../index.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Blog</a>
+          <h1 class="display-4 fw-bold mb-3">I Built a Video Player Out of Sprite Sheets</h1>
+          <div class="text-muted mb-4">
+            <span class="me-3">February 26, 2026</span>
+            <span>Development &bull; v90</span>
+          </div>
+        </div>
+
+        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="post:sprite-video-player#intro">
+          <div class="card-body">
+            <p class="lead mb-0">I needed 30fps video playback in a WebGL game. So I rolled my own video player out of sprite sheets, Addressables, and Unity Timeline. I'm not sure this was sane.</p>
+          </div>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:sprite-video-player#why">
+          <h2 class="h3 mb-3">Why Not Just Use the Video Player?</h2>
+          <p>
+            Unity has a VideoPlayer component. It plays videos. That's its entire job. But I didn't think it could give me the control I wanted — frame-accurate scrubbing on the Timeline, tight integration with the rest of the scene, reliable WebGL playback without browser quirks. So instead of testing that assumption, I decided to build my own.
+          </p>
+          <p>
+            In hindsight, maybe I should have just tried the VideoPlayer. Or bought a plugin. But here we are.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:sprite-video-player#how">
+          <h2 class="h3 mb-3">How It Works</h2>
+          <p>
+            I extract every frame from an mp4 using FFmpeg at 30fps. Then I pack those frames into 2048x2048 sprite sheets — each sheet holds a grid of frames (2 columns, 3 rows, 6 frames per sheet at 1024x576 per cell). The packer calculates the optimal grid layout to maximize frames per sheet while keeping each cell at least 75% of the source resolution.
+          </p>
+          <p>
+            Then I chunk those sheets — groups of 64 frames each get their own Addressables label. At runtime, a custom Timeline track drives a <code>SpriteFrameRenderer</code>. The mixer calculates which frame to show based on the playback time, loads the right chunk via Addressables, swaps the sheet texture using a <code>MaterialPropertyBlock</code> (zero allocation per frame), and shifts the GameObject's position so the correct cell is centered on camera.
+          </p>
+          <p>
+            It's a sliding window. On WebGL it keeps a max of 2 chunks in memory at once because WASM linear memory can only grow, never shrink — if you spike to 200MB during a video, you're stuck at 200MB for the rest of the session. So the mixer aggressively evicts chunks behind the playhead and preloads 1 chunk ahead.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:sprite-video-player#size">
+          <h2 class="h3 mb-3">The Size Problem</h2>
+          <p>
+            Here's the part that keeps me up at night. A 5MB mp4 file (Death1, a 5-second death animation) turns into ~20MB of Addressable bundles. A 50MB mp4 (Video2, a longer cutscene) becomes 357MB of bundles across 44 parts. The entire game's remote content directory is 176 bundles totaling 1.4GB. And there's barely any actual game content yet.
+          </p>
+          <p>
+            The initial build is only ~15MB (compressed wasm + data). That's fine. But the moment you hit play and the first video loads, you're downloading sprite sheet bundles from the server and caching them in browser cache. Every frame that was a few KB as a compressed video frame is now a chunk of a DXT1-compressed 2048x2048 texture. The math is brutal.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:sprite-video-player#worth-it">
+          <h2 class="h3 mb-3">Is This Even the Right Approach?</h2>
+          <p>
+            I genuinely don't know. I built a custom FFmpeg frame extractor tool, a sprite sheet packer, an auto-chunker, an Addressables label assigner, a custom Timeline track, a custom mixer with a sliding window chunk loader, a playback controller that kicks the PlayableDirector graph to force initialization — all so I could play a video at 30fps.
+          </p>
+          <p>
+            There are plugins on the Asset Store that probably do this. The Unity VideoPlayer might have worked fine with some tweaking. I might be doing everything wrong. But it works. The playback is smooth, the chunks stream in, the memory stays under control on mobile browsers, and Timeline scrubbing works in the editor.
+          </p>
+          <p>
+            My game is over a gig and there's like 4 levels. That feels wrong. But I shipped v90 and the videos play at 30fps and that's something.
+          </p>
+        </div>
+
+        <div class="text-muted small mt-4 pt-3 border-top border-secondary">
+          <p class="mb-0"><strong>v90:</strong> Videos play. At what cost? About 1.4GB of sprite sheets, apparently.</p>
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

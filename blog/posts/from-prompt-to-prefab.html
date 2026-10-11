@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>From Prompt to Prefab - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 600;
+    }
+    code {
+      color: #e685b5;
+    }
+    .blog-img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .blog-img-sm {
+      max-width: 400px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+    @media (max-width: 576px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--bs-primary);
+      color: white;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+    }
+    .pipeline-step {
+      border-left: 2px solid var(--bs-primary);
+      padding-left: 1.5rem;
+      margin-left: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .pipeline-step:last-child {
+      border-left-color: transparent;
+    }
+    .old-way {
+      text-decoration: line-through;
+      color: var(--bs-secondary);
+    }
+    .new-way {
+      color: var(--bs-success);
+      font-weight: 600;
+    }
+    .tech-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: 0.1rem;
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="../stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <article class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          <a href="../index.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to Blog</a>
+          <h1 class="display-4 fw-bold mb-3">From Prompt to Prefab</h1>
+          <div class="text-muted mb-4">
+            <span class="me-3">February 28, 2026</span>
+            <span>Development</span>
+          </div>
+        </div>
+
+        <!-- Intro -->
+        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="post:from-prompt-to-prefab#intro">
+          <div class="card-body">
+            <p class="lead mb-0">
+              Yesterday my AI learned to draw. Today it learned to animate, remove backgrounds, build sprite sheets, and create Unity prefabs. An entire enemy character &mdash; from a text prompt to a game-ready prefab &mdash; without opening a single tool manually.
+            </p>
+          </div>
+        </div>
+
+        <!-- The Old Way -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#old-way">
+          <h2 class="h3 mb-3">The Old Way</h2>
+          <p>
+            Before yesterday, making a new animated enemy for the game meant this:
+          </p>
+          <ol class="text-secondary">
+            <li>Open a web UI (Midjourney, DALL-E, whatever). Type a prompt. Wait. Download the PNG.</li>
+            <li>Open <strong>Camtasia Studio</strong> or After Effects. Manually keyframe the animation. Export as video.</li>
+            <li>Run <code>ffmpeg</code> in a terminal to extract individual frames from the video.</li>
+            <li>Go to <a href="https://bgsweep.com" class="text-info">bgsweep.com</a> or similar &mdash; upload each frame, remove the background, download each frame.</li>
+            <li>Go to <a href="https://www.finalparsec.com/tools/sprite_sheet_maker" class="text-info">finalparsec.com/tools/sprite_sheet_maker</a> &mdash; upload all the frames, arrange the grid, download the sprite sheet.</li>
+            <li>Drag the sprite sheet into Unity. Open the Sprite Editor. Set the slice grid. Click Apply.</li>
+            <li>Select all sliced sprites. Right-click. Create Animation. Drag into a new Animation Controller.</li>
+            <li>Create a new GameObject. Add SpriteRenderer, drag the sprite. Add Animator, drag the controller. Add Collider, Rigidbody. Adjust everything.</li>
+            <li>Save as Prefab.</li>
+          </ol>
+          <p>
+            Nine steps across six different applications and three websites. Hours of clicking. And God help you if you want to change the animation later &mdash; start over from step 2.
+          </p>
+        </div>
+
+        <!-- The New Way -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#new-way">
+          <h2 class="h3 mb-3">The New Way</h2>
+          <p>
+            I type one message to my AI: <em>"Generate a slime enemy idle animation and set it up in Unity."</em>
+          </p>
+          <p>
+            Then I go get coffee.
+          </p>
+          <p>
+            Here's what happens while I'm gone:
+          </p>
+        </div>
+
+        <!-- Pipeline Steps -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#pipeline">
+          <h2 class="h3 mb-4">The Pipeline</h2>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">1</span> Concept Art Generation</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">ComfyUI</span>
+              <span class="tech-badge bg-info bg-opacity-25">Stable Diffusion 1.5</span>
+              <span class="tech-badge bg-warning bg-opacity-25">AWS EC2 GPU</span>
+            </p>
+            <p>
+              The AI sends a workflow to ComfyUI running on a GPU server. A JSON blob describing a node graph: load model, encode text, sample, decode. 30 seconds later, a concept image:
+            </p>
+            <div class="text-center my-3">
+              <img src="../images/slime-concept.png" alt="AI-generated slime concept" class="blog-img-sm">
+              <p class="text-muted small mt-2">Generated from: "cute green slime monster, game character, simple design, black background, 2D sprite style"</p>
+            </div>
+          </div>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">2</span> Video Animation</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">CogVideoX 1.5</span>
+              <span class="tech-badge bg-info bg-opacity-25">Image-to-Video</span>
+              <span class="tech-badge bg-warning bg-opacity-25">NVIDIA A10G 24GB</span>
+            </p>
+            <p>
+              This is where it gets interesting. The concept image feeds into <strong>CogVideoX 1.5 GGUF</strong> &mdash; a 5-billion parameter video generation model. It takes a still image and produces a short video of that image <em>moving</em>.
+            </p>
+            <p>
+              The trick is in the prompt. You'd think "animate this slime bouncing" would work. It doesn't. The model goes crazy &mdash; morphing, reshaping, adding limbs. What actually works is telling it to <em>barely move</em>:
+            </p>
+            <blockquote class="border-start border-3 border-info ps-3 text-secondary fst-italic">
+              "A still image of a green slime monster sitting motionless on a black background, the slime surface has very slight subtle ripples, the character does not move or change shape, static camera, no movement, almost a photograph, only the tiniest wobble on the slime surface"
+            </blockquote>
+            <p>
+              29 frames at 768&times;768. 25 denoising steps at 6.23 seconds each. About 3 minutes of GPU time:
+            </p>
+            <div class="text-center my-3">
+              <img src="../images/slime-idle-animation.gif" alt="Generated slime idle animation" class="blog-img-sm">
+              <p class="text-muted small mt-2">CogVideoX 1.5 I2V &mdash; GGUF Q4_0 quantization, 6.1GB VRAM, DPM++ scheduler</p>
+            </div>
+          </div>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">3</span> Frame Extraction</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">ffmpeg</span>
+            </p>
+            <p>
+              The GIF gets split into individual frames. We sample 8 evenly-spaced frames from the 29 total &mdash; enough for a smooth idle loop without bloating memory:
+            </p>
+            <p><code>ffmpeg -i slime-idle.gif frame_%04d.png</code></p>
+            <p>
+              <span class="old-way">Open video in editor, scrub timeline, export frames one by one</span><br>
+              <span class="new-way">✓ One ffmpeg command, instant</span>
+            </p>
+          </div>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">4</span> Background Removal</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">rembg</span>
+              <span class="tech-badge bg-info bg-opacity-25">U2-Net</span>
+            </p>
+            <p>
+              Every frame gets its background stripped using <code>rembg</code> &mdash; an AI background remover running locally. No uploading to websites. No per-image clicking.
+            </p>
+            <div class="comparison-grid my-3">
+              <div class="text-center">
+                <img src="../images/slime-frame-before-rembg.png" alt="Before background removal" class="blog-img" style="max-width: 250px;">
+                <p class="text-muted small mt-1">Before</p>
+              </div>
+              <div class="text-center">
+                <img src="../images/slime-frame-after-rembg.png" alt="After background removal" class="blog-img" style="max-width: 250px; background: repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 50% / 20px 20px;">
+                <p class="text-muted small mt-1">After (transparency grid)</p>
+              </div>
+            </div>
+            <p>
+              <span class="old-way">Upload to bgsweep.com, wait, download. Per frame. Eight times.</span><br>
+              <span class="new-way">✓ Batch process all frames in one loop</span>
+            </p>
+          </div>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">5</span> Sprite Sheet Assembly</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">ImageMagick</span>
+            </p>
+            <p>
+              All 8 cleaned frames get resized to 400&times;400 and stitched into a 4&times;2 sprite sheet using <code>montage</code>:
+            </p>
+            <div class="text-center my-3">
+              <img src="../images/slime-sprite-sheet.png" alt="Final sprite sheet" class="blog-img">
+              <p class="text-muted small mt-2">1600&times;800 sprite sheet &mdash; 8 frames, ready for Unity</p>
+            </div>
+            <p>
+              <span class="old-way">Go to finalparsec.com sprite sheet maker, upload images, arrange, download</span><br>
+              <span class="new-way">✓ One ImageMagick command</span>
+            </p>
+          </div>
+
+          <div class="pipeline-step">
+            <h4><span class="step-number">6</span> Unity Import &amp; Prefab Creation</h4>
+            <p>
+              <span class="tech-badge bg-primary bg-opacity-25">Unity MCP</span>
+              <span class="tech-badge bg-info bg-opacity-25">C# Editor Script</span>
+            </p>
+            <p>
+              The AI writes a C# editor script, places it in the project, and triggers it through the Unity MCP bridge. One menu click and the script:
+            </p>
+            <ul class="text-secondary">
+              <li>Configures the sprite sheet import (Multiple mode, 4&times;2 grid, Point filtering)</li>
+              <li>Creates <code>SlimeIdle.anim</code> &mdash; 8-frame looping animation at 8fps</li>
+              <li>Creates <code>SlimeAnimator.controller</code> with the idle state as default</li>
+              <li>Creates <code>SlimeEnemy.prefab</code> with SpriteRenderer, Animator, CircleCollider2D, and kinematic Rigidbody2D</li>
+            </ul>
+            <p>
+              <span class="old-way">Drag sprite sheet into Unity. Open Sprite Editor. Set grid. Apply. Select sprites. Right-click &rarr; Create Animation. Create Animator Controller. Create GameObject. Add components one by one. Configure each. Save as Prefab.</span><br>
+              <span class="new-way">✓ One editor script, runs in under a second</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- The GPU Story -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#gpu">
+          <h2 class="h3 mb-3">The GPU Story</h2>
+          <p>
+            <a href="ai-content-pipeline.html" class="text-info">Yesterday</a> I mentioned the pipeline was running on CPU and an image took 10 minutes. That's fixed now.
+          </p>
+          <p>
+            We spun up an <strong>NVIDIA A10G</strong> (24GB VRAM) on AWS EC2. The ComfyUI Docker image pulls automatically, downloads all models on first boot, and starts generating. But getting here was a journey:
+          </p>
+          <ul class="text-secondary">
+            <li><strong>T4 (16GB)</strong> &mdash; First attempt. AnimateDiff worked but produced garbage. CogVideoX-5B needs 18-24GB VRAM. Dead end.</li>
+            <li><strong>AnimateDiff</strong> &mdash; Generated 8 different slimes instead of animating one slime. Fundamentally wrong approach for character animation.</li>
+            <li><strong>SVD (Stable Video Diffusion)</strong> &mdash; Uncontrolled motion. Can't tell it "do an idle animation." The slime melted.</li>
+            <li><strong>LTX-Video</strong> &mdash; Completely broken. VAE architecture incompatible with the loader nodes. <code>KeyError: 'post_quant_conv.weight'</code> on every attempt.</li>
+            <li><strong>CogVideoX bf16 (full precision)</strong> &mdash; OOM. 10GB model + 16GB system RAM = swap thrashing for 20 minutes then a crash.</li>
+            <li><strong>CogVideoX fp8 + CPU offload</strong> &mdash; Ran but produced color-drifted, artifact-ridden nightmares. "Painted glass" aesthetic. Not useful.</li>
+            <li><strong>CogVideoX 1.5 GGUF Q4_0</strong> &mdash; <em>Finally.</em> 6.1GB VRAM. 6.23s/step. Clean output. The winner.</li>
+          </ul>
+          <p>
+            Seven model configurations across two GPU types over two days. The lesson: quantization format matters more than raw model size. A 3GB GGUF file outperformed a 12GB bf16 file that couldn't even load without crashing.
+          </p>
+        </div>
+
+        <!-- Infrastructure -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#infra">
+          <h2 class="h3 mb-3">Solidified Infrastructure</h2>
+          <p>
+            The real work wasn't generating pretty pictures. It was making the pipeline <em>reproducible</em>. We can now terminate the GPU server, delete everything, launch a fresh instance, and the whole thing bootstraps itself:
+          </p>
+          <ol class="text-secondary">
+            <li><code>docker compose up</code> pulls the image (~21GB)</li>
+            <li>Entrypoint hook downloads the T5-XXL text encoder (~4.9GB) via aria2c</li>
+            <li>Custom nodes auto-install from vendored config</li>
+            <li>Workflows auto-copy into place</li>
+            <li>First workflow run triggers CogVideoX GGUF + VAE auto-download (~3.5GB)</li>
+            <li>Generation starts</li>
+          </ol>
+          <p>
+            We proved this today by literally terminating the server with all its data and rebuilding from zero. One <code>init-server.sh</code> script, wait for downloads, queue a workflow. Same output. Same performance. No "works on my machine."
+          </p>
+          <p>
+            The GPU server costs <strong>$1.02/hour</strong>. Spin it up when you need characters, shut it down when you don't. A full enemy character costs about $0.10 in compute time.
+          </p>
+        </div>
+
+        <!-- What's Eliminated -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#eliminated">
+          <h2 class="h3 mb-3">What's Eliminated</h2>
+          <div class="table-responsive">
+            <table class="table table-dark table-bordered">
+              <thead>
+                <tr>
+                  <th>Tool / Step</th>
+                  <th>Before</th>
+                  <th>Now</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Image generation</td>
+                  <td class="text-secondary">Web UI &rarr; download</td>
+                  <td class="text-success">API call to ComfyUI</td>
+                </tr>
+                <tr>
+                  <td>Animation</td>
+                  <td class="text-secondary">Camtasia / After Effects</td>
+                  <td class="text-success">CogVideoX I2V</td>
+                </tr>
+                <tr>
+                  <td>Frame extraction</td>
+                  <td class="text-secondary">Manual ffmpeg in terminal</td>
+                  <td class="text-success">Automated ffmpeg</td>
+                </tr>
+                <tr>
+                  <td>Background removal</td>
+                  <td class="text-secondary">bgsweep.com (per frame)</td>
+                  <td class="text-success">rembg batch (local)</td>
+                </tr>
+                <tr>
+                  <td>Sprite sheet</td>
+                  <td class="text-secondary">finalparsec.com web tool</td>
+                  <td class="text-success">ImageMagick montage</td>
+                </tr>
+                <tr>
+                  <td>Unity sprite import</td>
+                  <td class="text-secondary">Sprite Editor, manual slice</td>
+                  <td class="text-success">C# TextureImporter API</td>
+                </tr>
+                <tr>
+                  <td>Animation clip</td>
+                  <td class="text-secondary">Drag sprites, right-click create</td>
+                  <td class="text-success">AnimationUtility API</td>
+                </tr>
+                <tr>
+                  <td>Animator controller</td>
+                  <td class="text-secondary">Manual state machine setup</td>
+                  <td class="text-success">AnimatorController API</td>
+                </tr>
+                <tr>
+                  <td>Prefab</td>
+                  <td class="text-secondary">Add components, configure, save</td>
+                  <td class="text-success">PrefabUtility API</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Zero websites visited. Zero manual drag-and-drop. Zero right-click menus. The entire pipeline runs from a chat message to a game-ready prefab.
+          </p>
+        </div>
+
+        <!-- The Stack -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#stack">
+          <h2 class="h3 mb-3">The Stack</h2>
+          <ul class="text-secondary">
+            <li><strong>OpenClaw</strong> &mdash; AI agent orchestrating everything from a Telegram chat</li>
+            <li><strong>ComfyUI</strong> &mdash; Image/video generation (custom Docker image with auto-resolving models)</li>
+            <li><strong>CogVideoX 1.5 GGUF</strong> &mdash; 5B parameter video model, quantized to 3GB</li>
+            <li><strong>rembg</strong> &mdash; AI background removal (U2-Net, runs locally)</li>
+            <li><strong>ImageMagick</strong> &mdash; Image processing, sprite sheet assembly</li>
+            <li><strong>ffmpeg</strong> &mdash; Frame extraction from generated video</li>
+            <li><strong>Unity MCP</strong> &mdash; Remote control of Unity Editor via WebSocket</li>
+            <li><strong>AWS EC2 g5.xlarge</strong> &mdash; NVIDIA A10G 24GB, on-demand GPU compute</li>
+          </ul>
+        </div>
+
+        <!-- Final Result -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#result">
+          <h2 class="h3 mb-3">The Final Result</h2>
+          <p>
+            Here it is. A slime enemy running in the game. Generated from a text prompt, animated by a video model, processed by scripts, imported by code. No human touched a pixel.
+          </p>
+          <div class="text-center my-4">
+            <video controls loop playsinline style="max-width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <source src="../../videos/Slimed.mp4" type="video/mp4">
+              Your browser doesn't support video.
+            </video>
+            <p class="text-muted small mt-2">SlimeEnemy prefab running in the Unity test scene</p>
+          </div>
+        </div>
+
+        <!-- What's Next -->
+        <div class="mb-5" data-reaction-target="post:from-prompt-to-prefab#next">
+          <h2 class="h3 mb-3">What's Next</h2>
+          <p>
+            The idle animation is one animation state. Enemies need attack animations, walk cycles, death sequences, hit reactions. Each of those is the same pipeline with a different prompt. The infrastructure is there. Now it's about volume.
+          </p>
+          <p>
+            And the quality isn't perfect &mdash; the model sometimes adds subtle morphing, the background removal leaves slight halos. But it's <em>good enough</em> for a 2D game running at 400&times;400 per character. And every generation takes minutes, not hours.
+          </p>
+          <p>
+            Yesterday I couldn't make pictures. Today I have a fully automated character factory. Tomorrow I populate the game.
+          </p>
+        </div>
+
+        <div class="text-muted small mt-5 pt-4 border-top border-secondary">
+          <p>
+            <strong>Models tested:</strong> 7. <strong>Models that worked:</strong> 1. <strong>GPU instances terminated:</strong> 3. <strong>Websites visited to make art:</strong> 0. <strong>Total compute cost:</strong> ~$4.
+          </p>
+        </div>
+
+        <div class="mt-3">
+          <a href="../index.html" class="btn btn-outline-secondary">&larr; Back to Blog</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>

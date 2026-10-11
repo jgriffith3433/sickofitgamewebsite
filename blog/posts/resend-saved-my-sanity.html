@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>I Just Wanted To Send An Email - Sick Of It</title>
+  <!-- Umami Analytics -->
+  <script async defer src="/umami/script.js" data-website-id="293705f8-b467-4c6d-a55b-f142a986fdb0"></script>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 600;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="../stats.html">Stats</a></li>
+          <li class="nav-item"><a class="nav-link" href="../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <article class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="mb-4">
+          <a href="../index.html" class="btn btn-outline-secondary btn-sm mb-3">← Back to Blog</a>
+          <h1 class="display-4 fw-bold mb-3">I Just Wanted To Send An Email</h1>
+          <div class="text-muted mb-4">
+            <span class="me-3">February 18, 2026</span>
+            <span>Development</span>
+          </div>
+        </div>
+
+        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="post:resend-saved-my-sanity#intro">
+          <div class="card-body">
+            <p class="lead mb-0">
+              I was trying to consolidate everything. Keep it all in one place.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:resend-saved-my-sanity#the-plan">
+          <h2 class="h3 mb-3">The Plan</h2>
+          <p>
+            Person pays $1 → Gets access code → I email them the code. Basic e-commerce stuff.
+          </p>
+        </div>
+
+        <div class="mb-4" data-reaction-target="post:resend-saved-my-sanity#aws-said-no">
+          <h2 class="h3 mb-3">AWS Said No</h2>
+          <p>
+            Applied for SES production access. Denied.<br>
+            Wrote a more detailed application. Denied again.
+          </p>
+          <p>
+            Amazon denied my production level access for sending emails. Not once, but twice.
+          </p>
+          <p>
+            I get it. They deal with spam all day. The filters exist for good reasons. But I'm sitting here with working Stripe webhooks, valid purchase confirmations, and no way to send them.
+          </p>
+          <p>
+            So much for consolidation. I guess I had to... resend.
+          </p>
+        </div>
+
+        <div class="text-muted small mt-5 pt-4 border-top border-secondary">
+          <p>
+            <strong>What I ended up using:</strong> Resend API. Added DNS records. Got an API key. Sent emails. Took 10 minutes.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>
