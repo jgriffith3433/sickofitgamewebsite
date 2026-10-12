@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Son of a * - Sick Of It</title>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+    code { color: #e685b5; }
+    blockquote {
+      border-left: 3px solid var(--bs-primary);
+      padding: 0.75rem 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md border-bottom border-secondary mb-5">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../Game/">Play</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 800px;">
+    <article>
+      <header class="mb-5">
+        <p class="text-muted">October 11, 2026 • Development</p>
+        <h1 class="display-5 fw-bold mb-3">Son of a *</h1>
+        <p class="lead text-secondary">Seven months later. The AI is better. I'm a little older. I missed this, and the project was a wreck when I came back.</p>
+      </header>
+
+      <section class="mb-5">
+        <h2>Seven Months</h2>
+        <p>The last post was March 1. I tore the game down to one config file, said I'd keep going, and then I didn't.</p>
+        <p>Life. Other work. The usual. I got a little older. I kept thinking about Yooba standing in a burning village and then I'd close the tab. Tonight I opened it again because I missed working on it. That's the whole reason. I missed the stupid thing.</p>
+        <p>The AI is better than it was in March. That's the part I didn't expect to feel so clearly. Back then every session was a fight to keep it from inventing a second source of truth. Now it can read the repo, look at a <code>git diff</code>, and tell me what I actually broke. I still have to watch it. I just don't have to translate as much.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2>It Was Ruined</h2>
+        <p>I came back and the site was on GitHub Pages. Static files. A CDN. No Docker, no nginx, no Flask. The project I left in March assumed all of that was sitting behind the domain.</p>
+        <p>I loaded the page. The console was a graveyard.</p>
+        <ul>
+          <li>The analytics script, <code>/umami/script.js</code>, 404.</li>
+          <li>The start button calling <code>/paywall/check-access</code>, 404.</li>
+          <li>Unity trying to boot <code>SickOfIt.framework.js.gz</code> and choking on the first byte.</li>
+          <li>Then <code>unityFramework is not defined</code>, because the framework script never parsed.</li>
+          <li>The data file, about 4 MB, still gzipped, because the server never said <code>Content-Encoding: gzip</code>.</li>
+        </ul>
+        <p>GitHub Pages will happily hand you a gzip file. It will not tell the browser to unzip it. Unity's <code>.gz</code> build expects that header. Without it, the browser tries to run compressed bytes as JavaScript. Invalid token. Game dead. The homepage was also asking a server that doesn't exist whether I was allowed to press play.</p>
+        <blockquote>I built a game, left for seven months, and came back to a loading screen that couldn't load.</blockquote>
+      </section>
+
+      <section class="mb-5">
+        <h2>Putting It Back Together</h2>
+        <p>First we pulled the dead services out. Umami was on every page. There was a stats dashboard, a JavaScript wrapper so the Unity build could phone home, three markdown guides, and a Postgres container in the compose file. One commit. About 1,700 lines deleted. The Stats link in the blog nav went with it.</p>
+        <p>The paywall went too. The start button was fetching an access check and, if you had paid, sending you to <code>/Game/</code> instead of just starting. There were Buy and Take pages whose only job was checkout and redeem codes. Nginx was locking <code>/Game/</code> behind that login. None of that can run on a static host, and I didn't want it in front of the game anymore. Click to start means click to start.</p>
+        <p>There was also a live email API key sitting in the dev compose file as a default value. That came out. A key that has lived in a repo is burned, so that one gets rotated.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2>The Gzip Costume Change</h2>
+        <p>I didn't trust GitHub Pages with gzip headers, so I exported the build a different way. The files are still compressed. They're named <code>.unityweb</code>. The Unity loader looks for its own marker in the bytes and decompresses them in JavaScript. The server just serves a file. That's the whole trick.</p>
+        <p>v100 came out. v102 went in. Data, framework, wasm, a pile of Addressables bundles. The page at <code>/Game/</code> was still asking for the old names:</p>
+        <ul>
+          <li><code>SickOfIt.framework.js.gz</code></li>
+          <li><code>SickOfIt.wasm.gz</code></li>
+          <li><code>SickOfIt.data.gz</code></li>
+        </ul>
+        <p>All 404. GitHub's 404 is an HTML page. The loader tried to execute that HTML. <code>Unexpected token '&lt;'</code>. Then <code>unityFramework is not defined</code> again, same crash, new costume.</p>
+        <p>The fix was three strings. Point the page at the files that are actually in <code>Game/v102/SickOfIt/Build/</code>. <code>.data.unityweb</code>, <code>.framework.js.unityweb</code>, <code>.wasm.unityweb</code>. The game comes up.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2>I Forgot I Built Rewind</h2>
+        <p>Then I played it.</p>
+        <p>I rewound. The level ran backwards. Shots unspread. I went all the way to the start, let go, and I couldn't fire. That's the bug that made me go look.</p>
+        <p>The game has its own clock. <code>GameClock</code> can run time in reverse. A timeline records transforms, rigidbody velocity, whether an object is even active. Projectiles pause while you're scrubbing, because their lifetime reads that clock instead of Unity's. I built this in the spring and then I left, and I did not remember that it feels good.</p>
+        <p>It feels good. You hold rewind and the mess you just made unspools. It's the first time I've come back to this game and thought: oh. That's fun. I made that.</p>
+        <p>The shooting bug is the clock being honest and the cooldown being sloppy. Fire rate is checked against <code>GameClock</code> time, which is the right idea, except the last-shot timestamp doesn't rewind with everything else. Scrub back to zero and the last shot is still sitting in the future. The game thinks you're on cooldown until time catches up to a shot you already undid. I'll fix it. I'm glad I found it by playing, and I'm gladder the rewind is real.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2>Still Here</h2>
+        <p>Seven months. A little older. The AI got better while I was gone, which is lucky, because I needed it to help me read my own wreckage. The site is a pile of static files now. That's a downgrade from the Docker setup and it's also the thing that made the game load again.</p>
+        <p>Son of a *. I missed this.</p>
+      </section>
+
+      <div class="mt-5 pt-4 border-top border-secondary">
+        <a href="../" class="text-decoration-none">&larr; Back to Blog</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="border-top border-secondary mt-5 py-4">
+    <div class="container text-center text-muted">
+      <small>&copy; 2026 Sick Of It. All rights reserved.</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>
