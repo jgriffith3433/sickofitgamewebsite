@@ -72,7 +72,7 @@
       #unity-logo {
         width: 154px;
         height: 130px;
-        background: url('v100/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background: url('v101/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
         background-size: contain;
         margin: 0 auto 20px;
       }
@@ -293,7 +293,7 @@
   </head>
   <body>
     <!-- Version Display -->
-    <div id="version-display">v100</div>
+    <div id="version-display">v101</div>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
       <div id="install-banner-buttons">
@@ -394,7 +394,7 @@
       }
 
       var gameName = "SickOfIt";
-      var gameVersion = "v100"; // Update this when you publish a new game build
+      var gameVersion = "v101"; // Update this when you publish a new game build
       
       // Update version display
       var versionDisplay = document.getElementById('version-display');
@@ -444,14 +444,14 @@
         }
       });
       
-      var buildUrl = "v100/" + gameName + "/Build/" + gameName;
+      var buildUrl = "v101/" + gameName + "/Build/" + gameName;
       var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
       var config = {
         arguments: [],
         dataUrl: buildUrl + ".data.gz?v=" + gameVersion,
         frameworkUrl: buildUrl + ".framework.js.gz?v=" + gameVersion,
         codeUrl: buildUrl + ".wasm.gz?v=" + gameVersion,
-        streamingAssetsUrl: "v100/" + gameName + "/StreamingAssets",
+        streamingAssetsUrl: "v101/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
         productVersion: gameVersion,
