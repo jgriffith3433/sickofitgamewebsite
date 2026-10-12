@@ -395,6 +395,21 @@
 
       var gameName = "SickOfIt";
       var gameVersion = "v101"; // Update this when you publish a new game build
+
+      // Safari deletes IndexedDB and the Cache API (Unity's bundle cache) after
+      // 7 days of browser use with no visit. persist() opts this origin out of
+      // that eviction. It has to follow a user gesture, and Safari grants it
+      // from site use, especially once the game is installed to the Home Screen.
+      function requestPersistentStorage() {
+        if (!navigator.storage || !navigator.storage.persist)
+          return;
+        navigator.storage.persist().then(function (granted) {
+          console.log("[Storage] persistent:", granted);
+        });
+      }
+      window.addEventListener("pointerdown", function () {
+        requestPersistentStorage();
+      }, { once: true });
       
       // Update version display
       var versionDisplay = document.getElementById('version-display');
@@ -454,7 +469,22 @@
         streamingAssetsUrl: "v101/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
-        productVersion: gameVersion,
+        // Unity deletes every cached bundle when productVersion changes.
+        // Bundle filenames already include a content hash, so this stays on
+        // the current publish tag and is split so the deploy find-replace
+        // (which rewrites the literal game version) cannot bump it.
+        productVersion: ["v", "101"].join(""),
+        // Hashed .bundle URLs never change in place. "immutable" serves them
+        // from Unity's browser cache with no revalidation request.
+        // The player .data file keeps must-revalidate; its ?v= query changes
+        // on each publish. Everything else stays out of Unity's cache.
+        cacheControl: function (url) {
+          if (url.indexOf(".bundle") !== -1)
+            return "immutable";
+          if (url.indexOf(".data") !== -1)
+            return "must-revalidate";
+          return "no-store";
+        },
         showBanner: unityShowBanner,
         errorHandler: function(message, filename, lineno) {
           // Log all errors to console instead of showing alerts

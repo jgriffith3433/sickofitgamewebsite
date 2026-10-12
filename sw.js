@@ -20,7 +20,10 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.map(key => {
-        if (key !== CACHE_NAME) {
+        // Only drop previous copies of this site cache.
+        // Unity stores asset bundles in Cache Storage under UnityCache_*,
+        // and deleting those forces a full redownload.
+        if (key.startsWith('sickofit-pwa-') && key !== CACHE_NAME) {
           console.log('Deleting old cache:', key);
           return caches.delete(key);
         }
@@ -37,11 +40,22 @@ self.addEventListener('message', event => {
   }
 });
 
+// Unity's loader caches these itself (Cache Storage + IndexedDB).
+// A service worker cannot hand a 304 back to the page, so intercepting
+// them makes Unity treat every revisit as a full download.
+function unityManagesCache(url) {
+  const path = url.pathname;
+  return path.endsWith('.bundle') || path.indexOf('.data.unityweb') !== -1;
+}
+
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  
-  // NETWORK-FIRST strategy for ALL requests
-  // Always try to fetch from network first to avoid caching issues
+
+  if (unityManagesCache(url)) {
+    return;
+  }
+
+  // NETWORK-FIRST strategy for site files (shell, catalog, images).
   event.respondWith(
     fetch(event.request)
       .then(response => {
