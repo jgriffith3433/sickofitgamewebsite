@@ -158,6 +158,9 @@
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
         box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
       }
 
       #start-button:hover {
@@ -418,7 +421,7 @@
     <div id="start-overlay">
       <h1>Sick Of It</h1>
       <div id="button-container">
-        <button id="start-button">CLICK TO START</button>
+        <a id="start-button" href="/Game/index.html">CLICK TO START</a>
         <a href="blog/index.html" class="secondary-button">Blog</a>
       </div>
     </div>
@@ -780,8 +783,6 @@
 
         document.body.appendChild(script);
       }
-
-      document.getElementById('start-button').addEventListener('click', loadUnityGame);
 
       window.addEventListener('unhandledrejection', function(event) {
         if (event.reason && event.reason.name === 'NotAllowedError' && 
