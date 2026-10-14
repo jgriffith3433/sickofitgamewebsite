@@ -81,14 +81,14 @@
       <section class="mb-5">
         <h2>The Gzip Costume Change</h2>
         <p>I didn't trust GitHub Pages with gzip headers, so I exported the build a different way. The files are still compressed. They're named <code>.unityweb</code>. The Unity loader looks for its own marker in the bytes and decompresses them in JavaScript. The server just serves a file. That's the whole trick.</p>
-        <p>v100 came out. v103 went in. Data, framework, wasm, a pile of Addressables bundles. The page at <code>/Game/</code> was still asking for the old names:</p>
+        <p>v100 came out. v104 went in. Data, framework, wasm, a pile of Addressables bundles. The page at <code>/Game/</code> was still asking for the old names:</p>
         <ul>
           <li><code>SickOfIt.framework.js.gz</code></li>
           <li><code>SickOfIt.wasm.gz</code></li>
           <li><code>SickOfIt.data.gz</code></li>
         </ul>
         <p>All 404. GitHub's 404 is an HTML page. The loader tried to execute that HTML. <code>Unexpected token '&lt;'</code>. Then <code>unityFramework is not defined</code> again, same crash, new costume.</p>
-        <p>The fix was three strings. Point the page at the files that are actually in <code>Game/v103/SickOfIt/Build/</code>. <code>.data.unityweb</code>, <code>.framework.js.unityweb</code>, <code>.wasm.unityweb</code>. The game comes up.</p>
+        <p>The fix was three strings. Point the page at the files that are actually in <code>Game/v104/SickOfIt/Build/</code>. <code>.data.unityweb</code>, <code>.framework.js.unityweb</code>, <code>.wasm.unityweb</code>. The game comes up.</p>
       </section>
 
       <section class="mb-5">

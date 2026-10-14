@@ -96,7 +96,7 @@
             Problem: the agent could open the window via the Unity MCP <code>execute_menu_item</code> tool, but it couldn't click buttons. MCP gives you programmatic access to Unity, not mouse control.
           </p>
           <p>
-            So it wrote its own solution. It added a new menu item &mdash; <code>Tools/Run Full Deploy</code> &mdash; that calls the deploy function directly. Changed <code>RunFullDeploy()</code> from <code>private</code> to <code>internal</code>, told Unity to recompile, and then triggered the build. The whole thing ran: Addressables, WebGL build, version bump from v96 to v103, website started.
+            So it wrote its own solution. It added a new menu item &mdash; <code>Tools/Run Full Deploy</code> &mdash; that calls the deploy function directly. Changed <code>RunFullDeploy()</code> from <code>private</code> to <code>internal</code>, told Unity to recompile, and then triggered the build. The whole thing ran: Addressables, WebGL build, version bump from v96 to v104, website started.
           </p>
           <p>
             It adapted to a limitation it discovered in real time. That was kind of wild to watch.
@@ -106,7 +106,7 @@
         <div class="mb-4" data-reaction-target="post:openclaw-pipeline#verifying-the-deploy">
           <h2 class="h3 mb-3">Verifying the Deploy</h2>
           <p>
-            After the build finished, the agent verified everything worked. It curled the website, hit the paywall (correct &mdash; that's supposed to be there), redeemed the free access code via POST request, followed the redirect, and confirmed the Unity WebGL loader was serving v103 assets.
+            After the build finished, the agent verified everything worked. It curled the website, hit the paywall (correct &mdash; that's supposed to be there), redeemed the free access code via POST request, followed the redirect, and confirmed the Unity WebGL loader was serving v104 assets.
           </p>
           <p>
             End-to-end verification without opening a browser. It can't actually play the game &mdash; no WebGL renderer in a Docker container &mdash; but it confirmed the infrastructure was solid.
