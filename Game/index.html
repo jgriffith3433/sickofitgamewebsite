@@ -72,7 +72,7 @@
       #unity-logo {
         width: 154px;
         height: 130px;
-        background: url('v104/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background: url('v105/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
         background-size: contain;
         margin: 0 auto 20px;
       }
@@ -293,7 +293,7 @@
   </head>
   <body>
     <!-- Version Display -->
-    <div id="version-display">v104</div>
+    <div id="version-display">v105</div>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
       <div id="install-banner-buttons">
@@ -394,7 +394,7 @@
       }
 
       var gameName = "SickOfIt";
-      var gameVersion = "v104"; // Update this when you publish a new game build
+      var gameVersion = "v105"; // Update this when you publish a new game build
 
       // Safari deletes IndexedDB and the Cache API (Unity's bundle cache) after
       // 7 days of browser use with no visit. persist() opts this origin out of
@@ -459,14 +459,14 @@
         }
       });
       
-      var buildUrl = "v104/" + gameName + "/Build/" + gameName;
+      var buildUrl = "v105/" + gameName + "/Build/" + gameName;
       var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
       var config = {
         arguments: [],
         dataUrl: buildUrl + ".data.unityweb?v=" + gameVersion,
         frameworkUrl: buildUrl + ".framework.js.unityweb?v=" + gameVersion,
         codeUrl: buildUrl + ".wasm.unityweb?v=" + gameVersion,
-        streamingAssetsUrl: "v104/" + gameName + "/StreamingAssets",
+        streamingAssetsUrl: "v105/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
         // Unity deletes every cached bundle when productVersion changes.
