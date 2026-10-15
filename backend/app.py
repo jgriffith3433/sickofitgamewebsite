@@ -74,7 +74,7 @@ _products_default = json.dumps(
 )
 PRODUCTS = json.loads(os.environ.get("PRODUCTS") or _products_default)
 
-# Free game key – users who take this key are routed to PreGame, not the full game
+# Free game key – grants access to /Game/ (tracked as the "free" tier)
 FREE_GAME_KEY = os.environ.get("FREE_GAME_KEY", "SICK-0F1T-FR33-2026")
 
 # Protected paths – Nginx will call /paywall/auth-check for these
@@ -133,8 +133,7 @@ def set_session_cookie(response, token, expires_at, product_id="default"):
 def set_game_tier_cookie(response, tier):
     """Set a readable (non-httpOnly) cookie indicating game tier: 'free' or 'paid'.
     
-    This cookie can be read by JavaScript so the frontend knows whether to
-    route the user to PreGame (free) or /Game/ (paid).
+    This cookie can be read by JavaScript (e.g. for analytics tier tracking).
     """
     max_age = 20 * 365 * 86400  # ~20 years
     response.set_cookie(
@@ -478,7 +477,7 @@ def _do_redeem(code, product_id):
             error="An error occurred. Please try again.",
         ), 500
 
-    # Determine tier: free key → PreGame experience, paid key → full game
+    # Determine tier: free key and paid key both go to /Game/; tier is tracked separately
     is_free = code.upper().strip() == FREE_GAME_KEY.upper()
     if is_free:
         redirect_to = "/Game/"

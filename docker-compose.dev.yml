@@ -11,7 +11,6 @@ services:
     volumes:
       # Mount for live development - update files without rebuilding
       - ./Game:/usr/share/nginx/html/Game
-      - ./PreGame:/usr/share/nginx/html/PreGame
       - ./blog:/usr/share/nginx/html/blog
       - ./music:/usr/share/nginx/html/music
       - ./shorts:/usr/share/nginx/html/shorts
