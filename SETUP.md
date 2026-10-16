@@ -1,3 +1,5 @@
+> **Historical (before October 2026).** This describes the old Docker/EC2 paywall setup. The live site is static on GitHub Pages; see [README.md](README.md).
+
 # Sick Of It - Complete Setup Documentation
 
 ## Table of Contents
