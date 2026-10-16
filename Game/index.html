@@ -294,6 +294,7 @@
   <body>
     <!-- Version Display -->
     <div id="version-display">v106</div>
+    <script src="/js/hawkes-release.js" data-releases="/releases.json"></script>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
       <div id="install-banner-buttons">
@@ -414,6 +415,14 @@
       // Update version display
       var versionDisplay = document.getElementById('version-display');
       versionDisplay.textContent = gameVersion;
+      // The release (releases.json, written at each go live) and the build running: "v1.0.0 · build 106".
+      if (window.hawkesRelease) window.hawkesRelease.then(function (r) {
+        var top = r && r.releases && r.releases[0];
+        if (!top) return;
+        var beta = /\.hawkesgen\.com$/.test(location.hostname) || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        versionDisplay.textContent = 'v' + top.version + (beta ? ' beta' : '') + ' \u00b7 build ' + gameVersion.replace(/^v/, '');
+        versionDisplay.title = 'What\'s new: ' + location.origin + '/whatsnew.html (click copies the console log)';
+      });
       
       // Add click handler to copy console logs to clipboard
       versionDisplay.addEventListener('click', function() {

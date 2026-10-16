@@ -117,6 +117,15 @@
         box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
       }
 
+      #site-version {
+        display: block;
+        margin-top: 18px;
+        color: rgba(255, 255, 255, 0.45);
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
       .secondary-button:active {
         transform: translateY(0);
       }
@@ -264,7 +273,9 @@
       <div id="button-container">
         <a id="start-button" href="/Game/index.html">CLICK TO START</a>
         <a href="blog/index.html" class="secondary-button">Blog</a>
+        <a href="whatsnew.html" class="secondary-button">What's new</a>
       </div>
+      <a id="site-version" href="whatsnew.html" data-hawkes-version hidden></a>
     </div>
     <script>
       if ('serviceWorker' in navigator) {
@@ -404,5 +415,6 @@
         });
       })();
     </script>
+    <script src="/js/hawkes-release.js" data-releases="/releases.json" defer></script>
   </body>
 </html>

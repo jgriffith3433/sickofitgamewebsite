@@ -71,3 +71,12 @@ are no longer used by the live site:
 - `SETUP.md`, `PWA_CHECKLIST.md`, `UNITY_INTEGRATION_PROMPT.txt`
 
 They can be removed once local dev no longer needs Docker.
+
+## Versions and What's new
+
+Every go live is a release, made by Hawkes Studio (`hawkesstudio/src/releases.ts`): a semver version bumped at go
+live (minor when players get something new, patch for fixes) plus the build (`Game/v<n>`), shown as "v1.4.0 · build 107"
+and tagged `v<version>` in this repo and in `sickofitgame-unity`. Studio adds the release to `releases.json` (newest
+first) in the go-live commit, with the notes J approved. `whatsnew.html`, the landing page and the game page's version
+label read it through `js/hawkes-release.js` (a copy of `hawkesstudio/clients/web/hawkes-release.js`).
+Website changes go to this repo's `beta` branch (the beta build lands on top of it); going live moves `main` to it.
