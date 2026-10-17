@@ -16,6 +16,8 @@
  *    handed (iOS only lets an element play if it was started in a touch).
  * 3. Audio resumes when the tab comes back, the page is restored, or iOS reports the context "interrupted"; any
  *    later touch, click or key also resumes it.
+ * 4. Not sound, but it needs to run first: the first time the site's service worker takes control of the page, the
+ *    website's own "reload on controllerchange" is stopped, so a first visit isn't reloaded mid-game.
  *
  * window.hawkesSound: tap() presses the prompt (the playtest bot uses it), state() describes it as JSON.
  * Plain ES5, no dependencies: it must run on old iOS Safari too.
@@ -259,6 +261,24 @@
       });
     },
   };
+
+  // ─── No reload on the first visit ──────────────────────────────
+
+  // The website's page reloads itself when a service worker takes control ('controllerchange'), meant for updates. On a
+  // first visit the site's sw.js claims the page too (skipWaiting + clients.claim), which can be a minute in, once
+  // Unity's downloads let it install, and the reload throws the player out of the level to a fresh "Tap to play" and
+  // main menu. This listener is registered before the site's (this script runs first), so it swallows that first
+  // claim on a page that had no worker; a real update, on a page a worker already controls, still reloads.
+  var workers = navigator.serviceWorker;
+  if (workers && workers.addEventListener && !workers.controller) {
+    var claimed = false;
+    workers.addEventListener('controllerchange', function (e) {
+      if (claimed) return;
+      claimed = true;
+      e.stopImmediatePropagation();
+      log('service worker took control of the page; not reloading');
+    });
+  }
 
   addStyle();
   if (document.body) show();
