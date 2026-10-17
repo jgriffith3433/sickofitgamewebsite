@@ -8,9 +8,12 @@
  * 1. A full-screen "Tap to play" prompt shows as soon as the page loads, in any orientation. The game loads behind it.
  * 2. That tap unlocks audio. Unity keeps its AudioContext private (WEBAudio.audioContext inside the framework), so this
  *    script wraps window.AudioContext before the loader runs: every context Unity makes is tracked and resumed. If the
- *    player taps before Unity has made one, the tap makes it (inside the gesture, which iOS requires) and Unity's
- *    `new AudioContext` gets that already-unlocked one. The tap also plays a silent buffer and primes a pool of
- *    <audio> elements that Unity's `new Audio` is handed (iOS only lets an element play if it was started in a touch).
+ *    player taps before Unity has made one, it is resumed as soon as Unity makes it (and again on the next touch).
+ *    Never create a context for Unity or hand it one that is already running: Unity (6000.3, `_JS_Sound_Init`) only
+ *    counts its audio as running from the context's statechange event, so a context that is running before Unity
+ *    sets `onstatechange` never fires it and every sound waits in Unity's queue for good (all sound silent).
+ *    The tap also plays a silent buffer, and on iOS primes a pool of <audio> elements that Unity's `new Audio` is
+ *    handed (iOS only lets an element play if it was started in a touch).
  * 3. Audio resumes when the tab comes back, the page is restored, or iOS reports the context "interrupted"; any
  *    later touch, click or key also resumes it.
  *
@@ -27,12 +30,14 @@
   var NativeContext = window.AudioContext || window.webkitAudioContext;
   var NativeAudio = window.Audio;
   var contexts = [];
-  var pending = null;   // made in the tap before Unity asked for one
   var unlocked = false;
   var taps = 0;
   var trusted = false;  // the tap was a real user gesture
   var pool = [];
   var priming = 0;
+  // iPadOS reports itself as a Mac; a touch screen gives it away.
+  var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   function log(message) {
     if (window.console && console.log) console.log('[HawkesSound] ' + message);
@@ -54,17 +59,15 @@
   }
 
   if (NativeContext) {
+    // Always a fresh context, so Unity sees it change to "running" (see the header). If the tap came first, resume it
+    // right away: Unity has set its onstatechange by the time the resume lands.
     var HawkesAudioContext = function (options) {
-      var context;
-      if (pending && options === undefined) {
-        context = pending;
-        pending = null;
-      } else {
-        context = options === undefined ? new NativeContext() : new NativeContext(options);
-      }
-      return track(context);
+      var context = track(options === undefined ? new NativeContext() : new NativeContext(options));
+      if (unlocked) resumeAll();
+      return context;
     };
     HawkesAudioContext.prototype = NativeContext.prototype;
+    try { Object.setPrototypeOf(HawkesAudioContext, NativeContext); } catch (e) { /* old browser */ }
     window.AudioContext = HawkesAudioContext;
     if (window.webkitAudioContext) window.webkitAudioContext = HawkesAudioContext;
   }
@@ -89,10 +92,10 @@
     } catch (e) { /* the resume may still have worked */ }
   }
 
-  // ─── <audio> elements: a primed pool for Unity's `new Audio` ───
+  // ─── <audio> elements: a primed pool for Unity's `new Audio` (iOS only) ───
 
   function primePool() {
-    if (!NativeAudio) return;
+    if (!NativeAudio || !IOS) return;
     while (pool.length + priming < POOL_SIZE) {
       var element = new NativeAudio(SILENCE_WAV);
       element.muted = true;
@@ -112,7 +115,7 @@
     }
   }
 
-  if (NativeAudio) {
+  if (NativeAudio && IOS) {
     var HawkesAudio = function (src) {
       var element = pool.pop();
       if (element) {
@@ -134,10 +137,6 @@
   function unlock() {
     // iOS 16.4+: play through the ring/silent switch like a video does, so "no sound on my iPhone" isn't the switch.
     try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* older iOS */ }
-    if (NativeContext && contexts.length === 0 && !pending) {
-      try { pending = new NativeContext(); } catch (e) { pending = null; }
-      if (pending) track(pending);
-    }
     unlocked = true;
     resumeAll();
     for (var i = 0; i < contexts.length; i++) playSilence(contexts[i]);
@@ -215,6 +214,10 @@
 
   function onGesture() {
     if (!unlocked) return;
+    // Unity can make its context after the tap on a slow phone; a later touch is a gesture iOS accepts.
+    for (var i = 0; i < contexts.length; i++) {
+      if (contexts[i].state !== 'running' && contexts[i].state !== 'closed') playSilence(contexts[i]);
+    }
     resumeAll();
     primePool();
   }
