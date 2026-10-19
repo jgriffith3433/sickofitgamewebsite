@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <!-- Sick Of It lore: source in sickofitgame-unity Tools/Web/site, installed by the deploy (step 7d). Edit it there, not in the website. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Hell's Announcer - Sick Of It Lore</title>
+  <meta name="description" content="Hell's own voice: a booming 90s arcade cabinet that calls out floors, Wardens and deaths, and loves a show.">
+  <meta name="theme-color" content="#0b0605">
+  <link rel="shortcut icon" href="../../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../emoji-reactions.css">
+  <link rel="stylesheet" href="../assets/descent.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+  </style>
+</head>
+<body class="bg-dark hell lore-page" style="--c1:#ffc65c;--c2:#160c04;--depth:0.5">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <canvas class="hell-embers" data-embers="14" aria-hidden="true"></canvas>
+  <div class="hell-heat" aria-hidden="true"></div>
+
+  <header class="lore-head">
+
+    <div class="container">
+      <a href="../../lore.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to the Descent</a>
+      <div class="row align-items-center g-4">
+        <div class="col-md-8">
+          <span class="floor-tag">Hell's own voice</span>
+          <h1>Hell's Announcer</h1>
+          <p class="lead mb-0">Hell puts on a show, and the show needs a voice. Booming, delighted, and always slightly too loud.</p>
+        </div>
+        <div class="col-md-4 text-center"><div class="announce" style="font-size:64px;line-height:.9" aria-hidden="true">FLOOR<br>999!</div></div>
+      </div>
+    </div>
+  </header>
+
+  <article class="container lore-body" data-reaction-target="lore:characters/announcer">
+<h2>Who he is</h2>
+    <p>Nobody has seen him. He's Hell's own voice: a 90s arcade cabinet the size of a mountain, calling out floors, Wardens and deaths. He loves a show. He takes it very seriously. He'd like you to lose, but he'd like you to lose <em>well</em>.</p>
+
+    <h2>Greatest hits</h2>
+    <div class="quote-box">
+      <p class="announce">WELCOME TO THE BOTTOM. NINE HUNDRED NINETY-NINE TO GO.</p>
+      <p class="announce">ONLY NINE HUNDRED NINETY-NINE TO GO!</p>
+      <p class="line"><span class="who">The hero</span>You said that already.</p>
+    </div>
+    <div class="quote-box">
+      <p class="announce">FLOOR 950! HALFWAY TO NINE HUNDRED!</p>
+      <p class="line"><span class="who">The hero</span>Halfway through the first one.</p>
+    </div>
+    <div class="quote-box">
+      <p class="announce">FLOOR 901! THE WARDEN OF THE WASTES!</p>
+      <p class="announce">THE... MAGMA... KING!</p>
+      <p class="announce">THE MAGMA KING HAS FALLEN!</p>
+      <p class="announce">WAYSTONE LIT! FLOOR NINE HUNDRED ONE!</p>
+      <p class="announce">CIRCLE NINE! THE CRACKED ROAD!</p>
+    </div>
+
+    <h2>When you die</h2>
+    <p>The death screen says <span class="announce">YOU OBVIOUSLY DIED</span>, and he gloats, in turn:</p>
+    <div class="quote-box">
+      <p class="announce">OHHH! HELL TAKES THE ROUND!</p>
+      <p class="announce">FLATTENED! WHAT A FINISH... FOR HELL!</p>
+      <p class="announce">AND HE'S DOWN! BACK YOU GO!</p>
+    </div>
+    <p>The first time, he explains how it works:</p>
+    <div class="quote-box">
+      <p class="announce">HELL DOESN'T LET YOU DIE. IT LETS YOU DO IT AGAIN.</p>
+      <p class="line"><span class="who">The hero</span>Of course it does.</p>
+      <p class="announce">BACK TO THE WAYSTONE! DO IT AGAIN!</p>
+    </div>
+
+    <h2>What he hates</h2>
+    <p>A cheat. What he loves: a twist. Hell's shortcuts are both.</p>
+    <div class="quote-box">
+      <p class="announce">WHAT'S THIS? A SHORTCUT?! THE CROWD HATES IT!</p>
+      <p class="announce">FLOOR EIGHT FORTY-ONE! NOBODY TAKES THE STAIRS!</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="../../lore.html" class="hell-btn">&larr; Back to the Descent</a>
+      <a href="../systems/rules-of-hell.html" class="hell-btn">The Rules of Hell &rarr;</a>
+      <a href="../../../index.html" class="hell-btn">Play the Game</a>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+    <p class="text-secondary small mb-0 mt-1">Anonymous gameplay statistics (no cookies, no personal data, no IP stored) help us improve the game.</p>
+    <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
+    <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
+    <p class="hawkes-credit"><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
+    <!-- /Hawkes credit -->
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../emoji-reactions.js"></script>
+  <script src="../assets/descent.js"></script>
+</body>
+</html>

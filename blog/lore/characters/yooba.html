@@ -1,197 +1,115 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
+  <!-- Sick Of It lore: source in sickofitgame-unity Tools/Web/site, installed by the deploy (step 7d). Edit it there, not in the website. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Yooba - Sick Of It Lore</title>
+  <meta name="description" content="The village's green slime and its gossip. He swallowed the diamonds, got slurped into Hell, and runs a shop out of his own stomach.">
+  <meta name="theme-color" content="#0b0605">
   <link rel="shortcut icon" href="../../../favicon.ico">
   <link rel="icon" type="image/png" sizes="192x192" href="../../../icons/icon-192.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../emoji-reactions.css">
+  <link rel="stylesheet" href="../assets/descent.css">
   <style>
-    html {
-      overflow-y: scroll;
-    }
-    .navbar-nav .nav-link {
-      font-weight: 600;
-    }
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
   </style>
-  <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
-  <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
-  <script src="../../../js/hawkes-site.js" defer></script>
 </head>
-<body class="bg-dark">
+<body class="bg-dark hell lore-page" style="--c1:#3fd46a;--c2:#07140b;--depth:0.2">
   <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
     <div class="container">
       <a class="navbar-brand fw-bold" href="../../../index.html">Sick Of It</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menu">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="../../../index.html" data-play="nav">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../../index.html">Play</a></li>
           <li class="nav-item"><a class="nav-link" href="../../index.html">Blog</a></li>
-          <li class="nav-item"><a class="nav-link" href="../../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../../lore.html">Lore</a></li>
           <li class="nav-item"><a class="nav-link" href="../../music.html">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="../../shorts.html">Shorts</a></li>
         </ul>
       </div>
     </div>
   </nav>
+  <canvas class="hell-embers" data-embers="14" aria-hidden="true"></canvas>
+  <div class="hell-heat" aria-hidden="true"></div>
 
-  <article class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="mb-4">
-          <a href="../../lore.html" class="btn btn-outline-secondary btn-sm mb-3">← Back to Lore</a>
-          <h1 class="display-4 fw-bold mb-3">Yooba</h1>
-          <p class="lead text-secondary">The Survivor</p>
+  <header class="lore-head">
+
+    <div class="container">
+      <a href="../../lore.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to the Descent</a>
+      <div class="row align-items-center g-4">
+        <div class="col-md-8">
+          <span class="floor-tag">The village slime &middot; Between floors</span>
+          <h1>Yooba</h1>
+          <p class="lead mb-0">The village's green slime and its biggest gossip. He swallowed a handful of diamonds to hide them from the imps, got slurped into Hell after the hero, and has been delighted about it ever since.</p>
         </div>
-
-        <div class="card bg-dark border-secondary mb-4">
-          <div class="card-body p-4">
-            <!-- Character Image -->
-            <div class="text-center mb-4">
-              <img src="../../../images/Yooba.png" alt="Yooba" class="img-fluid rounded" style="max-width: 300px;">
-            </div>
-
-            <h3 class="h4 mb-4 text-center text-white">YOOBA</h3>
-            
-            <div class="row g-4">
-              <!-- Left Column -->
-              <div class="col-md-6">
-                <div class="mb-4">
-                  <h4 class="h6 text-info mb-2 text-uppercase">Class</h4>
-                  <p class="mb-0 ps-2 border-start border-info border-3">Vengeful Wanderer</p>
-                </div>
-
-                <div class="mb-4">
-                  <h4 class="h6 text-info mb-2 text-uppercase">Abilities</h4>
-                  <ul class="mb-0 ps-4">
-                    <li>Massive Bite Attack</li>
-                    <li>Unrelenting Determination</li>
-                    <li>Surprisingly Mobile (for someone with no limbs)</li>
-                  </ul>
-                </div>
-
-                <div class="mb-4">
-                  <h4 class="h6 text-info mb-2 text-uppercase">Stats</h4>
-                  <div class="ps-2 border-start border-info border-3">
-                    <div class="mb-2"><strong>Strength:</strong> <span class="text-secondary">???</span></div>
-                    <div class="mb-2"><strong>Speed:</strong> Moderate</div>
-                    <div class="mb-2"><strong>Rage:</strong> <span class="text-danger fw-bold">MAXIMUM</span></div>
-                    <div><strong>Arms:</strong> 0</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right Column -->
-              <div class="col-md-6">
-                <div class="mb-4">
-                  <h4 class="h6 text-danger mb-2 text-uppercase">Special Trait</h4>
-                  <div class="p-3 bg-danger bg-opacity-10 border border-danger rounded">
-                    <p class="mb-0"><strong>SO SICK OF IT</strong></p>
-                    <p class="small mb-0 text-secondary">Damage increases with frustration</p>
-                  </div>
-                </div>
-
-                <div class="mb-4">
-                  <h4 class="h6 text-info mb-2 text-uppercase">Weaknesses</h4>
-                  <ul class="mb-0 ps-4">
-                    <li>No hands</li>
-                    <li>Easily irritated</li>
-                    <li>Probably should have stayed home</li>
-                  </ul>
-                </div>
-
-                <div class="mb-4">
-                  <h4 class="h6 text-info mb-2 text-uppercase">Current Status</h4>
-                  <p class="mb-0 ps-2 border-start border-danger border-3 text-danger">On a warpath</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Full Width Sections -->
-            <div class="border-top border-secondary pt-4 mt-4">
-              <div class="mb-4">
-                <h4 class="h6 text-info mb-2 text-uppercase">Backstory</h4>
-                <p class="mb-0 ps-2 border-start border-info border-3">Former peaceful villager turned revenge-seeker after the <a href="overlord.html" class="link-danger">Overlord</a> destroyed everything he knew.</p>
-              </div>
-
-              <div>
-                <h4 class="h6 text-info mb-2 text-uppercase">Quote</h4>
-                <div class="ps-2 border-start border-secondary border-3">
-                  <p class="mb-1 fst-italic text-white">"..."</p>
-                  <p class="small text-muted mb-0">(Yooba doesn't talk much. He's too angry.)</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card bg-secondary bg-opacity-10 border-secondary mb-4" data-reaction-target="lore:characters/yooba#intro">
-          <div class="card-body">
-            <p class="lead mb-0">
-              Yooba lived in a <a href="../worlds/quiet-village.html" class="link-info">quiet village</a>. Then the <a href="overlord.html" class="link-danger">Overlord</a> destroyed it. Now Yooba wants revenge.
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-4" data-reaction-target="lore:characters/yooba#peaceful-days">
-          <h2 class="h3 mb-3">The Peaceful Days</h2>
-          <p>
-            Yooba lived in a <a href="../worlds/quiet-village.html" class="link-info">quiet village</a> between rolling hills and dense forests. He spent his days eating grass, staring at clouds, 
-            and enjoying the simple life. That was enough for him.
-          </p>
-        </div>
-
-        <div class="mb-4" data-reaction-target="lore:characters/yooba#everything-changed">
-          <h2 class="h3 mb-3">The Day Everything Changed</h2>
-          <p>
-            Then the <a href="overlord.html" class="link-danger">Overlord</a> showed up and destroyed everything.
-          </p>
-          <p>
-            Not because the village did anything wrong. The <a href="overlord.html" class="link-danger">Overlord</a> was just evil like that—a massive demonic entity who ruined 
-            Yooba's home for no reason. By the time Yooba got back from the fields, everyone was gone.
-          </p>
-        </div>
-
-        <div class="mb-4" data-reaction-target="lore:characters/yooba#sick-of-it">
-          <h2 class="h3 mb-3">Yooba Is SO SICK OF IT</h2>
-          <p>
-            Yooba tried to move on, but he couldn't. Every time he closed his eyes, he saw the smoke. The grief turned into anger. 
-            Then the anger turned into pure rage.
-          </p>
-          <p>
-            He doesn't have weapons or a plan. But he's done trying to live peacefully in a world run by tyrants.
-          </p>
-        </div>
-
-        <div class="mb-4" data-reaction-target="lore:characters/yooba#path-forward">
-          <h2 class="h3 mb-3">The Path Forward</h2>
-          <p>
-            Now Yooba's on a quest for revenge. He's going after the <a href="overlord.html" class="link-danger">Overlord</a> and anyone who stands in his way.
-          </p>
-          <p>
-            Does he stand a chance? Probably not.
-          </p>
-          <p>
-            But Yooba doesn't care anymore. And he's coming.
-          </p>
-        </div>
-
-        <div class="text-center my-5">
-          <a href="../../../index.html" class="btn btn-primary me-2">Play the Game</a>
-          <a href="../../lore.html" class="btn btn-outline-secondary">← Back to Lore</a>
-        </div>
+        <div class="col-md-4 text-center"><div class="yooba-portrait mx-auto" role="img" aria-label="Yooba, a green slime with two eyestalks and big pink teeth, wobbling"></div></div>
       </div>
+    </div>
+  </header>
+
+  <article class="container lore-body" data-reaction-target="lore:characters/yooba">
+<div class="fact-sheet">
+      <div class="fact"><b>What</b>A green village slime</div>
+      <div class="fact"><b>Known for</b>Gossip</div>
+      <div class="fact"><b>Swallowed</b>A handful of diamonds</div>
+      <div class="fact"><b>Proudest trick</b>Coughing one up</div>
+      <div class="fact"><b>Fights</b>Never</div>
+      <div class="fact"><b>Talks</b>Fast, wet, never stops for breath</div>
+    </div>
+
+    <h2>How he got here</h2>
+    <p>When the imps came for the village's diamonds, Yooba did the sensible thing and swallowed as many as he could. Then the portal opened in the meadow, the hero fell in, and a beat later a green slime bounced past, wobbled at the edge, and got slurped in after him. Nobody remarked on it.</p>
+    <p>At the bottom of Hell, after the Landing, the same slime turns up again: talking, thrilled to see a familiar face, and coughing up a diamond. He counted the announcer's nine hundred ninety-nine, by the way. He'll tell you.</p>
+
+    <h2>Between floors</h2>
+    <p>Yooba never fights and never shows up on a floor of Hell. He rides along in the gaps: on the Shaft between floors, where he has one thing to say about whatever just happened (a milestone floor, a death, a new Grudge, the Magma King getting close, or plain gossip), and behind his counter.</p>
+    <div class="quote-box">
+      <p class="line"><span class="who">Yooba, after a death</span>Back again? Hell does that.</p>
+    </div>
+
+    <h2>Yooba's Goods</h2>
+    <p>His shop is his stomach. He takes the village's diamonds and works them into the hero's gear, usually by coughing the result up, still warm. No tabs, no pockets. What he makes stays made: Hell can take your Grudges, not your boots.</p>
+    <div class="table-wrap">
+    <table class="hell-table">
+      <thead><tr><th>Goods</th><th>What it does</th><th>What it is</th></tr></thead>
+      <tbody>
+        <tr><td>Goo Plaster</td><td>+1 max health</td><td>a dab of Yooba over the dents</td></tr>
+        <tr><td>Bouncy Soles</td><td>an extra jump in the air</td><td>slime in the boots</td></tr>
+        <tr><td>Slick Heels</td><td>run 8% faster</td><td>slime on the heels</td></tr>
+        <tr><td>Licked Trigger</td><td>fire 10% faster</td><td>he licked it</td></tr>
+        <tr><td>Tummy-Dipped Shots</td><td>15% more damage</td><td>every shot dipped in his stomach</td></tr>
+        <tr><td>Loop Jar</td><td>+1 s of D&eacute;j&agrave; Vu</td><td>a loop shard one of the damned dropped; he only keeps it in a jar</td></tr>
+        <tr><td>Shiny Sniffer</td><td>diamonds come from farther away</td><td>a wobbly bit of Yooba that sniffs out diamonds</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>Slimes are villagers</h2>
+    <p>Nobody in Sick Of It ever fights a slime. Yooba's kind are the village's people: friendly, nosy, a bit sticky. He's never scared for long and never mean. He's also the same Yooba as in Yooba Land: he gets around.</p>
+
+    <div class="retcon">
+      <b>What changed.</b> The first version of this page made Yooba the one climbing for revenge: a farmer whose village the Overlord burned, too angry to talk. The village is still burned, and he's still from it. But he isn't the one climbing (that's <a href="hero.html">the hero</a>), and he has never once been too angry to talk.
+    </div>
+
+    <div class="page-nav">
+      <a href="../../lore.html" class="hell-btn">&larr; Back to the Descent</a>
+      <a href="../systems/rules-of-hell.html#goods" class="hell-btn">Yooba's Goods &rarr;</a>
+      <a href="hero.html" class="hell-btn">The Hero &rarr;</a>
+      <a href="../../../index.html" class="hell-btn">Play the Game</a>
     </div>
   </article>
 
   <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
-    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved. &middot; <a href="../../../privacy.html" class="link-secondary">Privacy</a></p>
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+    <p class="text-secondary small mb-0 mt-1">Anonymous gameplay statistics (no cookies, no personal data, no IP stored) help us improve the game.</p>
     <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
     <p class="hawkes-credit"><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
@@ -200,5 +118,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../emoji-reactions.js"></script>
+  <script src="../assets/descent.js"></script>
 </body>
 </html>

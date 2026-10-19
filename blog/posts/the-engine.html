@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <!-- Sick Of It blog post: source in sickofitgame-unity Tools/Web/site, installed by the deploy (step 7d). Edit it there, not in the website. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>The Engine: How Hell Runs - Sick Of It</title>
+  <meta name="description" content="The engine behind Sick Of It: a game made of JSON, a simulation that can run backward, scripted scenes, 1,000 floors, generated voices, bots that playtest every level, and AI agents building it with the studio.">
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../emoji-reactions.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+    code { color: #ffb37a; }
+    blockquote {
+      border-left: 3px solid #ff7a1a;
+      padding: 0.75rem 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+    }
+    .engine-code {
+      background: #120806; border: 1px solid rgba(255, 122, 26, .25); border-radius: 8px;
+      padding: 1rem 1.25rem; font-size: .85rem; line-height: 1.5; overflow-x: auto; color: #f3e6d6;
+    }
+    .engine-code code { color: inherit; }
+    .part-card {
+      background: rgba(255, 122, 26, 0.06);
+      border: 1px solid rgba(255, 122, 26, 0.25);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .part-card h5 { color: #ffb347; margin-bottom: 0.5rem; }
+    .stat-row { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+    .stat-box {
+      text-align: center; padding: 1rem 1.5rem; min-width: 120px;
+      background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .stat-box .number { font-size: 2rem; font-weight: 900; color: #ff7a1a; line-height: 1; }
+    .stat-box .label { font-size: 0.8rem; color: var(--bs-secondary); margin-top: 0.25rem; }
+    .announce { font-family: Impact, "Arial Black", sans-serif; letter-spacing: .04em; color: #fff4d6; text-shadow: 0 0 10px rgba(255, 122, 26, .8); font-style: normal; }
+    .timeline { list-style: none; padding: 0; border-left: 2px solid rgba(255, 122, 26, .4); margin: 1.5rem 0 1.5rem .5rem; }
+    .timeline li { position: relative; padding: 0 0 1rem 1.25rem; }
+    .timeline li::before { content: ""; position: absolute; left: -7px; top: .45rem; width: 12px; height: 12px; border-radius: 50%; background: #ff7a1a; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md border-bottom border-secondary mb-5">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-label="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../Game/">Play</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 800px;">
+    <article>
+      <header class="mb-5">
+        <p class="text-muted">October 18, 2026 &bull; Development</p>
+        <h1 class="display-5 fw-bold mb-3">The Engine: How Hell Runs</h1>
+        <p class="lead text-secondary">Hell is 1,000 floors that repeat forever, a rewind button, a booming announcer and a slime who runs a shop out of his stomach. Here's the machine underneath it, and why every part of it is built around one joke: Hell is repetition.</p>
+      </header>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#intro">
+        <h2>The short version</h2>
+        <p>Sick Of It runs on Unity, but almost nothing in the game is made by dragging things around in Unity. The whole game is a folder of text files. A small engine reads them and builds Hell out of them, every time you press play. The story is a document, the levels are data, the voices are prompts, and the playtesters are bots. Most of it is written and checked by AI agents working with the studio, one request at a time.</p>
+        <div class="stat-row">
+          <div class="stat-box"><div class="number">1,000</div><div class="label">floors of Hell</div></div>
+          <div class="stat-box"><div class="number">92</div><div class="label">entity files</div></div>
+          <div class="stat-box"><div class="number">235</div><div class="label">sounds and lines</div></div>
+          <div class="stat-box"><div class="number">22</div><div class="label">level files</div></div>
+        </div>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#data">
+        <h2>1. The game is data</h2>
+        <p>Every level, enemy, projectile, hazard, upgrade, menu, voice line and sound effect is a JSON file. There's one file per thing: <code>levels/Level6.json</code> is a stage, <code>content/entities/imp.json</code> is an imp, <code>audio.json</code> is every sound and line in the game, <code>ui/theme.json</code> is how every menu looks and every word on screen. An imp starts like this:</p>
+<pre class="engine-code"><code>{
+  "schemaVersion": 1,
+  "extends": "shooter",
+  "health": 2,
+  "tags": ["imp"],
+  ...
+}</code></pre>
+        <p>It <i>extends</i> a shooter, gets two hit points, and its art and animations are listed underneath. The Magma King's guard extends the imp. Change one number, and the game is different. That's the whole point.</p>
+        <p>The engine is strict about it. Unknown fields are errors. A typo gets a "Did you mean...?" with the file, the line and the exact spot. A level that names an enemy that doesn't exist won't import, and an import with errors changes nothing. Every build re-imports every file from scratch and checks the result, so a build can never ship yesterday's levels with today's code.</p>
+        <blockquote>If the game is text, anyone who can read and write text can change it. Including an AI.</blockquote>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#rewind">
+        <h2>2. A simulation that runs backward</h2>
+        <p>In the story, Hell runs everything on a loop, and the hero grabs the loop and drags it backward. The game calls it D&eacute;j&agrave; Vu: hold R and the last few seconds run in reverse, every imp and ember and falling rock included. Then the same future plays again, exactly the same, unless you do something different.</p>
+        <p>That only works if the game is honest with itself. So the engine is built like this:</p>
+        <div class="part-card">
+          <h5>A fixed-step simulation</h5>
+          <p class="mb-0">Gameplay advances in fixed ticks, every entity in the order it spawned. The same inputs give the same result, every time.</p>
+        </div>
+        <div class="part-card">
+          <h5>Every tick is saved</h5>
+          <p class="mb-0">Each entity, and the level's own director, saves its full state into a history. Rewinding loads it back. A test checks that every new ability saves every field it uses: forget one, and the build says so.</p>
+        </div>
+        <div class="part-card">
+          <h5>Seeded dice</h5>
+          <p class="mb-0">Every random choice (where an imp throws, which floor Hell builds next) comes from a seeded stream that belongs to that entity. Rewind it and it rolls the same numbers again. That's what makes the Loop work: the same lava burst in the same crack, the same imp tripping on the same spot.</p>
+        </div>
+        <div class="part-card">
+          <h5>Presentation keeps its hands off</h5>
+          <p class="mb-0">Sounds, sparks, screen shake and menus can look at the game, never touch it. And anything you're only meant to get once (a Grudge, a diamond pile, a shortcut you took) is paid once per play, so dragging the loop back can't farm it.</p>
+        </div>
+        <p>Dying uses the same idea, one size up. Hell doesn't let you die; it sends you back to the last Waystone and lets you do it again.</p>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#scenes">
+        <h2>3. Scenes, directed in data</h2>
+        <p>A level's gameplay is its <i>script</i>: phases, rules, waves, lines and what happens when. The same script language directs the story scenes. The end of the Meadow, where the Overlord burns a hole in the ground and the hero looks into it, is four phases in <code>Level1.json</code>: the beam, the look, the slime, the close. Here's a piece of the look:</p>
+<pre class="engine-code"><code>{ "type": "facePlayer", "target": "portal" },
+{ "type": "playPlayerAnimation", "state": "Curious" },
+{ "type": "wait", "seconds": 0.7 },
+{ "type": "showText", "text": "That's a hole.",
+  "sound": "vo_portal_hole_1", "style": "Subtitle" }</code></pre>
+        <p>The scene locks the player's input and the rewind (something bigger has hold of the loop, so the button says "Not now"), walks the hero to the edge by himself, plays his lines, lets Hell echo his "Hello?" back three times, turns him around for his "Nope.", then pulls him into a point, spinning and shrinking until he's gone. A slime hops in after him. The camera closes in, the screen fades, and the game rolls into the fall.</p>
+        <p>No cutscene editor. No timeline asset. The scene is a list of steps an agent can read, change and test.</p>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#floors">
+        <h2>4. 1,000 floors and the climb toolkit</h2>
+        <p>A level in Sick Of It goes somewhere: you travel through it, and the floor counter moves. Today's stages are stretches of ten floors walked to the right; the next version of the climb makes every floor its own level, a climb up out of the lava sea to a landing with the floor's number carved in it, with a floor boss every tenth floor. Same engine, same toolkit:</p>
+        <ul>
+          <li><b>The floor counter.</b> Always on screen (<span class="announce">FLOOR 973</span>), ticking down as you go, with milestones that get a line (999, 950, ...).</li>
+          <li><b>Travelling stages.</b> A camera that only goes forward (right, or up), ground that keeps coming, scenery streamed in ahead and dropped behind.</li>
+          <li><b>The floor generator.</b> Each Circle of Hell is one file: its backdrop, its track, its props, its monsters, its hazards, how hard its easiest and hardest floors are. Between the story's beats, the generator builds the floors, seeded, so a rewind (and a bot) sees the same ones.</li>
+          <li><b>Stage dressing.</b> A carved sign where you land (<i>IMPS ONLY</i>, <i>DON'T STOP</i>), floors Hell makes you walk twice, a door at the top with words on it (<i>THE SLAG THRONE</i>).</li>
+        </ul>
+        <p>In today's build, the Loop's whole trick is two lines of its level file:</p>
+<pre class="engine-code"><code>"sign": "YOU ARE HERE. AGAIN.",
+"repeat": [957]</code></pre>
+        <p>Between stages comes <b>the Shaft</b>: Hell's map, a tall cross-section of all ten Circles with a tiny marker for the hero. It plunges you to the bottom the first time, climbs you up after every stage, drops you back to a Waystone when Hell wins, and jumps a dotted line through a crack in the wall when you take one of Hell's shortcuts. It reads your progress; it never changes it. (The <a href="../lore.html">lore pages</a> borrow its paintings.)</p>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#voices">
+        <h2>5. Voices and sound, made to order</h2>
+        <p>Every sound effect and every line in the game is an entry in <code>audio.json</code>: who says it, what they say, and how. The hero's lines are written for a tired man who has had enough:</p>
+<pre class="engine-code"><code>"prompt": "[sighs] ...Great."</code></pre>
+        <p>Those prompts go through Hawkes Gen, the studio's generation service, which makes the voices and effects (with ElevenLabs) and the music (Hell's arcade soundtrack: a 90s cabinet played through a furnace). Each character has a designed voice: the hero's deadpan, the Overlord's enormous bored rumble, Yooba's fast wet gurgle, the Magma King's smug bass, and the announcer, who is always slightly too loud. Change a line and only that line is made again. If the exact same line was already made once, it comes back from the library instead.</p>
+        <p>The game itself never holds a key to any of it. It asks; Hawkes Gen makes.</p>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#bots">
+        <h2>6. Bots that play every level</h2>
+        <p>Every build has a bot inside it. It plays through the same controls you do: a virtual keyboard and gamepad pressing A and D, jumping, aiming, holding R to rewind, clicking menu buttons. It's never allowed to cheat by reaching into the game.</p>
+        <p>The bot runs <i>scenarios</i>: a quick smoke test, every level on its own, the whole story path from New Game, the Magma King's fight, a run that dies on purpose to check that Hell sends it back, a phone-sized check that no button overlaps another. While it plays, the game checks itself against the story's rules for a stage:</p>
+        <ul class="timeline">
+          <li>The first five seconds are quiet: a title, a line, room to move.</li>
+          <li>A new enemy arrives alone, and only one new kind per stage.</li>
+          <li>No more than three on screen in the first Circle.</li>
+          <li>Every hazard glows at least a second before it lands.</li>
+          <li>There's a breather between pushes, and a stage lasts one to two minutes.</li>
+          <li>Every scripted line is shown and heard, with its voice.</li>
+        </ul>
+        <p>A daily run plays the game like this and files what it finds: a missing sound, a softlock, a placeholder that slipped through, an imp that didn't explode properly.</p>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#agents">
+        <h2>7. Agents building Hell with the studio</h2>
+        <p>Most changes to Sick Of It start as one sentence from J: make the next ten floors, give the slime his real name, put the story on the website. An AI agent picks it up and works the way the project tells it to:</p>
+        <ol>
+          <li><b>Story first.</b> The story document is the game's design: the 1,000 floors, the cast, who lives on which floor and why. If a request needs something the story doesn't say yet, the agent writes it there first.</li>
+          <li><b>Then the data.</b> Levels, enemies, lines, menus: JSON, checked by the importer.</li>
+          <li><b>Then the checks.</b> Validators, tests, and a bot scenario that reaches the new thing.</li>
+          <li><b>Canon holds.</b> The studio keeps a shared memory of what's true in the world (the hero has no name, slimes are villagers, the Overlord is never in a hurry) and checks every change against it before it merges.</li>
+        </ol>
+        <p>J decides what Hell should be. The agents build it, the bots play it, and anything that costs real money on the GPU fleet waits for J's OK.</p>
+        <blockquote>This post, and the <a href="../lore.html">lore pages</a> you can fall through, were made the same way: one request, one agent, the story document open the whole time.</blockquote>
+      </section>
+
+      <section class="mb-5" data-reaction-target="post:the-engine#next">
+        <h2>Next floor</h2>
+        <p>The Ember Wastes are playable, the Magma King has fallen, the Cracked Road is waking up, and the Wastes are being rebuilt one floor at a time. 899 floors to go. The engine doesn't have to change much for any of it: a new Circle is a new file, a new monster is a new file, a new line is a new prompt. Hell is repetition. The engine is too, on purpose.</p>
+        <p><a href="../../Game/" class="btn btn-primary">Play it</a> <a href="../lore.html" class="btn btn-outline-light">Fall through the lore</a></p>
+      </section>
+
+      <div class="mt-5 pt-4 border-top border-secondary">
+        <a href="../" class="text-decoration-none">&larr; Back to Blog</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="border-top border-secondary mt-5 py-4">
+    <div class="container text-center text-muted">
+      <small>&copy; 2026 Sick Of It. All rights reserved.</small><br>
+      <small>Anonymous gameplay statistics (no cookies, no personal data, no IP stored) help us improve the game.</small>
+    </div>
+    <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
+    <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
+    <p class="hawkes-credit"><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
+    <!-- /Hawkes credit -->
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../emoji-reactions.js"></script>
+</body>
+</html>
