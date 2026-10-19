@@ -1,8 +1,20 @@
 {
   "product": "sickofit",
   "name": "Sick Of It",
-  "current": "1.0.0",
+  "current": "1.1.0",
   "releases": [
+    {
+      "version": "1.1.0",
+      "date": "2026-10-19",
+      "build": "191",
+      "title": "Smoother rewinds and sharper aim",
+      "notes": [
+        "Rewinding time now runs smoothly, even deep into a long climb.",
+        "The aim laser now follows your real shot path, including upgraded shots.",
+        "The mouse cursor is now a crosshair that fits Hell's style.",
+        "Restarting a level now really starts it over from the beginning."
+      ]
+    },
     {
       "version": "1.0.0",
       "date": "2026-10-16",

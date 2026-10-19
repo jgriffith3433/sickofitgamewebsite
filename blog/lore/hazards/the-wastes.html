@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <!-- Sick Of It lore: source in sickofitgame-unity Tools/Web/site, installed by the deploy (step 7d). Edit it there, not in the website. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>The Wastes' Hazards - Sick Of It Lore</title>
+  <meta name="description" content="Sinking stones, rising lava, lava geysers, falling slag, ember showers and the Magma King's lava flood: the things in Hell that aren't trying to kill you personally.">
+  <meta name="theme-color" content="#0b0605">
+  <link rel="shortcut icon" href="../../../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../../../icons/icon-192.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../emoji-reactions.css">
+  <link rel="stylesheet" href="../assets/descent.css">
+  <style>
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
+  </style>
+</head>
+<body class="bg-dark hell lore-page" style="--c1:#ff4d14;--c2:#1c0603;--depth:0.97">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../../../index.html">Sick Of It</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="../../../index.html">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../../lore.html">Lore</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../music.html">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="../../shorts.html">Shorts</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <canvas class="hell-embers" data-embers="14" aria-hidden="true"></canvas>
+  <div class="hell-heat" aria-hidden="true"></div>
+
+  <header class="lore-head">
+    <div class="head-bg" style="background-image:url(../img/band-X.webp)"></div>
+    <div class="container">
+      <a href="../../lore.html" class="btn btn-outline-secondary btn-sm mb-3">&larr; Back to the Descent</a>
+      <div class="row align-items-center g-4">
+        <div class="col-12">
+          <span class="floor-tag">Circle X &middot; Not creatures</span>
+          <h1>The Wastes' Hazards</h1>
+          <p class="lead mb-0">Not everything in the Wastes has a face. Some of it is just the place: dripping, bursting, sinking, rising.</p>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <article class="container lore-body" data-reaction-target="lore:hazards/the-wastes">
+<p>Hell's one courtesy: <b>every hazard warns you at least a second ahead</b>, with a glow right where it's going to hit. It isn't kindness. It's showmanship.</p>
+
+    <h2>Sinking stones</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>From Floor 1,000, the Landing</div>
+      <div class="fact"><b>Rule</b>Stand on one and it sinks</div>
+      <div class="fact"><b>Warning</b>It dips and hisses as you land</div>
+    </div>
+    <p>Slabs of cooled slag floating on the lava sea, the bottom of every floor of the Wastes. Stand on one and it starts to go under (about a second and a half); step off and it bobs back up. Keep moving.</p>
+    <div class="quote-box"><p class="line"><span class="who">The hero</span>It sinks if I stop. So I don't stop.</p></div>
+
+    <h2>Rising lava</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>From Floor 999</div>
+      <div class="fact"><b>Warning</b>A rumble and a line of bubbles, 2 s</div>
+      <div class="fact"><b>Rule</b>It stops below the ledges</div>
+    </div>
+    <p>The lava sea climbs the screen behind the hero, slowly: the Wastes breathing in. It pushes; it doesn't ambush. It never catches a hero who keeps moving, and it stops below every breather ledge and the landing at the top.</p>
+
+    <h2>Falling slag</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>The Slag Falls and the Drip</div>
+      <div class="fact"><b>Warning</b>A glowing drip, 1.2 s</div>
+      <div class="fact"><b>Hurts</b>Sets you burning</div>
+    </div>
+    <p>Molten rock from the falls. A drip gathers and glows, hissing, then a lump of slag drops from that exact spot.</p>
+    <div class="quote-box"><p class="line"><span class="who">The hero</span>The ceiling's melting.</p></div>
+
+    <h2>Lava geysers</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>From Floor 996, the Slag Falls</div>
+      <div class="fact"><b>Warning</b>The vent glows and spits, 1 s</div>
+      <div class="fact"><b>Hurts</b>A column of lava, straight up</div>
+    </div>
+    <p>The lava sea under pressure: a vent in the rock glows, spits, and blows a column of lava straight up. On the Loop, Floor 995, they go off at the same spot, in the same order, every lap. Which is how the hero works out what Hell is.</p>
+
+    <h2>The ember shower</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>From Floor 909, Ember Rain</div>
+      <div class="fact"><b>Warning</b>1.5 s, and the hero says so</div>
+      <div class="fact"><b>Hurts</b>Embers, two at a time</div>
+    </div>
+    <p>Steam off the lava sea boils up the stairwell and rains embers on whoever is climbing.</p>
+    <div class="quote-box"><p class="line"><span class="who">The hero</span>Now it's raining fire.</p></div>
+
+    <h2>The lava flood</h2>
+    <div class="fact-sheet">
+      <div class="fact"><b>Where</b>The Slag Throne, Floor 901</div>
+      <div class="fact"><b>Warning</b>The whole floor it'll cover glows red</div>
+      <div class="fact"><b>Rule</b>Too tall to jump</div>
+    </div>
+    <p>The Magma King's worst: both fists into the floor and a wall of lava rolls out from the throne. It stops just short of the far wall, so there's a strip of safe floor at the hall's far end, but from where you're usually standing you won't make it the first time. Hell runs on a loop. Drag it back and be running already.</p>
+    <div class="quote-box"><p class="line"><span class="who">The hero</span>Can't jump that. ...Can do it again, though.</p></div>
+
+    <div class="page-nav">
+      <a href="../../lore.html" class="hell-btn">&larr; Back to the Descent</a>
+      <a href="fireball.html" class="hell-btn">Embers and fireballs &rarr;</a>
+      <a href="../worlds/ember-wastes.html" class="hell-btn">The Ember Wastes &rarr;</a>
+      <a href="../../../index.html" class="hell-btn">Play the Game</a>
+    </div>
+  </article>
+
+  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+    <p class="text-secondary small mb-0 mt-1">Anonymous gameplay statistics (no cookies, no personal data, no IP stored) help us improve the game.</p>
+    <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
+    <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
+    <p class="hawkes-credit"><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
+    <!-- /Hawkes credit -->
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../emoji-reactions.js"></script>
+  <script src="../assets/descent.js"></script>
+</body>
+</html>

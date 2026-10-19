@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
+  <!-- Sick Of It lore: source in sickofitgame-unity Tools/Web/site, installed by the deploy (step 7d). Edit it there, not in the website. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>Lore - Sick Of It Blog</title>
+  <title>The Descent: Lore - Sick Of It Blog</title>
+  <meta name="description" content="The lore of Sick Of It: fall from the Meadow through the ten Circles of Hell to Floor 1,000. The hero, the Overlord, Yooba, the Wardens and the rules of Hell.">
+  <meta name="theme-color" content="#0b0605">
   <link rel="shortcut icon" href="../favicon.ico">
   <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="emoji-reactions.css">
+  <link rel="stylesheet" href="lore/assets/descent.css">
   <style>
-    html {
-      overflow-y: scroll;
-    }
-    .navbar-nav .nav-link {
-      font-weight: 600;
-    }
+    html { overflow-y: scroll; }
+    .navbar-nav .nav-link { font-weight: 600; }
   </style>
-  <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
-  <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
-  <script src="../js/hawkes-site.js" defer></script>
 </head>
-<body class="bg-dark">
+<body class="bg-dark hell descent-page">
   <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
     <div class="container">
       <a class="navbar-brand fw-bold" href="../index.html">Sick Of It</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menu">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="../index.html" data-play="nav">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html">Play</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html">Blog</a></li>
           <li class="nav-item"><a class="nav-link active" href="lore.html">Lore</a></li>
           <li class="nav-item"><a class="nav-link" href="music.html">Music</a></li>
@@ -40,127 +37,339 @@
       </div>
     </div>
   </nav>
+  <canvas class="hell-embers" data-embers="6" aria-hidden="true"></canvas>
+  <div class="hell-heat" aria-hidden="true"></div>
+  <div class="hell-caption" aria-hidden="true"></div>
+  <div class="hell-hud">
+    <div class="hell-floor" aria-live="off"><small>FLOOR</small><b data-hell-floor>0</b></div>
+    <button type="button" class="hell-sound" aria-pressed="false" title="Hell's hum (made in your browser, only if you ask)">Sound off</button>
+  </div>
 
-  <main class="container py-5">
-    <header class="text-center mb-5 p-5 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-      <h1 class="display-3 fw-bold mb-3">Lore</h1>
-      <p class="lead text-secondary">Explore the world, characters, and stories of Sick Of It</p>
+  <main class="descent">
+    <header class="descent-meadow" data-reaction-target="lore:descent#meadow">
+      <img class="meadow-art" src="lore/img/meadow.webp" alt="The Meadow, with a burning hole in the grass" width="768" height="640" fetchpriority="high">
+      <div class="container meadow-copy">
+        <span class="descent-kicker">FLOOR 0 &middot; THE MEADOW</span>
+        <h1 class="descent-title">The Descent</h1>
+        <p class="descent-lead">The lore of Sick Of It, the way the hero got it: from a nice afternoon in the Meadow, down a hole, past ten Circles of Hell, to Floor 1,000. Scroll down. Hell is that way.</p>
+        <nav class="descent-jump" aria-label="Lore library">
+          <a href="#prologue">The prologue</a>
+          <a href="#circle-I">The ten Circles</a>
+          <a href="#library">The lore library</a>
+        </nav>
+      </div>
     </header>
 
-    <!-- Characters Section -->
-    <section class="mb-5">
-      <h2 class="h3 mb-4 pb-2 border-bottom border-secondary">Characters</h2>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <div class="col">
-          <a href="lore/characters/sintinel.html" class="text-decoration-none" data-reaction-target="card:lore/characters/sintinel">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Sintinel</h3>
-                <p class="text-primary small mb-2">The Watchful Menace</p>
-                <p class="card-text text-secondary small mb-0">Watches. Waits. Then makes everything worse.</p>
-              </div>
+    <section class="chapter" id="prologue">
+      <div class="container" style="max-width:860px">
+        <span class="floor-tag">Floor 0</span>
+        <h2>A hole in the meadow</h2>
+        <p>A nice afternoon. The <a href="lore/characters/overlord.html">Overlord</a>, ruler of Hell's 1,000 floors, rises over the hills. He wants the surface, and diamonds are what holds a portal open, so his <a href="lore/characters/imps.html">imps</a> loot the village's diamonds while his lasers burn the meadow flat. Standing in the middle of it: <a href="lore/characters/hero.html">the hero</a>. No name, on purpose. Thirties. Unimpressed.</p>
+        <ol class="beats">
+          <li>He clears the imps and the <a href="lore/characters/cinders.html">cinders</a> off the grass, picks up a few diamonds, and gets his first taste of dragging time backward. He picks his first Grudge.</li>
+          <li>The Overlord's lasers come down one last time. Not at the hero: at the ground beside him. The grass scorches, cracks, and tears open into a ring of burning turf with fire swirling down inside.
+            <p class="line"><span class="who">The Overlord</span>Mm. ... Stay.</p></li>
+          <li>He walks over and peers down.
+            <p class="line"><span class="who">The hero</span>That's a hole.</p>
+            <p class="line"><span class="who">The hero</span>So that's where they keep coming from.</p></li>
+          <li>He cups a hand and shouts down it.
+            <p class="line"><span class="who">The hero</span>Hello?</p>
+            <p class="line echo"><span class="who">Hell</span><span>...hello?</span> <span>...hello?</span> <span>...hello?</span></p>
+            His own voice, coming back deeper every time. Hell is repetition. Even its echo won't stop.</li>
+          <li>He turns to leave.
+            <p class="line"><span class="who">The hero</span>Nope.</p>
+            The portal grabs him.
+            <p class="line"><span class="who">The hero</span>Oh, come ON-</p></li>
+          <li>A beat later a green village slime bounces past, wobbles at the edge, and is slurped in after him. Nobody remarks on it. His name is <a href="lore/characters/yooba.html">Yooba</a>.</li>
+        </ol>
+        <p class="mt-4"><a class="hell-btn" href="lore/story/prologue.html">The whole prologue &rarr;</a></p>
+      </div>
+    </section>
+
+    <section class="plunge" aria-label="The fall">
+      <div class="container">
+        <img class="scorch" src="lore/img/scorch.webp" alt="The scorch mark the portal leaves in the grass" width="320" height="172" loading="lazy">
+        <p>The portal flares and shrinks to a black scorch mark. Under it: a burning door, a <a href="lore/worlds/demon-path.html">tunnel of fire</a>, and a very long way down.</p>
+        <p class="scroll-hint mt-4" aria-hidden="true">&darr; FALL &darr;</p>
+      </div>
+    </section>
+
+    <section class="band" id="circle-I" style="--c1:#ffcf6a;--c2:#14100c" data-floor-from="1" data-floor-to="100" data-caption="CIRCLE ONE! THE THRONE STAIR!" aria-labelledby="circle-I-title">
+      <div class="band-bg" data-bg="lore/img/band-I.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle I &middot; Floors 1-100</span>
+              <h2 id="circle-I-title">The Throne Stair</h2>
+              <p class="mb-0">The Overlord's palace and his half-built gate. Daylight leaks down the stairs from the meadow above.</p>
+              <dl>
+                <dt>Residents</dt><dd>The Overlord's own guard: everything, at its strongest.</dd>
+                <dt>Warden</dt><dd>The Overlord himself, Floor 1</dd>
+              </dl>
+
             </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="lore/characters/yooba.html" class="text-decoration-none" data-reaction-target="card:lore/characters/yooba">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Yooba</h3>
-                <p class="text-primary small mb-2">The Survivor</p>
-                <p class="card-text text-secondary small mb-0">Village destroyed. Peace gone. Yooba's sick of it. Now he's on a quest for revenge against the Overlord.</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="lore/characters/overlord.html" class="text-decoration-none" data-reaction-target="card:lore/characters/overlord">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">The Overlord</h3>
-                <p class="text-danger small mb-2">Final Boss</p>
-                <p class="card-text text-secondary small mb-0">This is the Overlord. He's a dick. Destroys villages for no reason. Final boss.</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="lore/characters/bork.html" class="text-decoration-none" data-reaction-target="card:lore/characters/bork">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Bork</h3>
-                <p class="text-warning small mb-2">Basic Demon</p>
-                <p class="card-text text-secondary small mb-0">A demon. His name is Bork. He stands around in levels. That's about it.</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="lore/characters/slobber.html" class="text-decoration-none" data-reaction-target="card:lore/characters/slobber">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Slobber</h3>
-                <p class="text-danger small mb-2">Heavy Demon</p>
-                <p class="card-text text-secondary small mb-0">Big. Brutal. Drools everywhere. Swings his massive arms at you. He's actually pretty scary.</p>
-              </div>
-            </div>
-          </a>
+          </div>
+          <div class="col-md-5"><a class="warden" href="lore/characters/overlord.html" aria-label="The Overlord, at Floor 1"><img src="lore/img/warden-I.webp" alt="" width="320" height="320" loading="lazy"><span class="eyes" aria-hidden="true"></span><span class="warden-name">The Overlord</span><span class="warden-hint" data-rest="Floor 1" data-peek="Floor 1. He's in no hurry."></span></a></div>
         </div>
       </div>
     </section>
 
-    <!-- Worlds Section -->
-    <section class="mb-5">
-      <h2 class="h3 mb-4 pb-2 border-bottom border-secondary">Worlds</h2>
-      <div class="row row-cols-1 row-cols-md-2 g-4">
-        <div class="col">
-          <a href="lore/worlds/quiet-village.html" class="text-decoration-none" data-reaction-target="card:lore/worlds/quiet-village">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Quiet Village</h3>
-                <p class="text-primary small mb-2">World 1</p>
-                <p class="card-text text-secondary small mb-0">Rolling hills. Dense forests. Good land for farming. Then came fire. Now only ruins remain.</p>
-              </div>
+    <section class="band" id="circle-II" style="--c1:#e8a25a;--c2:#160d0a" data-floor-from="101" data-floor-to="200" data-caption="CIRCLE TWO! THE KEEP!" aria-labelledby="circle-II-title">
+      <div class="band-bg" data-bg="lore/img/band-II.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle II &middot; Floors 101-200</span>
+              <h2 id="circle-II-title">The Keep</h2>
+              <p class="mb-0">A courtyard, a dungeon, torches.</p>
+              <dl>
+                <dt>Residents</dt><dd>Jailers and Chains (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 101</dd>
+              </dl>
+
             </div>
-          </a>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle II's Warden at Floor 101: unknown. Tap to look closer."><img src="lore/img/warden-II.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 101" data-peek="Keys jangle at Floor 101."></span></button></div>
         </div>
-        <div class="col">
-          <a href="lore/worlds/demon-path.html" class="text-decoration-none" data-reaction-target="card:lore/worlds/demon-path">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Demon Path</h3>
-                <p class="text-danger small mb-2">World 2</p>
-                <p class="card-text text-secondary small mb-0">Through the portal. Darkness. Twisted trees. Cracked stone. Demons everywhere. Yooba chose to go here.</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <!-- More worlds will be added here -->
       </div>
     </section>
 
-    <!-- Hazards Section -->
-    <section class="mb-5">
-      <h2 class="h3 mb-4 pb-2 border-bottom border-secondary">Hazards</h2>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <div class="col">
-          <a href="lore/hazards/fireball.html" class="text-decoration-none" data-reaction-target="card:lore/hazards/fireball">
-            <div class="card h-100 bg-secondary bg-opacity-10 border-secondary">
-              <div class="card-body">
-                <h3 class="h5 mb-2">Fireball</h3>
-                <p class="text-danger small mb-2">Projectile</p>
-                <p class="card-text text-secondary small mb-0">Fire. In a ball. Demons throw them at Yooba. Don't get hit by them.</p>
-              </div>
+    <section class="band" id="circle-III" style="--c1:#d7cdb6;--c2:#121214" data-floor-from="201" data-floor-to="300" data-caption="CIRCLE THREE! THE BASTION!" aria-labelledby="circle-III-title">
+      <div class="band-bg" data-bg="lore/img/band-III.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle III &middot; Floors 201-300</span>
+              <h2 id="circle-III-title">The Bastion</h2>
+              <p class="mb-0">Fortress walls and gates.</p>
+              <dl>
+                <dt>Residents</dt><dd>Garrison and Archers (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 201</dd>
+              </dl>
+
             </div>
-          </a>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle III's Warden at Floor 201: unknown. Tap to look closer."><img src="lore/img/warden-III.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 201" data-peek="Something at Floor 201 is built like a gate."></span></button></div>
         </div>
-        <!-- More hazards will be added here -->
+      </div>
+    </section>
+
+    <section class="band" id="circle-IV" style="--c1:#a9b8ff;--c2:#0c0f1c" data-floor-from="301" data-floor-to="400" data-caption="CIRCLE FOUR! THE DEAD PEAKS!" aria-labelledby="circle-IV-title">
+      <div class="band-bg" data-bg="lore/img/band-IV.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle IV &middot; Floors 301-400</span>
+              <h2 id="circle-IV-title">The Dead Peaks</h2>
+              <p class="mb-0">Moonlit mountains and candle shrines.</p>
+              <dl>
+                <dt>Residents</dt><dd>Gargoyles and Candle Monks (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 301</dd>
+              </dl>
+
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle IV's Warden at Floor 301: unknown. Tap to look closer."><img src="lore/img/warden-IV.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 301" data-peek="A cracked bell, and candles melting."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-V" style="--c1:#ff8fa0;--c2:#1a0a0e" data-floor-from="401" data-floor-to="500" data-caption="CIRCLE FIVE! THE CAVERNS!" aria-labelledby="circle-V-title">
+      <div class="band-bg" data-bg="lore/img/band-V.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle V &middot; Floors 401-500</span>
+              <h2 id="circle-V-title">The Caverns</h2>
+              <p class="mb-0">Drool and teeth. Floor 500 is the halfway mark.</p>
+              <dl>
+                <dt>Residents</dt><dd>Droolers and Lurkers (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 401</dd>
+              </dl>
+
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle V's Warden at Floor 401: unknown. Tap to look closer."><img src="lore/img/warden-V.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 401" data-peek="Mostly mouth. Many small eyes."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-VI" style="--c1:#7dff9a;--c2:#07130c" data-floor-from="501" data-floor-to="600" data-caption="CIRCLE SIX! THE MIRE!" aria-labelledby="circle-VI-title">
+      <div class="band-bg" data-bg="lore/img/band-VI.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle VI &middot; Floors 501-600</span>
+              <h2 id="circle-VI-title">The Mire</h2>
+              <p class="mb-0">A drowned graveyard under green ghost lights.</p>
+              <dl>
+                <dt>Residents</dt><dd>Wisps and Bog Hands (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 501</dd>
+              </dl>
+
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle VI's Warden at Floor 501: unknown. Tap to look closer."><img src="lore/img/warden-VI.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 501" data-peek="Wet footsteps. A crown of weeds."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-VII" style="--c1:#ffe066;--c2:#0b0d08" data-floor-from="601" data-floor-to="700" data-caption="CIRCLE SEVEN! THE GLOOMWOOD!" aria-labelledby="circle-VII-title">
+      <div class="band-bg" data-bg="lore/img/band-VII.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle VII &middot; Floors 601-700</span>
+              <h2 id="circle-VII-title">The Gloomwood</h2>
+              <p class="mb-0">A dead forest, torches, and shadows with yellow eyes.</p>
+              <dl>
+                <dt>Residents</dt><dd>Shades: souls stuck repeating the same walk. They only hurt you if you stand in their loop. (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 601</dd>
+              </dl>
+
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle VII's Warden at Floor 601: unknown. Tap to look closer."><img src="lore/img/warden-VII.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 601" data-peek="Yellow eyes in a dead trunk."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-VIII" style="--c1:#6fd3ff;--c2:#050b16" data-floor-from="701" data-floor-to="800" data-caption="CIRCLE EIGHT! THE RUNE BRIDGES!" aria-labelledby="circle-VIII-title">
+      <div class="band-bg" data-bg="lore/img/band-VIII.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle VIII &middot; Floors 701-800</span>
+              <h2 id="circle-VIII-title">The Rune Bridges</h2>
+              <p class="mb-0">Glowing stone walkways over a void.</p>
+              <dl>
+                <dt>Residents</dt><dd>Watchers: floating eyes that guard the bridges (rumoured)</dd>
+                <dt>Warden</dt><dd>??? at Floor 701</dd>
+              </dl>
+
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle VIII's Warden at Floor 701: unknown. Tap to look closer."><img src="lore/img/warden-VIII.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 701" data-peek="A lantern of blue runes. No legs."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-IX" style="--c1:#ff9a3c;--c2:#120807" data-floor-from="801" data-floor-to="900" data-caption="CIRCLE NINE! THE CRACKED ROAD!" aria-labelledby="circle-IX-title">
+      <div class="band-bg" data-bg="lore/img/band-IX.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle IX &middot; Floors 801-900</span>
+              <h2 id="circle-IX-title">The Cracked Road</h2>
+              <p class="mb-0">Black spires with glowing seams over a road that keeps splitting.</p>
+              <dl>
+                <dt>Residents</dt><dd>Brimstone Demons, born from the cracks</dd>
+                <dt>Warden</dt><dd>??? at Floor 801</dd>
+              </dl>
+              <a class="more" href="lore/worlds/cracked-road.html">Into the Cracked Road &rarr;</a>
+            </div>
+          </div>
+          <div class="col-md-5"><button type="button" class="warden" aria-label="Circle IX's Warden at Floor 801: unknown. Tap to look closer."><img src="lore/img/warden-IX.webp" alt="" width="320" height="320" loading="lazy"><span class="warden-name">???</span><span class="warden-hint" data-rest="Floor 801" data-peek="The Spire Fiend. Next, says the Shaft."></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="circle-X" style="--c1:#ff5a14;--c2:#1c0703" data-floor-from="901" data-floor-to="1000" data-caption="CIRCLE TEN! THE EMBER WASTES!" aria-labelledby="circle-X-title">
+      <div class="band-bg" data-bg="lore/img/band-X.webp" aria-hidden="true"></div>
+      <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+          <div class="col-md-7">
+            <div class="band-copy">
+              <span class="floor-tag">Circle X &middot; Floors 901-1,000</span>
+              <h2 id="circle-X-title">The Ember Wastes</h2>
+              <p class="mb-0">Lava rivers where the portal spits out everything that falls through.</p>
+              <dl>
+                <dt>Residents</dt><dd>Imps (the Overlord's raiders) and cinders (sparks from the burning village)</dd>
+                <dt>Warden</dt><dd>The Magma King, Floor 901</dd>
+              </dl>
+              <a class="more" href="lore/worlds/ember-wastes.html">Into the Ember Wastes &rarr;</a>
+            </div>
+          </div>
+          <div class="col-md-5"><a class="warden is-known" href="lore/characters/magma-king.html"><img src="lore/img/warden-X.webp" alt="The Magma King, Warden of the Ember Wastes" width="320" height="320" loading="lazy"><span class="warden-name">The Magma King</span><span class="warden-hint" data-rest="Floor 901 &middot; Warden of the Wastes"></span></a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bottom" id="floor-1000" data-floor-from="1000" data-floor-to="1000" data-caption="WELCOME TO THE BOTTOM. NINE HUNDRED NINETY-NINE TO GO." data-reaction-target="lore:descent#bottom">
+      <div class="container" style="max-width:820px">
+        <span class="floor-tag">Floor 1,000 &middot; The Landing</span>
+        <p class="slam">WELCOME TO THE BOTTOM.<br>NINE HUNDRED NINETY-NINE TO GO.</p>
+        <p class="reply line"><span class="who">The hero</span>...Great.</p>
+        <p class="mt-4">That's where the game starts: the very bottom of Hell, with the Overlord at the very top, feeding the village's diamonds into a gate that will tear Hell open onto the surface for good. The way home is up. All of it, one floor at a time, counting down, with a floor boss every tenth floor. Yooba turns up after the Landing, coughing up a diamond. Hell keeps sending the hero back. He keeps coming back more annoyed.</p>
+        <div class="descent-jump justify-content-center"><a href="lore/worlds/the-shaft.html">The Shaft: Hell's map</a> <a href="lore/systems/rules-of-hell.html">The Rules of Hell</a> <a href="../index.html">Start climbing</a></div>
+      </div>
+    </section>
+
+    <section class="library" id="library">
+      <div class="container">
+        <h2>The lore library</h2>
+        <p class="text-secondary">Everything we know about Hell so far. Wardens the hero hasn't met stay ???. Hell likes a surprise.</p>
+
+        <h3>The story</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/story/prologue.html" data-reaction-target="card:lore/story/prologue"><img src="lore/img/scorch.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Floor 0</span><h4>The Prologue</h4><p>A nice afternoon, a hole in the meadow, an echo that won't stop.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/worlds/the-shaft.html" data-reaction-target="card:lore/worlds/the-shaft"><img src="lore/img/hero.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Floors 0-1,000</span><h4>The Shaft</h4><p>Hell is a hole. Ten Circles, 1,000 floors, counted from the bottom up.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/systems/rules-of-hell.html" data-reaction-target="card:lore/systems/rules-of-hell"><span class="thumb" aria-hidden="true">&#9664;&#9664;</span><div><span class="tag">How Hell works</span><h4>The Rules of Hell</h4><p>D&eacute;j&agrave; Vu, Grudges, diamonds, Waystones and runs, shortcuts.</p></div></a></div>
+        </div>
+
+        <h3>The cast</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/characters/hero.html" data-reaction-target="card:lore/characters/hero"><img src="lore/img/hero.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">The one climbing</span><h4>The Hero</h4><p>No name, on purpose. Already sick of everything, so Hell can't break him.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/overlord.html" data-reaction-target="card:lore/characters/overlord"><img src="lore/img/overlord.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Floor 1</span><h4>The Overlord</h4><p>Ruler of Hell. Wants the surface. Never in a hurry.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/yooba.html" data-reaction-target="card:lore/characters/yooba"><span class="yooba-portrait small" aria-hidden="true"></span><div><span class="tag">Between floors</span><h4>Yooba</h4><p>The village slime. Swallowed the diamonds. Runs a shop out of his stomach.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/announcer.html" data-reaction-target="card:lore/characters/announcer"><span class="thumb" aria-hidden="true">!!</span><div><span class="tag">Hell's own voice</span><h4>The Announcer</h4><p>A 90s arcade cabinet the size of a mountain. Loves a show.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/magma-king.html" data-reaction-target="card:lore/characters/magma-king"><img src="lore/img/magma-king.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Floor 901</span><h4>The Magma King</h4><p>Warden of the Ember Wastes. He doesn't get up. Unless you make him.</p></div></a></div>
+        </div>
+
+        <h3>Hell's residents</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/characters/imps.html" data-reaction-target="card:lore/characters/imps"><span class="thumb" aria-hidden="true">&#9650;&#9650;</span><div><span class="tag">Circle X</span><h4>Imps</h4><p>The Overlord's raiders, the sack imps and the Magma King's guard.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/cinders.html" data-reaction-target="card:lore/characters/cinders"><img src="lore/img/thumb-fireball.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Circle X</span><h4>Cinders</h4><p>Sparks from the burning village that came alive and followed him down.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/brimstone-demon.html" data-reaction-target="card:lore/characters/brimstone-demon"><img src="lore/img/warden-IX.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Circle IX</span><h4>Brimstone Demons</h4><p>The road splits and a demon climbs out of it.</p></div></a></div>
+        </div>
+
+        <h3>Hazards</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/hazards/fireball.html" data-reaction-target="card:lore/hazards/fireball"><img src="lore/img/thumb-fireball.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Projectile</span><h4>Embers and Fireballs</h4><p>Fire. In a ball. Who throws what.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/hazards/the-wastes.html" data-reaction-target="card:lore/hazards/the-wastes"><span class="thumb" aria-hidden="true">&#8776;</span><div><span class="tag">Circle X</span><h4>The Wastes' Hazards</h4><p>Falling slag, lava bursts, ember showers, the sinking Crust, the flood.</p></div></a></div>
+        </div>
+
+        <h3>Places</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/worlds/quiet-village.html" data-reaction-target="card:lore/worlds/quiet-village"><img src="lore/img/meadow.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Floor 0</span><h4>The Meadow</h4><p>The quiet village, before and after.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/worlds/demon-path.html" data-reaction-target="card:lore/worlds/demon-path"><img src="lore/img/scorch.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">The fall</span><h4>The Fire Tunnel</h4><p>What's under the hole. Once known as the Demon Path.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/worlds/ember-wastes.html" data-reaction-target="card:lore/worlds/ember-wastes"><img src="lore/img/band-X.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Circle X</span><h4>The Ember Wastes</h4><p>Floors 1000-901, floor by floor.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/worlds/cracked-road.html" data-reaction-target="card:lore/worlds/cracked-road"><img src="lore/img/band-IX.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Circle IX</span><h4>The Cracked Road</h4><p>Floors 900-801, and Hell's first shortcut.</p></div></a></div>
+        </div>
+
+        <h3>From the early builds</h3>
+        <p class="text-secondary small">Monsters from the arcade version of the game, before Hell was surveyed. They're not on the climb today. Hell doesn't throw anything away.</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col"><a class="lore-card" href="lore/characters/bork.html" data-reaction-target="card:lore/characters/bork"><img src="lore/img/thumb-bork.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Early build</span><h4>Bork</h4><p>A demon. His name is Bork.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/slobber.html" data-reaction-target="card:lore/characters/slobber"><img src="lore/img/thumb-slobber.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Early build</span><h4>Slobber</h4><p>Big. Brutal. Drools everywhere.</p></div></a></div>
+          <div class="col"><a class="lore-card" href="lore/characters/sintinel.html" data-reaction-target="card:lore/characters/sintinel"><img src="lore/img/thumb-sintinel.webp" alt="" width="72" height="72" loading="lazy"><div><span class="tag">Early build</span><h4>Sintinel</h4><p>Watches. Waits. Then makes everything worse.</p></div></a></div>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
-    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved. &middot; <a href="../privacy.html" class="link-secondary">Privacy</a></p>
+    <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved.</p>
+    <p class="text-secondary small mb-0 mt-1">Anonymous gameplay statistics (no cookies, no personal data, no IP stored) help us improve the game.</p>
     <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
     <p class="hawkes-credit"><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
@@ -169,5 +378,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="emoji-reactions.js"></script>
+  <script src="lore/assets/descent.js"></script>
 </body>
 </html>
