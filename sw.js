@@ -55,6 +55,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Hawkes Analytics batches are POSTs (sendBeacon / keepalive fetch) to Gen: let the browser send them as they are.
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   // NETWORK-FIRST strategy for site files (shell, catalog, images).
   event.respondWith(
     fetch(event.request)

@@ -117,6 +117,19 @@
         box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
       }
 
+      #site-privacy {
+        display: block;
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.35);
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      #site-privacy:hover {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
       #site-version {
         display: block;
         margin-top: 18px;
@@ -259,6 +272,9 @@
       }
 
     </style>
+    <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
+    <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+    <script src="/js/hawkes-site.js" defer></script>
   </head>
   <body>
     <div id="install-banner">
@@ -271,11 +287,12 @@
     <div id="start-overlay">
       <h1>Sick Of It</h1>
       <div id="button-container">
-        <a id="start-button" href="/Game/index.html">CLICK TO START</a>
+        <a id="start-button" href="/Game/index.html" data-play="landing">CLICK TO START</a>
         <a href="blog/index.html" class="secondary-button">Blog</a>
         <a href="whatsnew.html" class="secondary-button">What's new</a>
       </div>
       <a id="site-version" href="whatsnew.html" data-hawkes-version hidden></a>
+      <a id="site-privacy" href="privacy.html">Privacy</a>
     </div>
     <script>
       if ('serviceWorker' in navigator) {
