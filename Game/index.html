@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <!-- Hawkes sound prompt: installed by the deploy from sickofitgame-unity Tools/Web; must load before Unity's loader -->
+    <script src="v116/hawkes-sound.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -72,7 +74,7 @@
       #unity-logo {
         width: 154px;
         height: 130px;
-        background: url('v106/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background: url('v116/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
         background-size: contain;
         margin: 0 auto 20px;
       }
@@ -115,44 +117,6 @@
       #unity-warning > div.warning {
         background: rgba(255, 193, 7, 0.9);
         color: #000;
-      }
-
-      #rotate-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.95);
-        display: none;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 3000;
-      }
-
-      #rotate-overlay.show {
-        display: flex;
-      }
-
-      #rotate-icon {
-        width: 100px;
-        height: 100px;
-        margin-bottom: 20px;
-        animation: rotate-pulse 2s ease-in-out infinite;
-      }
-
-      @keyframes rotate-pulse {
-        0%, 100% { transform: rotate(0deg) scale(1); }
-        50% { transform: rotate(90deg) scale(1.1); }
-      }
-
-      #rotate-message {
-        color: #fff;
-        font-family: Arial, sans-serif;
-        font-size: 24px;
-        text-align: center;
-        padding: 0 20px;
       }
 
       body {
@@ -293,7 +257,7 @@
   </head>
   <body>
     <!-- Version Display -->
-    <div id="version-display">v106</div>
+    <div id="version-display">v116</div>
     <script src="/js/hawkes-release.js" data-releases="/releases.json"></script>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
@@ -301,15 +265,6 @@
         <button id="install-button">Install</button>
         <button id="dismiss-banner">×</button>
       </div>
-    </div>
-    <div id="rotate-overlay">
-      <svg id="rotate-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="10" width="60" height="80" rx="5" stroke="white" stroke-width="3" fill="none"/>
-        <path d="M40 30 L60 30" stroke="white" stroke-width="2"/>
-        <circle cx="50" cy="75" r="5" fill="white"/>
-        <path d="M70 45 L85 45 L85 25 M85 25 L80 30 M85 25 L90 30" stroke="#4a90e2" stroke-width="2" fill="none"/>
-      </svg>
-      <div id="rotate-message">Please rotate your device to landscape</div>
     </div>
     <div id="unity-container">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
@@ -395,7 +350,7 @@
       }
 
       var gameName = "SickOfIt";
-      var gameVersion = "v106"; // Update this when you publish a new game build
+      var gameVersion = "v116"; // Update this when you publish a new game build
 
       // Safari deletes IndexedDB and the Cache API (Unity's bundle cache) after
       // 7 days of browser use with no visit. persist() opts this origin out of
@@ -468,14 +423,14 @@
         }
       });
       
-      var buildUrl = "v106/" + gameName + "/Build/" + gameName;
+      var buildUrl = "v116/" + gameName + "/Build/" + gameName;
       var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
       var config = {
         arguments: [],
         dataUrl: buildUrl + ".data.unityweb?v=" + gameVersion,
         frameworkUrl: buildUrl + ".framework.js.unityweb?v=" + gameVersion,
         codeUrl: buildUrl + ".wasm.unityweb?v=" + gameVersion,
-        streamingAssetsUrl: "v106/" + gameName + "/StreamingAssets",
+        streamingAssetsUrl: "v116/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
         // Unity deletes every cached bundle when productVersion changes.
@@ -523,81 +478,39 @@
         }, { passive: true });
       }
 
+      // Only the CSS size is set here: Unity sizes the drawing buffer itself. Resizing canvas.width/height
+      // from the page (and swapping the viewport meta) broke the GL context after a few rotations.
+      var resizeTimer = null;
       function resizeCanvas() {
         var width = window.innerWidth;
         var height = window.innerHeight;
-        
+
         if (isMobile && window.visualViewport) {
           width = window.visualViewport.width;
           height = window.visualViewport.height;
         }
-        
-        canvas.width = width;
-        canvas.height = height;
+
         canvas.style.width = width + "px";
         canvas.style.height = height + "px";
       }
 
-      window.addEventListener('resize', resizeCanvas);
-      
-      if (isMobile) {
-        var orientationChangeHandler = function() {
-          // Force scroll to top to prevent zoom issues
+      // Rotation fires several resize events while the browser settles: size once, after it has.
+      function scheduleResize() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
           window.scrollTo(0, 0);
-          document.body.scrollTop = 0;
-          document.documentElement.scrollTop = 0;
-          
-          // Force a hard viewport reset
-          var viewport = document.querySelector('meta[name=viewport]');
-          if (viewport) {
-            // Temporarily remove and re-add viewport meta tag to force browser reset
-            var content = viewport.getAttribute('content');
-            viewport.setAttribute('content', 'width=1');
-            
-            // Use requestAnimationFrame to ensure browser processes the change
-            requestAnimationFrame(function() {
-              viewport.setAttribute('content', content);
-              
-              // Force another scroll to top after viewport reset
-              window.scrollTo(0, 0);
-              
-              // Wait for browser to settle, then resize canvas
-              setTimeout(function() {
-                window.scrollTo(0, 0); // One more time for good measure
-                resizeCanvas();
-              }, 200);
-            });
-          } else {
-            setTimeout(resizeCanvas, 200);
-          }
-        };
-        
-        // Listen to both orientationchange and resize for better coverage
-        window.addEventListener('orientationchange', orientationChangeHandler);
-        
-        if (window.visualViewport) {
-          window.visualViewport.addEventListener('resize', resizeCanvas);
-        }
+          resizeCanvas();
+        }, 150);
       }
-      
+
+      window.addEventListener('resize', scheduleResize);
+      window.addEventListener('orientationchange', scheduleResize);
+      if (isMobile && window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleResize);
+      }
+
       resizeCanvas();
 
-      // Orientation handling for mobile devices
-      var rotateOverlay = document.getElementById('rotate-overlay');
-      
-      function checkOrientation() {
-        if (!isMobile) return;
-        
-        var isPortrait = window.innerHeight > window.innerWidth;
-        
-        // Show rotate message if in portrait mode
-        if (isPortrait) {
-          rotateOverlay.classList.add('show');
-        } else {
-          rotateOverlay.classList.remove('show');
-        }
-      }
-      
       async function lockOrientationToLandscape() {
         if (!isMobile) return;
         
@@ -612,13 +525,6 @@
         }
       }
       
-      // Check orientation on load and when it changes
-      if (isMobile) {
-        checkOrientation();
-        window.addEventListener('resize', checkOrientation);
-        window.addEventListener('orientationchange', checkOrientation);
-      }
-
       // Load Unity game immediately (user is already authenticated)
       function loadUnityGame() {
         var script = document.createElement("script");
