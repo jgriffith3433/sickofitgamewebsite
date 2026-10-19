@@ -11,7 +11,7 @@ plus the site around it.
 ## How it's hosted
 
 Static files on **GitHub Pages**, served from the root of `main` (`CNAME` is `sickofitgame.com`, `.nojekyll` is
-set). There is no server: no paywall, no analytics, no backend. Pushing to `main` publishes the site.
+set). There is no server: no paywall, no backend. Pushing to `main` publishes the site.
 
 Because Pages can't send `Content-Encoding` headers, the Unity build uses compressed `.unityweb` files with
 Unity's decompression fallback. The loader unpacks them in the browser, so any static host can serve them.
@@ -68,9 +68,27 @@ are no longer used by the live site:
 - `backend/` (Flask paywall: Stripe, Resend email, redeem codes). The dev compose still starts it as `paywall`.
 - `nginx.conf`, `Dockerfile`, `docker-compose.prod.yml`, `docker-compose.deploy.yml`, `.dockerignore`
 - `auto-prod.bat`, `auto-deploy.bat`, `auto-copy-deploy.bat`, `auto-check-status.bat`, `auto-logs-*.bat`, `auto-ssh.bat`
-- `SETUP.md`, `PWA_CHECKLIST.md`, `UNITY_INTEGRATION_PROMPT.txt`
+- `SETUP.md`, `PWA_CHECKLIST.md`
 
 They can be removed once local dev no longer needs Docker.
+
+## Analytics
+
+**Hawkes Analytics** (Hawkes Gen's own SDK, `hawkesgen/docs/analytics.md`) is the only analytics, on every page;
+never add another tracker (no Umami, gtag, GoatCounter...). Each page's `<head>` has:
+
+```html
+<script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+<script src="/js/hawkes-site.js" defer></script>
+```
+
+- The SDK sends page views, sessions, outbound links, errors and load times by itself. `js/hawkes-site.js` adds
+  `play_click` (links with `data-play="landing|nav"` or into `/Game/`) and, on blog posts, `read_depth` (25/50/75/100)
+  and `read_time` (seconds on screen, summed). Its console lines start with `[hawkes-site]`.
+- `Game/index.html` sets `window.HAWKES_BUILD = { version: "v<n>" }` before the SDK. The game's Unity bridge sees the
+  `data-hawkes-analytics` tag and doesn't load a second copy.
+- New pages: copy the two tags (blog pages use a relative `js/hawkes-site.js` path) and link `privacy.html`, which
+  says what is counted. Add `?hawkes-analytics-debug=1` to a page's URL to log each event in the console.
 
 ## Versions and What's new
 

@@ -3,8 +3,6 @@ import json
 import logging
 import time
 import stripe
-import urllib.request
-import urllib.error
 from flask import (
     Flask,
     request,
@@ -55,10 +53,6 @@ SITE_NAME = os.environ.get("SITE_NAME", "Sick Of It")
 COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)  # None = current domain
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
 SESSION_EXPIRY_DAYS = int(os.environ.get("SESSION_EXPIRY_DAYS", "0"))  # 0 = never expire
-
-# Umami tracking config
-UMAMI_API_URL = os.environ.get("UMAMI_API_URL", "http://umami:3000")
-UMAMI_WEBSITE_ID = os.environ.get("UMAMI_WEBSITE_ID", "")
 
 # Product config – maps product IDs to Stripe price details
 # Extend this dict to add more pay-per-content items in the future
@@ -308,66 +302,8 @@ def handle_checkout_completed(session):
         else:
             logger.info("Access code sent to %s for session %s", email, session_id)
 
-        # Track revenue in Umami
-        track_umami_revenue(product_id, session)
     else:
         logger.error("Failed to create access code for session %s", session_id)
-
-
-# ---------------------------------------------------------------------------
-# Umami revenue tracking
-# ---------------------------------------------------------------------------
-
-
-def track_umami_revenue(product_id, stripe_session):
-    """Send a revenue event to Umami analytics."""
-    if not UMAMI_WEBSITE_ID:
-        logger.warning("UMAMI_WEBSITE_ID not configured, skipping revenue tracking")
-        return
-
-    product = PRODUCTS.get(product_id, {})
-    amount_cents = product.get("price_cents", 0)
-    currency = product.get("currency", "usd")
-    amount_dollars = amount_cents / 100
-
-    payload = json.dumps({
-        "payload": {
-            "hostname": SITE_URL.replace("https://", "").replace("http://", ""),
-            "language": "en-US",
-            "referrer": "",
-            "screen": "1920x1080",
-            "title": "Paywall Payment",
-            "url": "/paywall/payment-complete",
-            "website": UMAMI_WEBSITE_ID,
-            "name": "paywall-revenue",
-            "data": {
-                "product_id": product_id,
-                "product_name": product.get("name", "Unknown"),
-                "amount": amount_dollars,
-                "currency": currency.upper(),
-                "stripe_session_id": stripe_session.get("id", ""),
-                "revenue": {"currency": currency.upper(), "amount": amount_dollars},
-            },
-        },
-        "type": "event",
-    }).encode("utf-8")
-
-    try:
-        req = urllib.request.Request(
-            f"{UMAMI_API_URL}/api/send",
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": "Paywall/1.0",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            logger.info("Umami revenue tracked: $%.2f %s (status %d)", amount_dollars, currency.upper(), resp.status)
-    except urllib.error.URLError as e:
-        logger.error("Failed to track Umami revenue: %s", e)
-    except Exception as e:
-        logger.error("Unexpected error tracking Umami revenue: %s", e)
 
 
 # ---------------------------------------------------------------------------
