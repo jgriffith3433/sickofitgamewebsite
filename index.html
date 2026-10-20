@@ -39,7 +39,16 @@
       .btn.ghost{background:transparent;color:#fff!important;border:2px solid #6b2a1e;box-shadow:none}
       .btn.small{padding:8px 22px;font-size:14px}
       .hero{position:relative;text-align:center;padding:70px 0 60px;background:radial-gradient(ellipse at 50% 0,#4a1308 0,#0a0405 70%);overflow:hidden}
-      .hero img.ov{position:absolute;right:-4%;bottom:0;height:90%;width:auto;opacity:.18;pointer-events:none}
+      .hero .ov{position:absolute;right:-4%;bottom:0;height:90%;aspect-ratio:1024/571;opacity:.18;pointer-events:none}
+      .spr{background-repeat:no-repeat;image-rendering:pixelated;animation-timing-function:steps(1,end);animation-iteration-count:infinite}
+      .spr.ovs{background-image:url(images/Overlord.png);background-size:200% auto;animation:ovA .9s infinite steps(1,end)}
+      .spr.bk{background-image:url(images/Bork.png);background-size:400% 400%;animation:bkA 1.6s infinite steps(1,end)}
+      .spr.fb{background-image:url(images/Fireball.png);background-size:700% 200%;image-rendering:auto;animation:fbA 1.1s infinite steps(1,end)}
+      .shots .spr{width:100%;aspect-ratio:4/3;background-color:#000}
+      .shots .spr.bk,.shots .spr.fb{width:auto;height:100%;max-width:100%;aspect-ratio:1;margin:0 auto}
+      @keyframes ovA{0%{background-position:0 0}16.667%{background-position:100% 0}33.333%{background-position:0 38.66%}50%{background-position:100% 38.66%}66.667%{background-position:0 77.32%}83.333%{background-position:100% 77.32%}}
+      @keyframes bkA{0.000%{background-position:0.000% 0.000%}6.250%{background-position:33.333% 0.000%}12.500%{background-position:66.667% 0.000%}18.750%{background-position:100.000% 0.000%}25.000%{background-position:0.000% 33.333%}31.250%{background-position:33.333% 33.333%}37.500%{background-position:66.667% 33.333%}43.750%{background-position:100.000% 33.333%}50.000%{background-position:0.000% 66.667%}56.250%{background-position:33.333% 66.667%}62.500%{background-position:66.667% 66.667%}68.750%{background-position:100.000% 66.667%}75.000%{background-position:0.000% 100.000%}81.250%{background-position:33.333% 100.000%}87.500%{background-position:66.667% 100.000%}93.750%{background-position:100.000% 100.000%}}
+      @keyframes fbA{0.000%{background-position:0.000% 0%}7.143%{background-position:16.667% 0%}14.286%{background-position:33.333% 0%}21.429%{background-position:50.000% 0%}28.571%{background-position:66.667% 0%}35.714%{background-position:83.333% 0%}42.857%{background-position:100.000% 0%}50.000%{background-position:0.000% 100%}57.143%{background-position:16.667% 100%}64.286%{background-position:33.333% 100%}71.429%{background-position:50.000% 100%}78.571%{background-position:66.667% 100%}85.714%{background-position:83.333% 100%}92.857%{background-position:100.000% 100%}}
       .hero .wrap{position:relative}
       .hero h1{font-size:clamp(44px,10vw,96px);font-weight:900;letter-spacing:.04em;color:#fff;text-shadow:0 0 30px rgba(255,80,20,.6)}
       .hero .tag{font-size:clamp(17px,3vw,24px);margin:10px auto 30px;max-width:640px;color:#f0cdbf}
@@ -90,7 +99,7 @@
     </div></nav>
 
     <header class="hero">
-      <img class="ov" src="images/Overlord.png" alt="" aria-hidden="true">
+      <div class="ov spr ovs" aria-hidden="true"></div>
       <div class="wrap">
         <h1>SICK OF IT</h1>
         <p class="tag">1,000 floors of Hell. Same bullets, same screaming, same Overlord. The hero is not impressed. Rewind it.</p>
@@ -121,12 +130,12 @@
       <h2>Meet the neighbourhood</h2>
       <p class="lead">Art from the game. Hell looks better than it behaves.</p>
       <div class="grid">
-        <figure><img loading="lazy" src="images/Overlord.png" alt="The Overlord, a giant obsidian titan with red eyes"><figcaption>The Overlord. Not in a hurry.</figcaption></figure>
+        <figure><div class="spr ovs" role="img" aria-label="The Overlord, a giant obsidian titan with red eyes" style="aspect-ratio:1024/571;height:auto;background-size:200% auto"></div><figcaption>The Overlord. Not in a hurry.</figcaption></figure>
         <figure><img loading="lazy" src="images/QuietVillageBefore.jpg" alt="The village on a quiet afternoon"><figcaption>The village, a nice afternoon.</figcaption></figure>
         <figure><img loading="lazy" src="images/QuietVillageAfter.jpg" alt="The village after the lasers"><figcaption>The village, after the Overlord.</figcaption></figure>
         <figure><img loading="lazy" src="images/Yooba.png" alt="Yooba, the village's green slime" style="object-fit:contain"><figcaption>Yooba, the village gossip. A slime, and a villager.</figcaption></figure>
-        <figure><img loading="lazy" src="images/Bork.png" alt="Bork" style="object-fit:contain"><figcaption>Bork. Fires things.</figcaption></figure>
-        <figure><img loading="lazy" src="images/Fireball.png" alt="A fireball" style="object-fit:contain"><figcaption>Fireball. Do not stand there.</figcaption></figure>
+        <figure><div class="spr bk" role="img" aria-label="Bork"></div><figcaption>Bork. Fires things.</figcaption></figure>
+        <figure><div class="spr fb" role="img" aria-label="A fireball"></div><figcaption>Fireball. Do not stand there.</figcaption></figure>
       </div>
     </div></section>
 
