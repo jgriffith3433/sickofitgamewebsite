@@ -6,11 +6,15 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Sick Of It</title>
+    <title>Sick Of It: climb 1,000 floors of Hell. Rewind it.</title>
+    <meta name="description" content="A sarcastic nobody chases the Overlord up 1,000 floors of Hell. Dodge bullets, rewind time, free the diamonds. Play free in your browser.">
+    <meta property="og:title" content="Sick Of It">
+    <meta property="og:description" content="1,000 floors of Hell. One rewind button. Play free in your browser.">
+    <meta property="og:image" content="/images/Overlord.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="/icons/icon-192.svg">
@@ -18,259 +22,56 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        /* Prevent text size adjustment on orientation change */
-        -webkit-text-size-adjust: 100%;
-        -moz-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-      }
-
-      html, body {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: #000;
-        position: fixed;
-        overscroll-behavior: none;
-        -webkit-overflow-scrolling: touch;
-        touch-action: none;
-      }
-
-      #start-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        cursor: pointer;
-      }
-
-      #start-overlay h1 {
-        color: #fff;
-        font-family: Arial, sans-serif;
-        font-size: 48px;
-        margin-bottom: 30px;
-        text-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
-      }
-
-      #button-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
-      }
-
-      #start-button {
-        background: linear-gradient(135deg, #4a90e2, #2ecc71);
-        color: white;
-        border: none;
-        padding: 20px 60px;
-        font-size: 24px;
-        font-weight: bold;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-      }
-
-      #start-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(46, 204, 113, 0.6);
-      }
-
-      #start-button:active {
-        transform: translateY(0);
-      }
-
-      .secondary-button {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 15px 50px;
-        font-size: 20px;
-        font-weight: bold;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 3px 15px rgba(255, 255, 255, 0.1);
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .secondary-button:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
-      }
-
-      #site-privacy {
-        display: block;
-        margin-top: 8px;
-        color: rgba(255, 255, 255, 0.35);
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        text-decoration: none;
-      }
-
-      #site-privacy:hover {
-        color: rgba(255, 255, 255, 0.8);
-      }
-
-      #site-version {
-        display: block;
-        margin-top: 18px;
-        color: rgba(255, 255, 255, 0.45);
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-        text-decoration: none;
-      }
-
-      .secondary-button:active {
-        transform: translateY(0);
-      }
-
-      @media (max-width: 768px) {
-        #start-overlay h1 {
-          font-size: 36px;
-          margin-bottom: 20px;
-        }
-
-        #button-container {
-          gap: 15px;
-          width: 90%;
-        }
-
-        #start-button {
-          padding: 15px 40px;
-          font-size: 20px;
-          width: 100%;
-          max-width: 300px;
-        }
-
-        .secondary-button {
-          padding: 12px 35px;
-          font-size: 18px;
-          width: 100%;
-          max-width: 300px;
-          text-align: center;
-        }
-      }
-
-      body {
-        overscroll-behavior-y: contain;
-      }
-
-      /* Install banner styling */
-      #install-banner {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(30, 30, 30, 0.98);
-        padding: 12px 20px;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 5000;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        font-family: Arial, sans-serif;
-        gap: 15px;
-        flex-wrap: wrap;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      #install-banner.show {
-        display: flex;
-        opacity: 1;
-      }
-
-      #install-banner.fade-out {
-        opacity: 0;
-      }
-
-      #install-banner-text {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 14px;
-        margin: 0;
-        flex: 1;
-        min-width: 200px;
-        text-align: center;
-      }
-
-      #install-banner-text strong {
-        font-weight: bold;
-        color: #fff;
-      }
-
-      #install-banner-buttons {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-
-      #install-banner button {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 8px 20px;
-        font-size: 13px;
-        font-weight: 600;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: Arial, sans-serif;
-        white-space: nowrap;
-      }
-
-      #install-banner button:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateY(-1px);
-      }
-
-      #dismiss-banner {
-        background: transparent;
-        color: rgba(255, 255, 255, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 6px 15px;
-        font-size: 16px;
-      }
-
-      #dismiss-banner:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: rgba(255, 255, 255, 0.9);
-      }
-
-      @media (max-width: 600px) {
-        #install-banner {
-          padding: 10px 15px;
-        }
-        #install-banner-text {
-          font-size: 12px;
-        }
-        #install-banner button {
-          font-size: 12px;
-          padding: 6px 15px;
-        }
-      }
-
+      *{margin:0;padding:0;box-sizing:border-box}
+      html{scroll-behavior:smooth}
+      body{background:#0a0405;color:#eadfd8;font:16px/1.6 Arial,sans-serif}
+      a{color:#ff7a3d}
+      img{max-width:100%;height:auto;display:block}
+      .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+      nav{position:sticky;top:0;z-index:50;background:rgba(10,4,5,.92);border-bottom:1px solid #3a1510;backdrop-filter:blur(6px)}
+      nav .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:10px 20px}
+      nav .brand{font-weight:900;letter-spacing:.08em;color:#fff;text-decoration:none;margin-right:auto}
+      nav a{text-decoration:none;color:#d9c8c0;font-size:14px}
+      nav a:hover{color:#fff}
+      .btn{display:inline-block;background:linear-gradient(135deg,#ff4a1c,#ff9d2e);color:#1a0603!important;font-weight:900;letter-spacing:.06em;border-radius:50px;text-decoration:none;padding:14px 40px;font-size:20px;box-shadow:0 6px 24px rgba(255,90,30,.4);transition:transform .2s}
+      .btn:hover{transform:translateY(-2px)}
+      .btn.big{padding:20px 64px;font-size:26px}
+      .btn.ghost{background:transparent;color:#fff!important;border:2px solid #6b2a1e;box-shadow:none}
+      .btn.small{padding:8px 22px;font-size:14px}
+      .hero{position:relative;text-align:center;padding:70px 0 60px;background:radial-gradient(ellipse at 50% 0,#4a1308 0,#0a0405 70%);overflow:hidden}
+      .hero img.ov{position:absolute;right:-4%;bottom:0;height:90%;width:auto;opacity:.18;pointer-events:none}
+      .hero .wrap{position:relative}
+      .hero h1{font-size:clamp(44px,10vw,96px);font-weight:900;letter-spacing:.04em;color:#fff;text-shadow:0 0 30px rgba(255,80,20,.6)}
+      .hero .tag{font-size:clamp(17px,3vw,24px);margin:10px auto 30px;max-width:640px;color:#f0cdbf}
+      .hero .sub{margin-top:14px;font-size:13px;color:#a8928a}
+      section{padding:56px 0}
+      h2{font-size:clamp(26px,5vw,38px);color:#fff;margin-bottom:8px;letter-spacing:.03em}
+      .lead{color:#b9a59d;margin-bottom:26px}
+      .video{position:relative;aspect-ratio:16/9;background:#000 center/cover;border:2px solid #4a1d14;border-radius:10px;overflow:hidden;box-shadow:0 0 40px rgba(255,70,20,.2)}
+      .video button,.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+      .video button{background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.65));cursor:pointer;color:#fff;font:900 20px Arial,sans-serif}
+      .video button span{display:block;font-size:64px;line-height:1.2;color:#ff7a3d}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+      .card{background:#170a08;border:1px solid #3a1510;border-radius:10px;padding:22px}
+      .card h3{color:#ff9d2e;margin-bottom:6px}
+      .shots figure{background:#170a08;border:1px solid #3a1510;border-radius:10px;overflow:hidden}
+      .shots img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#000}
+      .shots figcaption{padding:10px 14px;font-size:14px;color:#b9a59d}
+      .story{background:#120708;border-block:1px solid #3a1510}
+      .story p{max-width:720px;margin-bottom:14px}
+      .story .quote{color:#ff9d2e;font-style:italic}
+      .cta{text-align:center}
+      footer{padding:30px 20px 20px;text-align:center;font-size:14px;color:#8d7a73;border-top:1px solid #3a1510}
+      footer nav-links a{margin:0 10px}
+      footer .links a{margin:0 10px;color:#b9a59d;text-decoration:none}
+      .hawkes-credit{margin:.8rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none}.hawkes-credit a:hover{color:#fff}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}
+      @media(max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit a{display:block;margin-top:2px}.btn.big{padding:18px 40px;font-size:22px}nav .wrap{gap:12px}}
+      #install-banner{position:fixed;top:0;left:0;width:100%;background:rgba(30,30,30,.98);padding:12px 20px;display:none;align-items:center;justify-content:center;z-index:5000;opacity:0;transition:opacity .5s;gap:15px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)}
+      #install-banner.show{display:flex;opacity:1}
+      #install-banner.fade-out{opacity:0}
+      #install-banner-text{color:#eee;font-size:14px;flex:1;min-width:200px;text-align:center}
+      #install-banner-buttons{display:flex;gap:10px}
+      #install-banner button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 20px;font-size:13px;border-radius:6px;cursor:pointer}
     </style>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
@@ -279,21 +80,88 @@
   <body>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
-      <div id="install-banner-buttons">
-        <button id="install-button">Install</button>
-        <button id="dismiss-banner">×</button>
-      </div>
+      <div id="install-banner-buttons"><button id="install-button">Install</button><button id="dismiss-banner">&times;</button></div>
     </div>
-    <div id="start-overlay">
-      <h1>Sick Of It</h1>
-      <div id="button-container">
-        <a id="start-button" href="/Game/index.html" data-play="landing">CLICK TO START</a>
-        <a href="blog/index.html" class="secondary-button">Blog</a>
-        <a href="whatsnew.html" class="secondary-button">What's new</a>
+    <nav><div class="wrap">
+      <a class="brand" href="/">SICK OF IT</a>
+      <a href="#trailer">Trailer</a><a href="#features">Features</a><a href="#story">Story</a>
+      <a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a>
+      <a class="btn small" href="/Game/index.html" data-play="nav">PLAY</a>
+    </div></nav>
+
+    <header class="hero">
+      <img class="ov" src="images/Overlord.png" alt="" aria-hidden="true">
+      <div class="wrap">
+        <h1>SICK OF IT</h1>
+        <p class="tag">1,000 floors of Hell. Same bullets, same screaming, same Overlord. The hero is not impressed. Rewind it.</p>
+        <a class="btn big" id="start-button" href="/Game/index.html" data-play="landing">PLAY NOW</a>
+        <p class="sub">Free in your browser. No download. <a href="whatsnew.html" id="site-version" data-hawkes-version hidden></a></p>
       </div>
-      <a id="site-version" href="whatsnew.html" data-hawkes-version hidden></a>
-      <a id="site-privacy" href="privacy.html">Privacy</a>
-    </div>
+    </header>
+
+    <section id="trailer"><div class="wrap">
+      <h2>The trailer</h2>
+      <p class="lead">Hell, as advertised by Hell.</p>
+      <div class="video" id="trailer-box" style="background-image:url(https://i.ytimg.com/vi/HABzgCDO1hs/hqdefault.jpg)">
+        <button type="button" id="trailer-play" aria-label="Play the Sick Of It launch trailer"><span>&#9654;</span>Watch the launch trailer</button>
+      </div>
+    </div></section>
+
+    <section id="features" class="story"><div class="wrap">
+      <h2>What you're in for</h2>
+      <p class="lead">Hell is repetition. You're just better at it.</p>
+      <div class="grid">
+        <div class="card"><h3>Rewind</h3><p>Hell loops forever, so the hero grabs the loop and drags it backward. Take the hit, undo the hit, act like nothing happened.</p></div>
+        <div class="card"><h3>1,000 floors of Hell</h3><p>Counting down from Floor 1,000 to the Overlord at Floor 1. Every floor is its own level, and every Circle has a Warden who would like a word.</p></div>
+        <div class="card"><h3>Bullet-dodging arcade</h3><p>Fast, tight and loud, with a booming announcer who loves a show. Die, come back more annoyed, climb again.</p></div>
+      </div>
+    </div></section>
+
+    <section id="art"><div class="wrap shots">
+      <h2>Meet the neighbourhood</h2>
+      <p class="lead">Art from the game. Hell looks better than it behaves.</p>
+      <div class="grid">
+        <figure><img loading="lazy" src="images/Overlord.png" alt="The Overlord, a giant obsidian titan with red eyes"><figcaption>The Overlord. Not in a hurry.</figcaption></figure>
+        <figure><img loading="lazy" src="images/QuietVillageBefore.jpg" alt="The village on a quiet afternoon"><figcaption>The village, a nice afternoon.</figcaption></figure>
+        <figure><img loading="lazy" src="images/QuietVillageAfter.jpg" alt="The village after the lasers"><figcaption>The village, after the Overlord.</figcaption></figure>
+        <figure><img loading="lazy" src="images/Yooba.png" alt="Yooba, the village's green slime" style="object-fit:contain"><figcaption>Yooba, the village gossip. A slime, and a villager.</figcaption></figure>
+        <figure><img loading="lazy" src="images/Bork.png" alt="Bork" style="object-fit:contain"><figcaption>Bork. Fires things.</figcaption></figure>
+        <figure><img loading="lazy" src="images/Fireball.png" alt="A fireball" style="object-fit:contain"><figcaption>Fireball. Do not stand there.</figcaption></figure>
+      </div>
+    </div></section>
+
+    <section id="story" class="story"><div class="wrap">
+      <h2>The story</h2>
+      <p class="lead">A very bad afternoon.</p>
+      <p>A giant Overlord lasers a village flat. His imps take the diamonds that hold a portal open, and he steps back through to gather his army. A tired, sarcastic nobody, curious about the wrong hole, gets swallowed by a portal that burns open right next to him.</p>
+      <p>He lands at the bottom of Hell, Floor 1,000. The Overlord sits at the top, feeding the diamonds into a gate that will tear Hell open onto the surface for good. Yooba, the village's green slime, got dragged along with a stomach full of hidden diamonds, and now trades between floors.</p>
+      <p class="quote">"Fine. Up, then."</p>
+    </div></section>
+
+    <section class="cta"><div class="wrap">
+      <h2>Latest from the blog</h2>
+      <p class="lead">How Hell runs, how it was made, and what keeps breaking.</p>
+      <div class="card" style="max-width:640px;margin:0 auto 24px;text-align:left"><h3>The Engine: How Hell Runs</h3><p>A game made of JSON, a simulation that can run backward, 1,000 floors, voices made to order, and bots that play every level.</p><p style="margin-top:12px"><a href="blog/posts/the-engine.html">Read the post</a></p></div>
+      <a class="btn ghost" href="blog/index.html">Read the blog</a> <a class="btn" href="/Game/index.html" data-play="cta">PLAY NOW</a>
+    </div></section>
+
+    <footer>
+      <div class="links"><a href="/Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="privacy.html">Privacy</a></div>
+      <p class="hawkes-credit"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
+    </footer>
+    <script>
+      (function(){
+        var b=document.getElementById('trailer-play'),box=document.getElementById('trailer-box');
+        b.addEventListener('click',function(){
+          var f=document.createElement('iframe');
+          f.src='https://www.youtube-nocookie.com/embed/HABzgCDO1hs?autoplay=1&rel=0';
+          f.title='Sick Of It launch trailer';
+          f.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+          f.allowFullscreen=true;
+          box.replaceChildren(f);
+        });
+      })();
+    </script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -433,9 +301,5 @@
       })();
     </script>
     <script src="/js/hawkes-release.js" data-releases="/releases.json" defer></script>
-    <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
-    <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
-    <div class="hawkes-credit hawkes-credit-pinned"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.com" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></div>
-    <!-- /Hawkes credit -->
   </body>
 </html>
