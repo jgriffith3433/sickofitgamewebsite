@@ -22,7 +22,7 @@
       border-left: 3px solid transparent;
     }
     .hover-card:hover {
-      border-left: 3px solid var(--bs-primary);
+      border-left: 3px solid #ff7a1a;
     }
   </style>
   <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
@@ -30,9 +30,9 @@
   <script src="../js/hawkes-site.js" defer></script>
 </head>
 <body class="bg-dark">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="../index.html">Sick Of It</a>
+      <a class="navbar-brand fw-bold" href="../index.html">SICK OF IT</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -40,6 +40,7 @@
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="../index.html" data-play="nav">Play</a></li>
           <li class="nav-item"><a class="nav-link active" href="index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="development.html">Development</a></li>
           <li class="nav-item"><a class="nav-link" href="lore.html">Lore</a></li>
           <li class="nav-item"><a class="nav-link" href="music.html">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="shorts.html">Shorts</a></li>
@@ -49,9 +50,10 @@
   </nav>
 
   <main class="container py-5">
-    <header class="text-center mb-5 p-5 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+    <header class="blog-hero text-center mb-5 p-5 rounded">
+      <span class="blog-kicker">Dispatches from the Climb</span>
       <h1 class="display-3 fw-bold mb-3">Sick Of It Blog</h1>
-      <p class="lead text-secondary">Development updates, lore, and game music</p>
+      <p class="lead text-secondary mb-0">Development updates, lore, and game music</p>
     </header>
 
     <section class="mb-5">
@@ -259,7 +261,7 @@
     </section>
   </main>
 
-  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+  <footer class="text-center py-4 mt-5 border-top border-secondary">
     <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved. &middot; <a href="../privacy.html" class="link-secondary">Privacy</a></p>
     <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>

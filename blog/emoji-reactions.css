@@ -1,33 +1,40 @@
-/* ── Emoji Reactions Styles ──────────────────────────────────────── */
+/* ── Emoji Reactions & Shared Blog Theme ───────────────────────────
+   Loaded by all blog pages and posts.
+   Blog theme rules are scoped to body:not(.hell) so blog/lore.html
+   and blog/lore/** keep their exact descent.css rules, while all blog
+   index/category/post pages and Unity deploy step 7d inserts inherit
+   the warm dark Sick Of It look automatically.
+   ─────────────────────────────────────────────────────────────────── */
 
 /* ── Add Reaction Button ─────────────────────────────────────────── */
 .emoji-add-btn {
   display: none;
   align-items: center;
   gap: 2px;
-  border: none;
+  border: 1px solid rgba(255, 198, 92, 0.25);
   border-radius: 20px;
   padding: 4px 10px;
   font-size: 1.15rem;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(23, 10, 8, 0.88);
+  color: #f3e6d6;
   backdrop-filter: blur(8px);
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
   z-index: 10;
   white-space: nowrap;
   line-height: 1;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 .emoji-add-btn:hover {
-  background: rgba(13, 110, 253, 0.35);
+  background: rgba(255, 122, 26, 0.32);
+  border-color: rgba(255, 198, 92, 0.6);
   transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 90, 20, 0.35);
 }
 .emoji-add-plus {
   font-size: 0.7rem;
   font-weight: 700;
-  color: rgba(255,255,255,0.7);
+  color: #ffc65c;
   margin-left: 1px;
 }
 
@@ -58,10 +65,10 @@
   z-index: 9999;
   width: 340px;
   max-height: 420px;
-  background: #1a1d23;
-  border: 1px solid rgba(255,255,255,0.12);
+  background: #170a08;
+  border: 1px solid #3a1510;
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 198, 92, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -77,7 +84,7 @@
   display: flex;
   gap: 2px;
   padding: 4px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid #3a1510;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -93,10 +100,10 @@
   flex-shrink: 0;
 }
 .emoji-tab:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 198, 92, 0.1);
 }
 .emoji-tab.active {
-  background: rgba(13, 110, 253, 0.25);
+  background: rgba(255, 122, 26, 0.28);
 }
 
 /* Grid */
@@ -108,10 +115,10 @@
   overflow-y: auto;
   max-height: 280px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.15) transparent;
+  scrollbar-color: rgba(255, 157, 46, 0.3) transparent;
 }
 .emoji-grid::-webkit-scrollbar { width: 6px; }
-.emoji-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+.emoji-grid::-webkit-scrollbar-thumb { background: rgba(255, 157, 46, 0.3); border-radius: 3px; }
 .emoji-btn {
   border: none;
   background: transparent;
@@ -127,11 +134,11 @@
   padding: 0;
 }
 .emoji-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 198, 92, 0.14);
   transform: scale(1.2);
 }
 .emoji-btn.reacted {
-  background: rgba(13, 110, 253, 0.2);
+  background: rgba(255, 122, 26, 0.25);
   border-radius: 6px;
 }
 
@@ -150,25 +157,26 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid #3a1510;
   border-radius: 16px;
   padding: 3px 10px 3px 6px;
   font-size: 0.85rem;
-  background: rgba(255,255,255,0.04);
-  color: #ccc;
+  background: #140907;
+  color: #d9c8c0;
   cursor: pointer;
   transition: all 0.15s;
   line-height: 1;
 }
 .emoji-badge:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(255, 122, 26, 0.14);
+  border-color: rgba(255, 198, 92, 0.4);
+  color: #fff;
   transform: scale(1.05);
 }
 .emoji-badge.user-reacted {
-  background: rgba(13, 110, 253, 0.18);
-  border-color: rgba(13, 110, 253, 0.4);
-  color: #8bb8ff;
+  background: rgba(255, 122, 26, 0.22);
+  border-color: rgba(255, 157, 46, 0.55);
+  color: #ffc65c;
 }
 .emoji-badge-icon {
   font-size: 1rem;
@@ -201,4 +209,566 @@
   .emoji-add-btn-inline {
     display: inline-flex;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Sick Of It Warm Dark Blog Theme (scoped to body:not(.hell))
+   ══════════════════════════════════════════════════════════════════ */
+
+body:not(.hell) {
+  --blog-bg: #0a0405;
+  --blog-bg-alt: #0b0605;
+  --blog-surface: #170a08;
+  --blog-surface-alt: #140907;
+  --blog-border: #3a1510;
+  --blog-border-gold: rgba(255, 198, 92, 0.22);
+  --blog-text: #eadfd8;
+  --blog-bone: #f3e6d6;
+  --blog-secondary: #b9a59d;
+  --blog-muted: #9e887f;
+  --blog-ember: #ff7a1a;
+  --blog-ember-soft: #ff7a3d;
+  --blog-orange: #ff9d2e;
+  --blog-gold: #ffc65c;
+
+  --bs-body-bg: #0a0405;
+  --bs-body-color: #eadfd8;
+  --bs-secondary-color: #b9a59d;
+  --bs-tertiary-color: #9e887f;
+  --bs-primary: #ff7a1a;
+  --bs-primary-rgb: 255, 122, 26;
+  --bs-info: #ff9d2e;
+  --bs-info-rgb: 255, 157, 46;
+  --bs-warning: #ffc65c;
+  --bs-warning-rgb: 255, 198, 92;
+  --bs-secondary: #b9a59d;
+  --bs-secondary-rgb: 58, 21, 16;
+  --bs-dark-rgb: 10, 4, 5;
+  --bs-black-rgb: 10, 4, 5;
+  --bs-border-color: #3a1510;
+  --bs-link-color: #ff7a3d;
+  --bs-link-hover-color: #ffc65c;
+
+  background-color: #0a0405 !important;
+  color: #eadfd8;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  line-height: 1.65;
+}
+
+/* ── Typography & Links ──────────────────────────────────────────── */
+body:not(.hell) h1,
+body:not(.hell) h2,
+body:not(.hell) h3,
+body:not(.hell) h4,
+body:not(.hell) h5,
+body:not(.hell) h6,
+body:not(.hell) .h1,
+body:not(.hell) .h2,
+body:not(.hell) .h3,
+body:not(.hell) .h4,
+body:not(.hell) .h5,
+body:not(.hell) .h6 {
+  color: #f3e6d6;
+  letter-spacing: 0.02em;
+}
+
+body:not(.hell) a {
+  color: #ff7a3d;
+  transition: color 0.18s ease;
+}
+body:not(.hell) a:hover {
+  color: #ffc65c;
+}
+
+body:not(.hell) .text-secondary {
+  color: #b9a59d !important;
+}
+body:not(.hell) .text-muted {
+  color: #9e887f !important;
+}
+body:not(.hell) .text-info,
+body:not(.hell) a.text-info {
+  color: #ff9d2e !important;
+}
+body:not(.hell) a.text-info:hover {
+  color: #ffc65c !important;
+}
+body:not(.hell) .text-warning,
+body:not(.hell) .link-warning {
+  color: #ffc65c !important;
+}
+body:not(.hell) .link-warning:hover {
+  color: #fff !important;
+}
+body:not(.hell) .link-secondary {
+  color: #b9a59d !important;
+  text-decoration: none;
+}
+body:not(.hell) .link-secondary:hover {
+  color: #ffc65c !important;
+}
+
+body:not(.hell) .border-secondary,
+body:not(.hell) .border-primary {
+  border-color: #3a1510 !important;
+}
+
+/* ── Sticky Warm Translucent Navbar ──────────────────────────────── */
+body:not(.hell) .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: rgba(10, 4, 5, 0.92) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid #3a1510 !important;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+body:not(.hell) .navbar .navbar-brand {
+  font-weight: 900 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff !important;
+  font-size: 1.15rem;
+  text-shadow: 0 0 18px rgba(255, 90, 30, 0.35);
+}
+body:not(.hell) .navbar .navbar-brand:hover {
+  color: #ffc65c !important;
+}
+
+body:not(.hell) .navbar .navbar-nav {
+  align-items: center;
+  gap: 0.35rem;
+}
+
+body:not(.hell) .navbar .navbar-nav .nav-link {
+  color: #d9c8c0 !important;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+body:not(.hell) .navbar .navbar-nav .nav-link:hover,
+body:not(.hell) .navbar .navbar-nav .nav-link:focus {
+  color: #fff !important;
+  background: rgba(255, 122, 26, 0.12);
+}
+body:not(.hell) .navbar .navbar-nav .nav-link.active {
+  color: #ffc65c !important;
+  background: rgba(255, 122, 26, 0.15);
+}
+
+/* Highlighted Play pill in the navbar matching index.html */
+body:not(.hell) .navbar .navbar-nav .nav-link[data-play],
+body:not(.hell) .navbar .navbar-nav .nav-link[href*="/Game"],
+body:not(.hell) .navbar .navbar-nav .nav-link.nav-play-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff4a1c, #ff9d2e) !important;
+  color: #1a0603 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  padding: 0.38rem 1.25rem !important;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  box-shadow: 0 4px 16px rgba(255, 90, 30, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+body:not(.hell) .navbar .navbar-nav .nav-link[data-play]:hover,
+body:not(.hell) .navbar .navbar-nav .nav-link[href*="/Game"]:hover,
+body:not(.hell) .navbar .navbar-nav .nav-link.nav-play-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(255, 90, 30, 0.5);
+  color: #1a0603 !important;
+}
+
+body:not(.hell) .navbar-toggler {
+  border-color: #3a1510 !important;
+}
+body:not(.hell) .navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 122, 26, 0.35);
+}
+
+/* ── Page Header Banners (index, development, music, shorts) ─────── */
+body:not(.hell) .blog-hero,
+body:not(.hell) main > header {
+  background: radial-gradient(ellipse at 50% 0, #4a1308 0%, #140807 75%) !important;
+  border: 1px solid #3a1510 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 198, 92, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+body:not(.hell) .blog-hero h1,
+body:not(.hell) main > header h1 {
+  color: #fff;
+  font-weight: 900 !important;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 28px rgba(255, 80, 20, 0.55);
+}
+
+body:not(.hell) .blog-hero .lead,
+body:not(.hell) main > header .lead {
+  color: #f0cdbf !important;
+}
+
+body:not(.hell) .blog-kicker {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffc65c;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 198, 92, 0.25);
+  padding: 4px 12px;
+  border-radius: 50px;
+  margin-bottom: 0.85rem;
+}
+
+/* ── Section Headings ────────────────────────────────────────────── */
+body:not(.hell) section > h2 {
+  color: #f3e6d6;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-bottom-color: #3a1510 !important;
+}
+
+/* ── Cards, Post Cards & Hover Cards ─────────────────────────────── */
+body:not(.hell) .card {
+  background: #170a08 !important;
+  border: 1px solid #3a1510 !important;
+  border-radius: 10px;
+  color: #eadfd8;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s ease, border-left-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body:not(.hell) .card > .card-body {
+  background: transparent !important;
+}
+
+body:not(.hell) .card .card-title,
+body:not(.hell) .card h3,
+body:not(.hell) .card h3 a,
+body:not(.hell) .card h5 {
+  color: #f3e6d6 !important;
+  font-weight: 700;
+  transition: color 0.18s ease;
+}
+
+body:not(.hell) .hover-card,
+body:not(.hell) [data-reaction-target^="card:posts/"].card {
+  border-left: 3px solid rgba(255, 122, 26, 0.35) !important;
+}
+
+body:not(.hell) .hover-card:hover,
+body:not(.hell) a:hover > .hover-card,
+body:not(.hell) [data-reaction-target^="card:posts/"].card:hover {
+  border-color: rgba(255, 198, 92, 0.35) !important;
+  border-left: 3px solid #ff7a1a !important;
+  box-shadow: 0 6px 24px rgba(255, 90, 20, 0.22);
+  transform: translateY(-2px);
+}
+
+body:not(.hell) .hover-card:hover .card-title,
+body:not(.hell) a:hover > .hover-card .card-title,
+body:not(.hell) [data-reaction-target^="card:posts/"].card:hover h3 a {
+  color: #ffc65c !important;
+}
+
+body:not(.hell) .card.border-warning,
+body:not(.hell) .alert.border-warning {
+  background: rgba(255, 198, 92, 0.06) !important;
+  border: 1px solid rgba(255, 198, 92, 0.35) !important;
+  color: #f3e6d6 !important;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+body:not(.hell) .btn-primary {
+  background: linear-gradient(135deg, #ff4a1c, #ff9d2e) !important;
+  border: 1px solid #ff7a1a !important;
+  color: #1a0603 !important;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(255, 90, 30, 0.32);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+body:not(.hell) .btn-primary:hover,
+body:not(.hell) .btn-primary:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(255, 90, 30, 0.48);
+  filter: brightness(1.06);
+  color: #1a0603 !important;
+}
+
+body:not(.hell) .btn-outline-info,
+body:not(.hell) .btn-outline-light {
+  background: rgba(20, 9, 7, 0.65) !important;
+  border: 1px solid rgba(255, 198, 92, 0.5) !important;
+  color: #ffc65c !important;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+body:not(.hell) .btn-outline-info:hover,
+body:not(.hell) .btn-outline-info:focus-visible,
+body:not(.hell) .btn-outline-light:hover,
+body:not(.hell) .btn-outline-light:focus-visible {
+  background: rgba(255, 122, 26, 0.22) !important;
+  border-color: #ff7a1a !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+body:not(.hell) .btn-outline-secondary {
+  background: #140907 !important;
+  border: 1px solid #3a1510 !important;
+  color: #d9c8c0 !important;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+body:not(.hell) .btn-outline-secondary:hover,
+body:not(.hell) .btn-outline-secondary:focus-visible {
+  background: rgba(255, 122, 26, 0.16) !important;
+  border-color: #ff7a3d !important;
+  color: #fff !important;
+}
+
+/* ── Music & Shorts Player Controls ──────────────────────────────── */
+body:not(.hell) .music-player,
+body:not(.hell) .video-player {
+  background: #170a08 !important;
+  border: 1px solid #3a1510 !important;
+  border-radius: 14px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+}
+
+body:not(.hell) .visualizer-container,
+body:not(.hell) .video-container {
+  background: #0d0504 !important;
+  border: 1px solid #2b100c;
+  border-radius: 10px;
+}
+
+body:not(.hell) .track-title,
+body:not(.hell) .video-title {
+  color: #f3e6d6;
+}
+
+body:not(.hell) .track-artist,
+body:not(.hell) .video-description,
+body:not(.hell) .time-display,
+body:not(.hell) .playlist-item-artist,
+body:not(.hell) .playlist-item-description {
+  color: #b9a59d !important;
+}
+
+body:not(.hell) .progress {
+  background-color: rgba(255, 198, 92, 0.12) !important;
+  border: 1px solid rgba(58, 21, 16, 0.8);
+}
+
+body:not(.hell) .progress-bar {
+  background: linear-gradient(90deg, #ff4a1c, #ff9d2e, #ffc65c) !important;
+}
+
+body:not(.hell) .control-btn {
+  background: #220d0a !important;
+  border: 1px solid #4a1d14 !important;
+  color: #f3e6d6 !important;
+}
+body:not(.hell) .control-btn:hover {
+  background: rgba(255, 122, 26, 0.25) !important;
+  border-color: #ff7a3d !important;
+  color: #fff !important;
+}
+
+body:not(.hell) .control-btn.play-btn {
+  background: linear-gradient(135deg, #ff4a1c, #ff9d2e) !important;
+  border: none !important;
+  color: #1a0603 !important;
+  box-shadow: 0 4px 18px rgba(255, 90, 30, 0.4);
+}
+body:not(.hell) .control-btn.play-btn:hover {
+  box-shadow: 0 6px 24px rgba(255, 90, 30, 0.6);
+  color: #1a0603 !important;
+}
+
+body:not(.hell) .volume-slider {
+  accent-color: #ff7a1a;
+}
+body:not(.hell) .form-range::-webkit-slider-thumb {
+  background-color: #ff7a1a;
+}
+body:not(.hell) .form-range::-moz-range-thumb {
+  background-color: #ff7a1a;
+}
+
+body:not(.hell) .playlist-item {
+  background: #140907 !important;
+  border: 1px solid #3a1510 !important;
+  color: #eadfd8;
+}
+body:not(.hell) .playlist-item:hover {
+  background: #1e0c09 !important;
+  border-color: rgba(255, 122, 26, 0.45) !important;
+}
+body:not(.hell) .playlist-item.active {
+  background: rgba(255, 122, 26, 0.16) !important;
+  border-color: #ff7a1a !important;
+  border-left: 3px solid #ffc65c !important;
+  color: #fff;
+}
+
+body:not(.hell) .alert-info {
+  background: #140907 !important;
+  border: 1px solid #3a1510 !important;
+  color: #eadfd8 !important;
+}
+
+/* ── Blog Post Pages (blog/posts/*.html) ─────────────────────────── */
+body:not(.hell) article > header,
+body:not(.hell) article .post-header {
+  background: radial-gradient(ellipse at 50% 0, #4a1308 0%, #140807 75%);
+  border: 1px solid #3a1510;
+  border-radius: 12px;
+  padding: 2rem 2rem 1.75rem;
+  margin-bottom: 2rem !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 198, 92, 0.12);
+}
+
+body:not(.hell) article h1,
+body:not(.hell) article .display-4,
+body:not(.hell) article .display-5 {
+  color: #fff;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 24px rgba(255, 80, 20, 0.4);
+}
+
+body:not(.hell) article h2,
+body:not(.hell) article .h3 {
+  color: #f3e6d6;
+  font-weight: 800;
+  margin-top: 1.75rem;
+}
+
+body:not(.hell) article blockquote,
+body:not(.hell) blockquote {
+  border-left: 3px solid #ff7a1a !important;
+  padding: 0.85rem 1.25rem;
+  margin: 1.5rem 0;
+  background: #140907 !important;
+  border-top: 1px solid #3a1510;
+  border-right: 1px solid #3a1510;
+  border-bottom: 1px solid #3a1510;
+  border-radius: 0 8px 8px 0;
+  color: #f3e6d6 !important;
+  font-style: italic;
+}
+
+body:not(.hell) code {
+  color: #ffb37a !important;
+  background: rgba(255, 122, 26, 0.1);
+  padding: 0.12em 0.38em;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+
+body:not(.hell) pre,
+body:not(.hell) pre.bg-dark,
+body:not(.hell) .engine-code {
+  background: #120806 !important;
+  border: 1px solid rgba(255, 198, 92, 0.22) !important;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  color: #f3e6d6 !important;
+  overflow-x: auto;
+}
+body:not(.hell) pre code,
+body:not(.hell) .engine-code code {
+  color: inherit !important;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+body:not(.hell) .part-card,
+body:not(.hell) .rule-card {
+  background: #170a08 !important;
+  border: 1px solid #3a1510 !important;
+  border-left: 3px solid #ff7a1a !important;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+body:not(.hell) .part-card h5,
+body:not(.hell) .rule-card h5 {
+  color: #ff9d2e !important;
+  margin-bottom: 0.5rem;
+}
+
+body:not(.hell) .stat-box {
+  background: #170a08 !important;
+  border: 1px solid #3a1510 !important;
+  border-radius: 8px;
+}
+body:not(.hell) .stat-box .number,
+body:not(.hell) .damage-counter {
+  color: #ff7a1a !important;
+}
+body:not(.hell) .stat-box .label,
+body:not(.hell) .damage-label {
+  color: #b9a59d !important;
+}
+
+body:not(.hell) .step-number {
+  background: linear-gradient(135deg, #ff4a1c, #ff9d2e) !important;
+  color: #1a0603 !important;
+}
+body:not(.hell) .pipeline-step,
+body:not(.hell) .timeline-entry {
+  border-left-color: #ff7a1a !important;
+}
+body:not(.hell) .timeline-entry::before {
+  background: #ff7a1a !important;
+}
+
+body:not(.hell) .tech-badge.bg-primary,
+body:not(.hell) .tech-badge.bg-info,
+body:not(.hell) .tech-badge.bg-warning {
+  background: rgba(255, 122, 26, 0.16) !important;
+  border: 1px solid rgba(255, 198, 92, 0.28);
+  color: #ffc65c !important;
+}
+
+body:not(.hell) .blog-img,
+body:not(.hell) .blog-img-sm {
+  border-color: #3a1510 !important;
+}
+
+body:not(.hell) .table-dark {
+  --bs-table-bg: #140907;
+  --bs-table-border-color: #3a1510;
+  --bs-table-color: #eadfd8;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+body:not(.hell) footer {
+  background-color: #0a0405 !important;
+  border-top: 1px solid #3a1510 !important;
+  color: #8d7a73;
+}
+body:not(.hell) .hawkes-credit a:hover,
+body:not(.hell) .hawkes-credit a:focus {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 122, 26, 0.8);
 }
