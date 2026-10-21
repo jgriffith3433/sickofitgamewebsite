@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <!-- Hawkes sound prompt: installed by the deploy from sickofitgame-unity Tools/Web; must load before Unity's loader -->
-    <script src="v194/hawkes-sound.js"></script>
+    <script src="v200/hawkes-sound.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -74,7 +74,7 @@
       #unity-logo {
         width: 154px;
         height: 130px;
-        background: url('v194/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background: url('v200/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
         background-size: contain;
         margin: 0 auto 20px;
       }
@@ -256,14 +256,14 @@
     </style>
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
-    <script>window.HAWKES_BUILD = { version: "v194" };</script>
+    <script>window.HAWKES_BUILD = { version: "v200" };</script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="/js/hawkes-site.js" defer></script>
   </head>
   <body>
     <!-- Version Display -->
-    <div id="version-display">v194</div>
+    <div id="version-display">v200</div>
     <script src="/js/hawkes-release.js" data-releases="/releases.json"></script>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
@@ -356,7 +356,7 @@
       }
 
       var gameName = "SickOfIt";
-      var gameVersion = "v194"; // Update this when you publish a new game build
+      var gameVersion = "v200"; // Update this when you publish a new game build
 
       // Safari deletes IndexedDB and the Cache API (Unity's bundle cache) after
       // 7 days of browser use with no visit. persist() opts this origin out of
@@ -429,14 +429,14 @@
         }
       });
       
-      var buildUrl = "v194/" + gameName + "/Build/" + gameName;
+      var buildUrl = "v200/" + gameName + "/Build/" + gameName;
       var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
       var config = {
         arguments: [],
         dataUrl: buildUrl + ".data.unityweb?v=" + gameVersion,
         frameworkUrl: buildUrl + ".framework.js.unityweb?v=" + gameVersion,
         codeUrl: buildUrl + ".wasm.unityweb?v=" + gameVersion,
-        streamingAssetsUrl: "v194/" + gameName + "/StreamingAssets",
+        streamingAssetsUrl: "v200/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
         // Unity deletes every cached bundle when productVersion changes.
