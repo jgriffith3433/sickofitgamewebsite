@@ -18,13 +18,15 @@
       font-weight: 600;
     }
     .video-player {
-      background: rgba(0, 0, 0, 0.5);
+      background: #170a08;
+      border: 1px solid #3a1510;
       border-radius: 15px;
       padding: 2rem;
     }
     
     .video-container {
-      background: rgba(0, 0, 0, 0.3);
+      background: #0d0504;
+      border: 1px solid #2b100c;
       border-radius: 10px;
       padding: 1rem;
       margin-bottom: 2rem;
@@ -49,10 +51,11 @@
       font-size: 1.5rem;
       font-weight: bold;
       margin-bottom: 0.5rem;
+      color: #f3e6d6;
     }
     
     .video-description {
-      color: #888;
+      color: #b9a59d;
       font-size: 1rem;
     }
     
@@ -68,9 +71,9 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      border: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      border: 1px solid #4a1d14;
+      background: #220d0a;
+      color: #f3e6d6;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -79,7 +82,9 @@
     }
     
     .control-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 122, 26, 0.25);
+      border-color: #ff7a3d;
+      color: #fff;
       transform: scale(1.1);
     }
     
@@ -90,7 +95,10 @@
     .control-btn.play-btn {
       width: 60px;
       height: 60px;
-      background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+      border: none;
+      background: linear-gradient(135deg, #ff4a1c, #ff9d2e);
+      color: #1a0603;
+      box-shadow: 0 4px 18px rgba(255, 90, 30, 0.4);
     }
     
     .volume-control {
@@ -102,6 +110,7 @@
     
     .volume-slider {
       flex: 1;
+      accent-color: #ff7a1a;
     }
     
     .playlist {
@@ -112,30 +121,33 @@
     .playlist-item {
       padding: 1rem;
       margin-bottom: 0.5rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: #140907;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s;
-      border: 1px solid transparent;
+      border: 1px solid #3a1510;
     }
     
     .playlist-item:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: #1e0c09;
+      border-color: rgba(255, 122, 26, 0.45);
     }
     
     .playlist-item.active {
-      background: rgba(13, 110, 253, 0.2);
-      border-color: #0d6efd;
+      background: rgba(255, 122, 26, 0.16);
+      border-color: #ff7a1a;
+      border-left: 3px solid #ffc65c;
     }
     
     .playlist-item-title {
       font-weight: 500;
       margin-bottom: 0.25rem;
+      color: #f3e6d6;
     }
     
     .playlist-item-description {
       font-size: 0.875rem;
-      color: #888;
+      color: #b9a59d;
     }
     
     @media (max-width: 768px) {
@@ -167,9 +179,9 @@
   <script src="../js/hawkes-site.js" defer></script>
 </head>
 <body class="bg-dark">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top border-bottom border-secondary">
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="../index.html">Sick Of It</a>
+      <a class="navbar-brand fw-bold" href="../index.html">SICK OF IT</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -177,6 +189,7 @@
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="../index.html" data-play="nav">Play</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="development.html">Development</a></li>
           <li class="nav-item"><a class="nav-link" href="lore.html">Lore</a></li>
           <li class="nav-item"><a class="nav-link" href="music.html">Music</a></li>
           <li class="nav-item"><a class="nav-link active" href="shorts.html">Shorts</a></li>
@@ -186,9 +199,10 @@
   </nav>
 
   <main class="container py-5">
-    <header class="text-center mb-5 p-5 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+    <header class="blog-hero text-center mb-5 p-5 rounded">
+      <span class="blog-kicker">Clips from the Climb</span>
       <h1 class="display-3 fw-bold mb-3">Game Shorts</h1>
-      <p class="lead text-secondary">Watch short gameplay clips from Sick Of It</p>
+      <p class="lead text-secondary mb-0">Watch short gameplay clips from Sick Of It</p>
     </header>
 
     <div class="row justify-content-center">
@@ -253,7 +267,7 @@
     </div>
   </main>
 
-  <footer class="bg-black text-center py-4 mt-5 border-top border-primary border-opacity-25">
+  <footer class="text-center py-4 mt-5 border-top border-secondary">
     <p class="text-secondary mb-0">&copy; 2026 Sick Of It. All rights reserved. &middot; <a href="../privacy.html" class="link-secondary">Privacy</a></p>
     <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
