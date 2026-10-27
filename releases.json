@@ -1,8 +1,17 @@
 {
   "product": "sickofit",
   "name": "Sick Of It",
-  "current": "1.6.0",
+  "current": "1.7.0",
   "releases": [
+    {
+      "version": "1.7.0",
+      "date": "2026-10-27",
+      "build": "262",
+      "title": "Behind-the-scenes updates",
+      "notes": [
+        "Improvements and fixes."
+      ]
+    },
     {
       "version": "1.6.0",
       "date": "2026-10-27",
