@@ -1,8 +1,20 @@
 {
   "product": "sickofit",
   "name": "Sick Of It",
-  "current": "1.8.0",
+  "current": "1.8.1",
   "releases": [
+    {
+      "version": "1.8.1",
+      "date": "2026-10-27",
+      "build": "264",
+      "title": "Clearer menus, and The Spill can be beaten",
+      "notes": [
+        "Level Select now shows a Back button and page arrows, so you can get out of it and move between pages.",
+        "Settings in both the main menu and the pause menu now show every control, with no empty rows.",
+        "The Rocket Launcher's weapon label now reads clearly on its button instead of being squeezed into a narrow column.",
+        "The Spill can now be cleared, so you can climb past it."
+      ]
+    },
     {
       "version": "1.8.0",
       "date": "2026-10-27",

@@ -21,13 +21,13 @@ Unity's decompression fallback. The loader unpacks them in the browser, so any s
 | Path | What |
 |---|---|
 | `index.html` | Landing page. **CLICK TO START** goes straight to `/Game/index.html` |
-| `Game/index.html` | Unity loader page. It points at the current build (`gameVersion = "v263"`, `buildUrl = "v263/SickOfIt/Build/SickOfIt"`) |
+| `Game/index.html` | Unity loader page. It points at the current build (`gameVersion = "v264"`, `buildUrl = "v264/SickOfIt/Build/SickOfIt"`) |
 | `Game/v<n>/SickOfIt/` | The WebGL build (Build/, StreamingAssets/, TemplateData/) |
 | `Game/v<n>/ServerData/` | Addressables bundles (DXT for desktop, ASTC for phones) |
 | `Game/v0000000/` | The template the deploy copies each new version from. Don't delete it |
 | `blog/` | Blog: `index.html`, `development.html`, `lore.html`, `music.html`, `shorts.html`, `posts/*.html`, `lore/` (characters, hazards, worlds). See `blog/BLOG_README.md` |
 | `music/`, `shorts/`, `videos/`, `images/` | Media used by the site and blog. Music playlist: `music/README.md` |
-| `manifest.json`, `sw.js`, `offline.html`, `icons/` | PWA. `sw.js` cache name carries the build version (`sickofit-pwa-v263`) |
+| `manifest.json`, `sw.js`, `offline.html`, `icons/` | PWA. `sw.js` cache name carries the build version (`sickofit-pwa-v264`) |
 
 ## Publishing a new game build
 
