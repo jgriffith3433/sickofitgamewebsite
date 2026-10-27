@@ -1,8 +1,21 @@
 {
   "product": "sickofit",
   "name": "Sick Of It",
-  "current": "1.8.1",
+  "current": "1.9.0",
   "releases": [
+    {
+      "version": "1.9.0",
+      "date": "2026-10-27",
+      "build": "267",
+      "title": "Cheaper rewinds and new floor moments",
+      "notes": [
+        "Rewind now costs less per frame, so you can hold it for longer.",
+        "Enemies appear just past the edge of the screen instead of popping in on the play area.",
+        "Floor 998 has a boss in the background and a shorter run to the top.",
+        "The death screen lets you pay a few diamonds to return to the fight.",
+        "More floors now have discoveries and story moments, and shop prices and limits have been rebalanced."
+      ]
+    },
     {
       "version": "1.8.1",
       "date": "2026-10-27",
