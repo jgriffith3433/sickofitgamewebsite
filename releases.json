@@ -1,8 +1,20 @@
 {
   "product": "sickofit",
   "name": "Sick Of It",
-  "current": "1.5.0",
+  "current": "1.6.0",
   "releases": [
+    {
+      "version": "1.6.0",
+      "date": "2026-10-27",
+      "build": "261",
+      "title": "Touch controls, calmer Floor 998 and more",
+      "notes": [
+        "On phones, the on-screen controls for moving, dodging and dashing now show up as they should.",
+        "The skip button on the death screen is much bigger and easy to hit with a thumb.",
+        "Floor 998, The Spill, is calmer, and the hero gets a few seconds of invincibility when it starts.",
+        "Ghosts of players who have stepped away look fainter, and the main menu now has a band of climbing ghosts with a \"climbing right now\" label."
+      ]
+    },
     {
       "version": "1.5.0",
       "date": "2026-10-26",
