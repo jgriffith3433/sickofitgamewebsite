@@ -39,7 +39,6 @@
       .btn.ghost{background:transparent;color:#fff!important;border:2px solid #6b2a1e;box-shadow:none}
       .btn.small{padding:8px 22px;font-size:14px}
       .hero{position:relative;text-align:center;padding:70px 0 60px;background:radial-gradient(ellipse at 50% 0,#4a1308 0,#0a0405 70%);overflow:hidden}
-      .hero .ov{position:absolute;left:50%;transform:translateX(-50%);bottom:0;height:90%;aspect-ratio:1024/571;opacity:.18;pointer-events:none}
       .spr{background-repeat:no-repeat;image-rendering:pixelated;animation-timing-function:steps(1,end);animation-iteration-count:infinite}
       .spr.ovs{background-image:url(images/Overlord.png);background-size:200% auto;animation:ovA .9s infinite steps(1,end)}
       .spr.bk{background-image:url(images/Bork.png);background-size:400% 400%;animation:bkA 1.6s infinite steps(1,end)}
@@ -52,7 +51,7 @@
       @keyframes bkA{0.000%{background-position:0.000% 0.000%}6.250%{background-position:33.333% 0.000%}12.500%{background-position:66.667% 0.000%}18.750%{background-position:100.000% 0.000%}25.000%{background-position:0.000% 33.333%}31.250%{background-position:33.333% 33.333%}37.500%{background-position:66.667% 33.333%}43.750%{background-position:100.000% 33.333%}50.000%{background-position:0.000% 66.667%}56.250%{background-position:33.333% 66.667%}62.500%{background-position:66.667% 66.667%}68.750%{background-position:100.000% 66.667%}75.000%{background-position:0.000% 100.000%}81.250%{background-position:33.333% 100.000%}87.500%{background-position:66.667% 100.000%}93.750%{background-position:100.000% 100.000%}}
       @keyframes fbA{0.000%{background-position:0.000% 0%}7.143%{background-position:16.667% 0%}14.286%{background-position:33.333% 0%}21.429%{background-position:50.000% 0%}28.571%{background-position:66.667% 0%}35.714%{background-position:83.333% 0%}42.857%{background-position:100.000% 0%}50.000%{background-position:0.000% 100%}57.143%{background-position:16.667% 100%}64.286%{background-position:33.333% 100%}71.429%{background-position:50.000% 100%}78.571%{background-position:66.667% 100%}85.714%{background-position:83.333% 100%}92.857%{background-position:100.000% 100%}}
       .hero .loop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-      .hero .shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(10,4,5,.45) 0,rgba(10,4,5,.8) 75%)}
+      .hero .shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(10,4,5,.3) 0,rgba(10,4,5,.75) 80%)}
       .hero .wrap{position:relative}
       .hero h1{font-size:clamp(44px,10vw,96px);font-weight:900;letter-spacing:.04em;color:#fff;text-shadow:0 0 30px rgba(255,80,20,.6)}
       .hero .tag{font-size:clamp(17px,3vw,24px);margin:10px auto 30px;max-width:640px;color:#f0cdbf}
@@ -105,7 +104,6 @@
     <header class="hero">
       <video class="loop" data-hero-loop autoplay muted loop playsinline preload="auto" disablepictureinpicture poster="images/hero-loop.jpg" aria-hidden="true"><source src="images/hero-loop.mp4" type="video/mp4"></video><script>(function(){var v=document.querySelector('[data-hero-loop]');if(v&&window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){v.removeAttribute('autoplay');v.pause();}})();</script>
       <div class="shade" aria-hidden="true"></div>
-      <div class="ov spr ovs" aria-hidden="true"></div>
       <div class="wrap">
         <h1>SICK OF IT</h1>
         <p class="tag">1,000 floors of Hell. Same bullets, same screaming, same Overlord. The hero is not impressed. Rewind it.</p>
