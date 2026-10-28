@@ -258,7 +258,7 @@
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
     <script>window.HAWKES_BUILD = { version: "v267" };</script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
-    <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+    <script src="https://gen.hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="/js/hawkes-site.js" defer></script>
   </head>
   <body>
@@ -380,7 +380,7 @@
       if (window.hawkesRelease) window.hawkesRelease.then(function (r) {
         var top = r && r.releases && r.releases[0];
         if (!top) return;
-        var beta = /\.hawkesgen\.com$/.test(location.hostname) || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        var beta = /\.hawkesgen\.ai$/.test(location.hostname) || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
         versionDisplay.textContent = 'v' + top.version + (beta ? ' beta' : '') + ' \u00b7 build ' + gameVersion.replace(/^v/, '');
         versionDisplay.title = 'What\'s new: ' + location.origin + '/whatsnew.html (click copies the console log)';
       });
