@@ -2,7 +2,7 @@
  * Sick Of It: the site's own Hawkes Analytics events, on top of what the SDK sends by itself (page views, sessions,
  * outbound links, errors...). Load it after the SDK tag:
  *
- *   <script src="https://gen.hawkesgen.com/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+ *   <script src="https://gen.hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
  *   <script src="/js/hawkes-site.js" defer></script>
  *
  * - play_click: a click on a Play button (a link with data-play, or any link into /Game/), with where it was on the
