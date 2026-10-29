@@ -257,6 +257,7 @@
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
     <script>window.HAWKES_BUILD = { version: "v267" };</script>
+    <script>window.HAWKES_NET_ENDPOINT = window.HAWKES_NET_ENDPOINT || 'https://net.hawkesgen.ai'; // builds before 2026-10-28 have net.hawkesgen.com baked in; beta pages set their own first</script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://gen.hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="/js/hawkes-site.js" defer></script>
