@@ -78,7 +78,7 @@ They can be removed once local dev no longer needs Docker.
 never add another tracker (no Umami, gtag, GoatCounter...). Each page's `<head>` has:
 
 ```html
-<script src="https://gen.hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+<script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
 <script src="/js/hawkes-site.js" defer></script>
 ```
 
