@@ -75,7 +75,7 @@
       #unity-logo {
         width: 154px;
         height: 130px;
-        background: url('https://sites.hawkesgen.ai/builds/sickofit/v269/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
+        background: url('https://sites.hawkesgen.ai/builds/sickofit/v272/SickOfIt/TemplateData/unity-logo-dark.png') no-repeat center;
         background-size: contain;
         margin: 0 auto 20px;
       }
@@ -257,7 +257,7 @@
     </style>
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
-    <script>window.HAWKES_BUILD = { version: "v269" };</script>
+    <script>window.HAWKES_BUILD = { version: "v272" };</script>
     <script>window.HAWKES_NET_ENDPOINT = window.HAWKES_NET_ENDPOINT || 'https://net.hawkesgen.ai'; // builds before 2026-10-28 have net.hawkesgen.com baked in; beta pages set their own first</script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
@@ -265,7 +265,7 @@
   </head>
   <body>
     <!-- Version Display -->
-    <div id="version-display">v269</div>
+    <div id="version-display">v272</div>
     <script src="/js/hawkes-release.js" data-releases="/releases.json"></script>
     <div id="install-banner">
       <p id="install-banner-text"><strong>Install for offline play!</strong> Get faster loads and play anytime, anywhere.</p>
@@ -358,7 +358,7 @@
       }
 
       var gameName = "SickOfIt";
-      var gameVersion = "v269"; // Update this when you publish a new game build
+      var gameVersion = "v272"; // Update this when you publish a new game build
 
       // Safari deletes IndexedDB and the Cache API (Unity's bundle cache) after
       // 7 days of browser use with no visit. persist() opts this origin out of
@@ -431,14 +431,14 @@
         }
       });
       
-      var buildUrl = "https://sites.hawkesgen.ai/builds/sickofit/v269/" + gameName + "/Build/" + gameName;
+      var buildUrl = "https://sites.hawkesgen.ai/builds/sickofit/v272/" + gameName + "/Build/" + gameName;
       var loaderUrl = buildUrl + ".loader.js?v=" + gameVersion; // Add version query param
       var config = {
         arguments: [],
         dataUrl: buildUrl + ".data.unityweb?v=" + gameVersion,
         frameworkUrl: buildUrl + ".framework.js.unityweb?v=" + gameVersion,
         codeUrl: buildUrl + ".wasm.unityweb?v=" + gameVersion,
-        streamingAssetsUrl: "https://sites.hawkesgen.ai/builds/sickofit/v269/" + gameName + "/StreamingAssets",
+        streamingAssetsUrl: "https://sites.hawkesgen.ai/builds/sickofit/v272/" + gameName + "/StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sick Of It",
         // Unity deletes every cached bundle when productVersion changes.
@@ -615,8 +615,37 @@
         document.body.appendChild(script);
       }
 
+      // build.json (written by every Hawkes Gen publish) names the build this page should play. Read it first so the
+      // page never plays an older build than the one published; if it can't be read, play the version baked in above.
+      function useBuild(base, version) {
+        base = base.replace(/\/?$/, "/");
+        gameVersion = version;
+        window.HAWKES_BUILD = { version: version };
+        versionDisplay.textContent = gameVersion;
+        buildUrl = base + gameName + "/Build/" + gameName;
+        loaderUrl = buildUrl + ".loader.js?v=" + gameVersion;
+        config.dataUrl = buildUrl + ".data.unityweb?v=" + gameVersion;
+        config.frameworkUrl = buildUrl + ".framework.js.unityweb?v=" + gameVersion;
+        config.codeUrl = buildUrl + ".wasm.unityweb?v=" + gameVersion;
+        config.streamingAssetsUrl = base + gameName + "/StreamingAssets";
+      }
+      function startGame() {
+        if (!window.fetch) { loadUnityGame(); return; }
+        fetch("build.json", { cache: "no-store" }).then(function(r) {
+          return r.ok ? r.json() : null;
+        }).then(function(b) {
+          if (b && b.base && b.version && /^https:\/\//.test(b.base)) {
+            var v = "v" + String(b.version).replace(/^v/, "");
+            if (v !== gameVersion) console.log("[Game] build.json names " + v + " (page had " + gameVersion + ")");
+            useBuild(b.base, v);
+          }
+        }).catch(function(e) {
+          console.warn("[Game] build.json unreadable, playing " + gameVersion, e);
+        }).then(loadUnityGame);
+      }
+
       // Start loading immediately
-      loadUnityGame();
+      startGame();
 
       window.addEventListener('unhandledrejection', function(event) {
         if (event.reason && event.reason.name === 'NotAllowedError' && 
