@@ -629,19 +629,30 @@
         config.codeUrl = buildUrl + ".wasm.unityweb?v=" + gameVersion;
         config.streamingAssetsUrl = base + gameName + "/StreamingAssets";
       }
-      function startGame() {
-        if (!window.fetch) { loadUnityGame(); return; }
-        fetch("build.json", { cache: "no-store" }).then(function(r) {
+      // Sick of It's builds now publish to Hawkes Games (hawkesgames.com/play/sickofit, hawkesgenwebsite
+      // docs/hosted-games.md), so that pointer wins; this page's own build.json is the fallback.
+      var hostedPointer = (/\.hawkesgen\.ai$/.test(location.hostname) || location.hostname === "localhost" || location.hostname === "127.0.0.1")
+        ? "https://beta.hawkesgames.com/play/sickofit/build.json"
+        : "https://hawkesgames.com/play/sickofit/build.json";
+      function readPointer(url) {
+        return fetch(url, { cache: "no-store" }).then(function(r) {
           return r.ok ? r.json() : null;
         }).then(function(b) {
-          if (b && b.base && b.version && /^https:\/\//.test(b.base)) {
+          return b && b.base && b.version && /^https:\/\//.test(b.base) ? b : null;
+        }).catch(function() { return null; });
+      }
+      function startGame() {
+        if (!window.fetch) { loadUnityGame(); return; }
+        Promise.all([readPointer("build.json"), readPointer(hostedPointer)]).then(function(list) {
+          var b = list[1] || list[0];
+          if (b) {
             var v = "v" + String(b.version).replace(/^v/, "");
             if (v !== gameVersion) console.log("[Game] build.json names " + v + " (page had " + gameVersion + ")");
             useBuild(b.base, v);
+          } else {
+            console.warn("[Game] build.json unreadable, playing " + gameVersion);
           }
-        }).catch(function(e) {
-          console.warn("[Game] build.json unreadable, playing " + gameVersion, e);
-        }).then(loadUnityGame);
+        }).then(loadUnityGame, loadUnityGame);
       }
 
       // Start loading immediately
