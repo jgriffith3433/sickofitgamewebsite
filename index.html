@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; the game (and its playtest bot) lives on
+         Game/, so pass the run there with its options (seed, speed, at). Visitors never have ?playtest. -->
+    <script>(function(){try{if(new URLSearchParams(location.search).has('playtest'))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -15,12 +18,12 @@
     <meta property="og:title" content="Sick Of It">
     <meta property="og:description" content="1,000 floors of Hell. One rewind button. Play free in your browser.">
     <meta property="og:image" content="/images/Overlord.png">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
     <style>
       *{margin:0;padding:0;box-sizing:border-box}
       html{scroll-behavior:smooth}
@@ -87,7 +90,7 @@
     </style>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
-    <script src="/js/hawkes-site.js" defer></script>
+    <script src="js/hawkes-site.js" defer></script>
   </head>
   <body>
     <div id="install-banner">
@@ -95,10 +98,10 @@
       <div id="install-banner-buttons"><button id="install-button">Install</button><button id="dismiss-banner">&times;</button></div>
     </div>
     <nav><div class="wrap">
-      <a class="brand" href="/">SICK OF IT</a>
+      <a class="brand" href="./">SICK OF IT</a>
       <a href="#trailer">Trailer</a><a href="#features">Features</a><a href="#story">Story</a>
       <a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a>
-      <a class="btn small" href="/Game/index.html" data-play="nav">PLAY</a>
+      <a class="btn small" href="Game/index.html" data-play="nav">PLAY</a>
     </div></nav>
 
     <header class="hero">
@@ -107,7 +110,7 @@
       <div class="wrap">
         <h1>SICK OF IT</h1>
         <p class="tag">1,000 floors of Hell. Same bullets, same screaming, same Overlord. The hero is not impressed. Rewind it.</p>
-        <a class="btn big" id="start-button" href="/Game/index.html" data-play="landing">PLAY NOW</a>
+        <a class="btn big" id="start-button" href="Game/index.html" data-play="landing">PLAY NOW</a>
         <p class="sub">Free in your browser. No download. <a href="whatsnew.html" id="site-version" data-hawkes-version hidden></a></p>
       </div>
     </header>
@@ -155,11 +158,11 @@
       <h2>Latest from the blog</h2>
       <p class="lead">How Hell runs, how it was made, and what keeps breaking.</p>
       <div class="card" style="max-width:640px;margin:0 auto 24px;text-align:left"><h3>The Engine: How Hell Runs</h3><p>A game made of JSON, a simulation that can run backward, 1,000 floors, voices made to order, and bots that play every level.</p><p style="margin-top:12px"><a href="blog/posts/the-engine.html">Read the post</a></p></div>
-      <a class="btn ghost" href="blog/index.html">Read the blog</a> <a class="btn" href="/Game/index.html" data-play="cta">PLAY NOW</a>
+      <a class="btn ghost" href="blog/index.html">Read the blog</a> <a class="btn" href="Game/index.html" data-play="cta">PLAY NOW</a>
     </div></section>
 
     <footer>
-      <div class="links"><a href="/Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="privacy.html">Privacy</a></div>
+      <div class="links"><a href="Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="privacy.html">Privacy</a></div>
       <p class="hawkes-credit"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.ai" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
     </footer>
     <script>
@@ -178,7 +181,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+          navigator.serviceWorker.register('sw.js').then(function(reg) {
             console.log('Service worker registered.', reg);
             
             // Check for updates on visibility change and periodically (every 60 seconds)
@@ -313,7 +316,7 @@
         });
       })();
     </script>
-    <script src="/js/hawkes-release.js" data-releases="/releases.json" defer></script>
+    <script src="js/hawkes-release.js" data-releases="releases.json" defer></script>
     <!-- Hawkes credit: installed by the deploy from sickofitgame-unity (GameDeployWindow); edit it there -->
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
     <div class="hawkes-credit hawkes-credit-pinned"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.ai" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></div>
