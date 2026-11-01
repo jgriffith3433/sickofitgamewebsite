@@ -1,10 +1,11 @@
-const CACHE_NAME = 'sickofit-pwa-v268';
+const CACHE_NAME = 'sickofit-pwa-v272';
+// Paths are relative to this file, so the site works at its domain's root and under a sub-path (Studio's beta).
 // Note: manifest.json is intentionally not cached to ensure users always get
 // the latest version and start_url, which is critical for cache busting
 const URLS_TO_CACHE = [
-  '/offline.html',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
+  'offline.html',
+  'icons/icon-192.svg',
+  'icons/icon-512.svg'
 ];
 
 self.addEventListener('install', event => {
@@ -69,7 +70,7 @@ self.addEventListener('fetch', event => {
         
         // Only cache successful responses for offline.html and icons
         if (response.status === 200 && 
-            (url.pathname.endsWith('/offline.html') || url.pathname.startsWith('/icons/'))) {
+            (url.pathname.endsWith('/offline.html') || url.pathname.indexOf('/icons/') !== -1)) {
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, responseClone);
           });
@@ -85,7 +86,7 @@ self.addEventListener('fetch', event => {
           }
           // Return offline page if nothing else works
           if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
+            return caches.match(new URL('offline.html', self.registration.scope).href);
           }
           return new Response('Network error', { status: 503 });
         });
