@@ -34,7 +34,7 @@ from email_service import send_access_code_email
 # ---------------------------------------------------------------------------
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "change-me-in-production")
+app.secret_key = os.environ["FLASK_SECRET_KEY"]  # required: no public fallback
 
 logging.basicConfig(
     level=logging.INFO,
@@ -69,7 +69,7 @@ _products_default = json.dumps(
 PRODUCTS = json.loads(os.environ.get("PRODUCTS") or _products_default)
 
 # Free game key – grants access to /Game/ (tracked as the "free" tier)
-FREE_GAME_KEY = os.environ.get("FREE_GAME_KEY", "SICK-0F1T-FR33-2026")
+FREE_GAME_KEY = os.environ["FREE_GAME_KEY"]  # required: no public fallback
 
 # Protected paths – Nginx will call /paywall/auth-check for these
 PROTECTED_PATHS = json.loads(

@@ -11,6 +11,10 @@
 (function () {
   'use strict';
 
+  // The reactions API (/api/reactions) went away with the old Flask server on 2026-10-11, and GitHub Pages has no
+  // server: the reactions stay hidden until they have a home.
+  return;
+
   // ── Emoji Categories ──────────────────────────────────────────────
   const EMOJI_CATEGORIES = {
     'Smileys': [
