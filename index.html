@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; the game (and its playtest bot) lives on
+         Game/, so pass the run there with its options (seed, speed, at). Visitors never have ?playtest. -->
+    <script>(function(){try{if(new URLSearchParams(location.search).has('playtest'))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
