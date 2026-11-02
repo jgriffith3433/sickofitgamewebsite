@@ -1,6 +1,6 @@
 # Sick Of It — website
 
-The public site for **Sick Of It** at [sickofitgame.com](https://sickofitgame.com): the landing page, the
+The public site for **Sick Of It** at [hawkesgames.com/play/sickofit](https://hawkesgames.com/play/sickofit/): the landing page, the
 playable Unity WebGL build, the blog (dev log and lore), music and shorts.
 
 In the Hawkes Biomedical line, Sick Of It is sold as *single-use fever shots*; see `C:\Projects\AGENTS.md`.
