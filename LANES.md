@@ -10,7 +10,7 @@ Agents' fixes land on `beta` (pull requests Studio merges); `sync.bat` brings th
 |---|---|
 | Local | [http://localhost:8087/](http://localhost:8087/), [http://localhost:8087/Game/](http://localhost:8087/Game/) |
 | Beta | [https://sickofit.hawkesgen.ai/](https://sickofit.hawkesgen.ai/) |
-| Live | [https://sickofitgame.com/](https://sickofitgame.com/) |
+| Live | [https://hawkesgames.com/play/sickofit/](https://hawkesgames.com/play/sickofit/) |
 | Deploys (GitHub Actions) | [github.com/jgriffith3433/sickofitgamewebsite/actions](https://github.com/jgriffith3433/sickofitgamewebsite/actions) |
 
 **How it deploys:** Builds arrive on beta from sickofitgame-unity (build tags). Push main: GitHub Pages publishes it live (Studio does this when the game goes live).
