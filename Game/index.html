@@ -259,6 +259,42 @@
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
     <script>window.HAWKES_BUILD = { version: "v272" };</script>
     <script>window.HAWKES_NET_ENDPOINT = window.HAWKES_NET_ENDPOINT || 'https://net.hawkesgen.ai'; // builds before 2026-10-28 have net.hawkesgen.com baked in; beta pages set their own first</script>
+    <script>
+      // Net lobby guard: the build's net client reconnects forever, reusing the same room token, so a down service (502) or
+      // an expired room (410) fills the console and the network with failed handshakes. Allow a few failed attempts to
+      // the net endpoint, then hand back a socket that closes quietly without touching the network. Games don't depend on it.
+      (function () {
+        var Native = window.WebSocket, MAX_FAILS = 2, fails = 0;
+        if (!Native) return;
+        function isNet(u) {
+          try { return new URL(String(u), location.href).host === new URL(window.HAWKES_NET_ENDPOINT).host; } catch (e) { return false; }
+        }
+        function Guarded(url, protocols) {
+          if (!isNet(url)) return protocols === undefined ? new Native(url) : new Native(url, protocols);
+          if (fails >= MAX_FAILS) {
+            var stub = new EventTarget();
+            stub.readyState = 3; stub.url = String(url); stub.protocol = ''; stub.extensions = ''; stub.bufferedAmount = 0;
+            stub.binaryType = 'blob'; stub.send = function () {}; stub.close = function () {};
+            setTimeout(function () {
+              var ev = new Event('close'); ev.code = 1006; ev.wasClean = false; ev.reason = '';
+              if (typeof stub.onerror === 'function') stub.onerror(new Event('error'));
+              stub.dispatchEvent(new Event('error'));
+              if (typeof stub.onclose === 'function') stub.onclose(ev);
+              stub.dispatchEvent(ev);
+            }, 0);
+            return stub;
+          }
+          var ws = protocols === undefined ? new Native(url) : new Native(url, protocols);
+          var opened = false;
+          ws.addEventListener('open', function () { opened = true; fails = 0; });
+          ws.addEventListener('close', function () { if (!opened) fails++; });
+          return ws;
+        }
+        Guarded.prototype = Native.prototype;
+        ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'].forEach(function (k) { Guarded[k] = Native[k]; });
+        window.WebSocket = Guarded;
+      })();
+    </script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="../js/hawkes-site.js" defer></script>
