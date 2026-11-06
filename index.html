@@ -58,6 +58,9 @@
       .hero .wrap{position:relative}
       .hero h1{font-size:clamp(44px,10vw,96px);font-weight:900;letter-spacing:.04em;color:#fff;text-shadow:0 0 30px rgba(255,80,20,.6)}
       .hero .tag{font-size:clamp(17px,3vw,24px);margin:10px auto 30px;max-width:640px;color:#f0cdbf}
+      .hero .tag.premise{font-weight:900;font-size:clamp(20px,4vw,32px);color:#fff;margin-bottom:6px}
+      .hero .tag2{font-size:clamp(14px,2.4vw,18px);margin:0 auto 26px;max-width:560px;color:#c9aea3}
+      .hero{min-height:420px}
       .hero .sub{margin-top:14px;font-size:13px;color:#a8928a}
       section{padding:56px 0}
       h2{font-size:clamp(26px,5vw,38px);color:#fff;margin-bottom:8px;letter-spacing:.03em}
@@ -106,11 +109,12 @@
     </div></nav>
 
     <header class="hero">
-      <video class="loop" data-hero-loop autoplay muted loop playsinline preload="auto" disablepictureinpicture poster="images/hero-loop.jpg" aria-hidden="true"><source src="images/hero-loop.mp4" type="video/mp4"></video><script>(function(){var v=document.querySelector('[data-hero-loop]');if(v&&window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){v.removeAttribute('autoplay');v.pause();}})();</script>
+      <video class="loop" data-hero-loop autoplay muted loop playsinline preload="auto" width="960" height="720" disablepictureinpicture poster="images/hero-rewind.jpg" aria-hidden="true"><source src="images/hero-rewind.mp4" type="video/mp4"></video><script>(function(){var v=document.querySelector('[data-hero-loop]');if(!v)return;v.muted=true;var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;if(rm){v.removeAttribute('autoplay');v.pause();return;}if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){});}else v.pause();});},{threshold:0.15}).observe(v);}})();</script>
       <div class="shade" aria-hidden="true"></div>
       <div class="wrap">
         <h1>SICK OF IT</h1>
-        <p class="tag">1,000 floors of Hell. Same bullets, same screaming, same Overlord. The hero is not impressed. Rewind it.</p>
+        <p class="tag premise">Dodge the bullets. Rewind the hits. Stay sick of it.</p>
+        <p class="tag2">1,000 floors of Hell, the same bullets and the same Overlord. The hero is not impressed.</p>
         <a class="btn big" id="start-button" href="Game/index.html" data-play="landing">PLAY NOW</a>
         <p class="sub">Free in your browser. No download. <a href="whatsnew.html" id="site-version" data-hawkes-version hidden></a></p>
       </div>
