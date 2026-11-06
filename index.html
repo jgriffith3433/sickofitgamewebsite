@@ -15,9 +15,20 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sick Of It: climb 1,000 floors of Hell. Rewind it.</title>
     <meta name="description" content="A sarcastic nobody chases the Overlord up 1,000 floors of Hell. Dodge bullets, rewind time, free the diamonds. Play free in your browser.">
-    <meta property="og:title" content="Sick Of It">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Sick Of It">
+    <meta property="og:title" content="Sick Of It: climb 1,000 floors of Hell. Rewind it.">
     <meta property="og:description" content="1,000 floors of Hell. One rewind button. Play free in your browser.">
-    <meta property="og:image" content="/images/Overlord.png">
+    <meta property="og:url" content="https://hawkesgames.com/play/sickofit/">
+    <meta property="og:image" content="https://hawkesgames.com/play/sickofit/images/share/og-card.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Sick Of It: the hero on a lava platform in Hell, 'Climb 1,000 floors of Hell. Rewind it.'">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sick Of It: climb 1,000 floors of Hell. Rewind it.">
+    <meta name="twitter:description" content="1,000 floors of Hell. One rewind button. Play free in your browser.">
+    <meta name="twitter:image" content="https://hawkesgames.com/play/sickofit/images/share/twitter-card.jpg">
+    <link rel="canonical" href="https://hawkesgames.com/play/sickofit/">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="icons/icon-192.svg">
@@ -25,6 +36,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
     <style>
+      .share{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:18px 0}.share span{color:#d9c8c0;font-weight:700}.share .btn.small{border:2px solid #6b2a1e;cursor:pointer;font:inherit;font-size:14px;font-weight:900}
       *{margin:0;padding:0;box-sizing:border-box}
       html{scroll-behavior:smooth}
       body{background:#0a0405;color:#eadfd8;font:16px/1.6 Arial,sans-serif}
@@ -113,7 +125,7 @@
     <nav><div class="wrap">
       <a class="brand" href="./">SICK OF IT</a>
       <a href="#trailer">Trailer</a><a href="#features">Features</a><a href="#story">Story</a><a href="#about">About</a><a href="#faq">FAQ</a>
-      <a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a>
+      <a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="press.html">Press</a>
       <a class="btn small" href="Game/index.html" data-play="nav">PLAY</a>
     </div></nav>
 
@@ -208,8 +220,10 @@
       <a class="btn ghost" href="blog/index.html">Read the blog</a> <a class="btn" href="Game/index.html" data-play="cta">PLAY NOW</a>
     </div></section>
 
+    <section id="share"><div class="wrap" style="text-align:center"><h2>Pass it on</h2><p class="lead">Know someone who is also sick of it?</p><div class="share" data-share><span>Share it:</span><button type="button" class="btn ghost small" data-share-native hidden>Share&hellip;</button><a class="btn ghost small" data-share-x target="_blank" rel="noopener" href="#">X</a><a class="btn ghost small" data-share-reddit target="_blank" rel="noopener" href="#">Reddit</a><a class="btn ghost small" data-share-facebook target="_blank" rel="noopener" href="#">Facebook</a><button type="button" class="btn ghost small" data-share-copy>Copy link</button></div></div></section>
+
     <footer>
-      <div class="links"><a href="Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="#faq">FAQ</a><a href="#credits">Credits</a><a href="privacy.html">Privacy</a></div>
+      <div class="links"><a href="Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="#faq">FAQ</a><a href="#credits">Credits</a><a href="press.html">Press kit</a><a href="privacy.html">Privacy</a></div>
       <p class="hawkes-credit"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.ai" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
     </footer>
     <script>
@@ -368,5 +382,6 @@
     <style>.hawkes-credit{margin:.5rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s,text-shadow .2s}.hawkes-credit a:hover,.hawkes-credit a:focus{color:#fff;text-shadow:0 0 12px rgba(74,144,226,.8)}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}.hawkes-credit-bar{margin:0;padding:1.5rem 1rem;background:#000;border-top:1px solid rgba(13,110,253,.25)}.hawkes-credit-pinned{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:2100}@media (max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit-pinned a{display:block;margin-top:2px}}</style>
     <div class="hawkes-credit hawkes-credit-pinned"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.ai" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></div>
     <!-- /Hawkes credit -->
-  </body>
+  <script src="js/share.js" defer></script>
+</body>
 </html>
