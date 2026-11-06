@@ -2,8 +2,8 @@
 <html lang="en-us">
   <head>
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; the game (and its playtest bot) lives on
-         Game/, so pass the run there with its options (seed, speed, at). Visitors never have ?playtest. -->
-    <script>(function(){try{if(new URLSearchParams(location.search).has('playtest'))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
+         Game/, so pass the run there (except the landing's own `trailer` scenario, js/landing-playtest.js) with its options (seed, speed, at). Visitors never have ?playtest. -->
+    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt&&pt!=='trailer')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -116,6 +116,7 @@
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="js/hawkes-site.js" defer></script>
+    <script src="js/landing-playtest.js" defer></script>
   </head>
   <body>
     <div id="install-banner">
