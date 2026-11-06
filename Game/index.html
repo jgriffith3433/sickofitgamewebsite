@@ -254,6 +254,29 @@
           left: 5px;
         }
       }
+
+      /* Mobile guide: controls card before play, rotate prompt in portrait, fullscreen button */
+      #guide, #rotate-prompt { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; font-family: Arial, sans-serif; color: #f0cdbf; padding: 16px;
+        background: radial-gradient(ellipse at 50% 30%, #3a1510 0%, #170a08 60%, #0a0405 100%); }
+      #guide { z-index: 2000; overflow-y: auto; }
+      #guide[hidden], #rotate-prompt[hidden] { display: none; }
+      #rotate-prompt { z-index: 3000; }
+      #guide h2, #rotate-prompt h2 { font-size: 22px; color: #ff9d2e; margin-bottom: 6px; letter-spacing: .5px; }
+      #guide p.sub, #rotate-prompt p { font-size: 14px; color: #b9a59d; margin-bottom: 14px; max-width: 320px; }
+      #guide svg { width: min(92vw, 520px); max-height: 38vh; height: auto; }
+      #guide-play { margin-top: 14px; background: #ff7a3d; color: #170a08; border: 0; border-radius: 8px; padding: 12px 34px;
+        font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
+      #guide-play:disabled { opacity: .6; cursor: wait; }
+      #guide-status { margin-top: 8px; font-size: 12px; color: #b9a59d; }
+      #rotate-icon { width: 64px; height: 64px; margin-bottom: 12px; animation: rot 2.4s ease-in-out infinite; }
+      @keyframes rot { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
+      @media (prefers-reduced-motion: reduce) { #rotate-icon { animation: none; transform: rotate(-90deg); } }
+      #fs-button { position: fixed; top: 8px; right: 8px; z-index: 2500; width: 40px; height: 40px; border-radius: 8px;
+        background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 20px; cursor: pointer; line-height: 1; }
+      #fs-button[hidden] { display: none; }
+      @media (max-height: 420px) { #guide h2 { font-size: 18px; margin-bottom: 2px; } #guide p.sub { margin-bottom: 4px; }
+        #guide svg { max-height: 50vh; } #guide-play { margin-top: 6px; padding: 8px 28px; } }
     </style>
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
@@ -310,6 +333,30 @@
         <button id="dismiss-banner">×</button>
       </div>
     </div>
+    <div id="rotate-prompt" hidden role="alert">
+      <svg id="rotate-icon" viewBox="0 0 64 64" fill="none" stroke="#ff9d2e" stroke-width="3" stroke-linejoin="round"><rect x="20" y="6" width="24" height="44" rx="4"/><circle cx="32" cy="43" r="2" fill="#ff9d2e"/><path d="M12 58h40M46 52l6 6-6 6" stroke-linecap="round"/></svg>
+      <h2>Turn your phone sideways</h2>
+      <p>Hell is wider than it is tall. Rotate to landscape to play.</p>
+    </div>
+    <div id="guide">
+      <h2>Dodge. Rewind. Stay sick of it.</h2>
+      <p class="sub" id="guide-sub">Touch controls are on screen. Keyboard works too.</p>
+      <svg viewBox="0 0 520 220" role="img" aria-label="Controls: left thumb moves, right thumb rewinds time">
+        <rect x="2" y="2" width="516" height="216" rx="14" fill="#0a0405" stroke="#3a1510" stroke-width="2"/>
+        <circle cx="120" cy="120" r="56" fill="none" stroke="#ff7a3d" stroke-width="3" stroke-dasharray="6 6"/>
+        <circle cx="120" cy="120" r="22" fill="#ff7a3d" opacity=".85"/>
+        <path d="M120 52v-14m0 164v-14M52 120H38m164 0h-14" stroke="#ff9d2e" stroke-width="4" stroke-linecap="round"/>
+        <text x="120" y="30" text-anchor="middle" fill="#f0cdbf" font-size="16" font-family="Arial" font-weight="700">MOVE</text>
+        <text x="120" y="212" text-anchor="middle" fill="#b9a59d" font-size="13" font-family="Arial">drag left thumb · WASD / arrows</text>
+        <circle cx="400" cy="120" r="46" fill="none" stroke="#ff4a1c" stroke-width="4"/>
+        <path d="M418 102a26 26 0 1 0 6 22M424 124l-2-14-13 7" fill="none" stroke="#ff9d2e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="400" y="30" text-anchor="middle" fill="#f0cdbf" font-size="16" font-family="Arial" font-weight="700">REWIND</text>
+        <text x="400" y="212" text-anchor="middle" fill="#b9a59d" font-size="13" font-family="Arial">tap right thumb · undo the hit</text>
+      </svg>
+      <button id="guide-play" type="button" disabled>Loading…</button>
+      <div id="guide-status" aria-live="polite">Loading Hell…</div>
+    </div>
+    <button id="fs-button" type="button" aria-label="Full screen" title="Full screen" hidden>&#x26F6;</button>
     <div id="unity-container">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -576,9 +623,11 @@
         script.onload = function() {
           createUnityInstance(canvas, config, function(progress) {
             document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+            window.dispatchEvent(new CustomEvent("hawkes-unity-progress", { detail: progress }));
           }).then(function(unityInstance) {
             document.querySelector("#unity-loading-bar").style.display = "none";
             window.unityInstance = unityInstance;
+            window.dispatchEvent(new Event("hawkes-unity-ready"));
             
             function tryFullscreen() {
               if (isIOS) {
@@ -701,6 +750,65 @@
           console.log('Pointer lock will be re-acquired on next interaction');
         }
       });
+    </script>
+    <script>
+      // Mobile guide: controls card -> Play (a tap, so fullscreen is allowed) ; rotate prompt in portrait ; fullscreen button.
+      (function () {
+        var guide = document.getElementById('guide'), play = document.getElementById('guide-play'),
+            status = document.getElementById('guide-status'), rotate = document.getElementById('rotate-prompt'),
+            fs = document.getElementById('fs-button'), container = document.getElementById('unity-container');
+        var touch = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+        var ready = false, started = false;
+        if (!touch) document.getElementById('guide-sub').textContent = 'Keyboard and mouse. Touch controls appear on phones.';
+
+        function isFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+        function enterFs() {
+          var f = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen;
+          if (!f) return Promise.resolve(false);
+          try {
+            var r = f.call(container);
+            return Promise.resolve(r).then(function () {
+              if (screen.orientation && screen.orientation.lock) return screen.orientation.lock('landscape').catch(function () {});
+            }).then(function () { return true; }, function (e) { console.log('Fullscreen request failed:', e && e.message); return false; });
+          } catch (e) { return Promise.resolve(false); }
+        }
+        function exitFs() {
+          var x = document.exitFullscreen || document.webkitExitFullscreen;
+          if (x) try { x.call(document); } catch (e) {}
+        }
+        // iPhone Safari has no fullscreen for elements: hide the button there (Add to Home Screen gives a full-screen app).
+        var canFs = !!(container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen);
+        function syncFs() {
+          fs.hidden = !started || !canFs;
+          fs.textContent = isFs() ? '\u2715' : '\u26F6';
+          fs.setAttribute('aria-label', isFs() ? 'Exit full screen' : 'Full screen');
+        }
+        fs.addEventListener('click', function () { if (isFs()) exitFs(); else enterFs(); });
+        document.addEventListener('fullscreenchange', syncFs);
+        document.addEventListener('webkitfullscreenchange', syncFs);
+
+        function checkOrientation() {
+          // Portrait phone: a narrow, tall viewport. Desktop windows stay out of it.
+          var portrait = touch && window.innerWidth < window.innerHeight && window.innerWidth <= 820;
+          rotate.hidden = !portrait;
+        }
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        checkOrientation();
+
+        play.addEventListener('click', function () {
+          if (!ready) return;
+          started = true;
+          guide.hidden = true;
+          if (touch) enterFs();
+          syncFs();
+          window.dispatchEvent(new Event('resize'));
+        });
+        // The game loads behind the card (the loader fires these); Play opens once Unity is up.
+        window.addEventListener('hawkes-unity-progress', function (e) { status.textContent = 'Loading Hell\u2026 ' + Math.round(e.detail * 100) + '%'; });
+        window.addEventListener('hawkes-unity-ready', function () { ready = true; play.disabled = false; play.textContent = 'Play'; status.textContent = 'Ready.'; });
+        window.hawkesGuide = { isReady: function () { return ready; }, isStarted: function () { return started; } };
+      })();
     </script>
     <script>
       if ('serviceWorker' in navigator) {
