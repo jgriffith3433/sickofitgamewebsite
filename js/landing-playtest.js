@@ -1,10 +1,10 @@
-// Playtest contract (v1) for the landing page: the "trailer" and "hero" scenarios. Loaded only when the URL has
-// ?playtest=trailer or ?playtest=hero, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. The Unity game's own
+// Playtest contract (v1) for the landing page: the "trailer", "hero" and "about" scenarios. Loaded only when the URL has
+// ?playtest=trailer, hero or about, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. The Unity game's own
 // scenarios live on Game/ (index.html sends every other ?playtest there).
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  if (which !== 'trailer' && which !== 'hero') return;
+  if (which !== 'trailer' && which !== 'hero' && which !== 'about') return;
   var run = null, t0 = 0;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var round = function (n) { return Math.round(n * 10) / 10; };
@@ -99,16 +99,70 @@
     finish('done');
   }
 
+  // About: click the nav About / FAQ links and the footer Credits link like a player; log the story word count, the FAQ
+  // answers (free, account, phone support) and the credits list.
+  async function about() {
+    var words = function (t) { return (t.trim().match(/\S+/g) || []).length; };
+    var visible = function (el) { if (!el) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.top < window.innerHeight && r.bottom > 0; };
+    var go = async function (sel, id, label) {
+      var a = document.querySelector(sel);
+      if (!a) { problem('bug', label + ' link is missing'); return null; }
+      a.click(); ev('click', label + ' link');
+      await sleep(1200);
+      var sec = document.getElementById(id);
+      ev(id + '-in-view', sec ? (visible(sec) ? 'visible' : 'NOT visible') : 'MISSING');
+      if (!sec || !visible(sec)) problem('bug', '#' + id + ' is not on screen after clicking ' + label);
+      return sec;
+    };
+    run.state.scene = 'Landing: about'; ev('scene', 'Landing: about');
+    window.scrollTo(0, 0);
+    await sleep(1000);
+    await go('nav a[href="#about"]', 'about', 'About');
+    var st = document.querySelector('[data-about-story]');
+    var n = st ? words(st.textContent) : 0;
+    ev('story-text', st ? st.textContent.trim().replace(/\s+/g, ' ') : 'MISSING');
+    ev('story-words', n);
+    run.metrics.storyWords = n;
+    if (n < 80 || n > 150) problem('bug', 'story section has ' + n + ' words (want 80 to 150)');
+    run.state.progress = 0.35;
+    var faq = await go('nav a[href="#faq"]', 'faq', 'FAQ');
+    var qs = faq ? Array.prototype.slice.call(faq.querySelectorAll('details')) : [];
+    var need = { free: /free/i, account: /account/i, phone: /phone support/i };
+    Object.keys(need).forEach(function (k) {
+      var d = qs.filter(function (x) { return need[k].test(x.textContent); })[0];
+      ev('faq-' + k, d ? d.querySelector('summary').textContent.trim() + ' -> ' + d.querySelector('p').textContent.trim() + (d.open ? '' : ' (collapsed)') : 'MISSING');
+      if (!d) problem('bug', 'FAQ has no answer about ' + k);
+    });
+    var phone = qs.filter(function (x) { return need.phone.test(x.textContent); })[0];
+    if (phone) {
+      var sm = phone.querySelector('summary');
+      if (phone.open) { sm.click(); await sleep(300); }
+      sm.click(); await sleep(500);
+      ev('faq-phone-opened', phone.open ? 'answer shown' : 'answer NOT shown');
+      if (!phone.open) problem('bug', 'FAQ answer does not open on click');
+    }
+    run.state.progress = 0.7;
+    var cr = await go('footer a[href="#credits"]', 'credits', 'Credits');
+    var items = cr ? Array.prototype.slice.call(cr.querySelectorAll('li')).map(function (li) { return li.textContent.trim().replace(/\s+/g, ' '); }) : [];
+    ev('credits-count', items.length);
+    items.forEach(function (t) { ev('credit', t); });
+    run.metrics.credits = items.length;
+    if (!items.length) problem('bug', 'credits list the team: no entries');
+    await sleep(1000);
+    finish('done');
+  }
+
   window.hawkesPlaytest = {
     version: 1, product: 'sickofit',
     scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
-      { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] }]; },
+      { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
+      { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
     start: async function (id, options) {
-      if (id !== 'trailer' && id !== 'hero') throw new Error('no playtest scenario "' + id + '" (have: trailer, hero)');
+      if (id !== 'trailer' && id !== 'hero' && id !== 'about') throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, about)');
       t0 = performance.now();
       run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
       ev('start', id);
-      try { await (id === 'hero' ? hero() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
+      try { await (id === 'hero' ? hero() : id === 'about' ? about() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },
     stop: function () { if (run) finish('done'); },
     state: function () {
