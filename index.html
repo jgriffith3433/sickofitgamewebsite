@@ -2,8 +2,8 @@
 <html lang="en-us">
   <head>
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; the game (and its playtest bot) lives on
-         Game/, so pass the run there (except the landing's own `trailer` scenario, js/landing-playtest.js) with its options (seed, speed, at). Visitors never have ?playtest. -->
-    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt&&pt!=='trailer')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
+         Game/, so pass the run there (except the landing's own `trailer` and `hero` scenarios, js/landing-playtest.js) with its options (seed, speed, at). Visitors never have ?playtest. -->
+    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt&&pt!=='trailer'&&pt!=='hero')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
