@@ -79,6 +79,15 @@
       .story{background:#120708;border-block:1px solid #3a1510}
       .story p{max-width:720px;margin-bottom:14px}
       .story .quote{color:#ff9d2e;font-style:italic}
+      .about-text p{max-width:720px;margin-bottom:14px}
+      .faq details{background:#170a08;border:1px solid #3a1510;border-radius:10px;padding:14px 20px;margin-bottom:10px;max-width:720px}
+      .faq summary{cursor:pointer;font-weight:900;color:#ff9d2e}
+      .faq details p{margin-top:8px}
+      .credits ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;max-width:900px}
+      .credits li{background:#170a08;border:1px solid #3a1510;border-radius:10px;padding:14px 18px}
+      .credits li strong{display:block;color:#fff}
+      .credits li span{color:#b9a59d;font-size:14px}
+      .credits .cast{margin-top:18px;color:#b9a59d;font-size:14px}
       .cta{text-align:center}
       footer{padding:30px 20px 20px;text-align:center;font-size:14px;color:#8d7a73;border-top:1px solid #3a1510}
       footer nav-links a{margin:0 10px}
@@ -103,7 +112,7 @@
     </div>
     <nav><div class="wrap">
       <a class="brand" href="./">SICK OF IT</a>
-      <a href="#trailer">Trailer</a><a href="#features">Features</a><a href="#story">Story</a>
+      <a href="#trailer">Trailer</a><a href="#features">Features</a><a href="#story">Story</a><a href="#about">About</a><a href="#faq">FAQ</a>
       <a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a>
       <a class="btn small" href="Game/index.html" data-play="nav">PLAY</a>
     </div></nav>
@@ -160,6 +169,38 @@
       <p class="quote">"Fine. Up, then."</p>
     </div></section>
 
+    <section id="about"><div class="wrap about-text">
+      <h2>Why the dodger exists</h2>
+      <p class="lead">Asked politely. Answered honestly.</p>
+      <div data-about-story>
+        <p>Look, I never wanted a dodger. I wanted a quiet afternoon. Then a portal ate me and dropped me at the bottom of Hell, where everything is on a loop: the same bullets, the same Overlord, the same floor, one thousand times.</p>
+        <p>So I made a deal with the loop. If Hell insists on repeating itself, I'll repeat it right back, only better. Dodge what I can. Rewind what I can't. Climb anyway.</p>
+        <p>That's the whole game. It's free because nobody should pay to be this annoyed. Up we go.</p>
+      </div>
+    </div></section>
+
+    <section id="faq" class="story faq"><div class="wrap">
+      <h2>FAQ</h2>
+      <p class="lead">Short answers. Hell has enough paperwork.</p>
+      <details open><summary>Is it free?</summary><p>Yes. Free to play in your browser, start to finish. No paywall, no tricks.</p></details>
+      <details open><summary>Do I need an account?</summary><p>No account, no sign-up, no email. Press PLAY NOW and fall.</p></details>
+      <details open><summary>Is there phone support?</summary><p>No phone support. There is no phone number, and no one will pick up in Hell. The blog and What's new page are where the answers live.</p></details>
+      <details open><summary>Do I have to download anything?</summary><p>No. It runs in your browser. You can install it as an app for faster loads if you like.</p></details>
+      <details open><summary>Can I play on my phone?</summary><p>Yes. The game page has touch controls and a controls guide.</p></details>
+    </div></section>
+
+    <section id="credits" class="credits"><div class="wrap">
+      <h2>Credits</h2>
+      <p class="lead">The team. Nobody was asked if they were sick of it.</p>
+      <ul>
+        <li><strong>J</strong><span>Creator. Design and direction.</span></li>
+        <li><strong>Hawkes Studio</strong><span>The AI agents that write, build and playtest the game, one request at a time.</span></li>
+        <li><strong>Hawkes Gen</strong><span>Art, voices, sound and music, made to order.</span></li>
+        <li><strong>Hawkes Biomedical</strong><span>Publisher. Single-use fever shots, now with bullets.</span></li>
+      </ul>
+      <p class="cast">Starring the Hero, the Overlord, Yooba, Bork, and a booming Announcer who loves a show.</p>
+    </div></section>
+
     <section class="cta"><div class="wrap">
       <h2>Latest from the blog</h2>
       <p class="lead">How Hell runs, how it was made, and what keeps breaking.</p>
@@ -168,7 +209,7 @@
     </div></section>
 
     <footer>
-      <div class="links"><a href="Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="privacy.html">Privacy</a></div>
+      <div class="links"><a href="Game/index.html" data-play="footer">Play</a><a href="blog/index.html">Blog</a><a href="whatsnew.html">What's new</a><a href="#faq">FAQ</a><a href="#credits">Credits</a><a href="privacy.html">Privacy</a></div>
       <p class="hawkes-credit"><a href="https://hawkesbiomedical.com" target="_blank" rel="noopener" data-hawkes-credit="parent">A <strong>HAWKES BIOMEDICAL</strong> company</a><span class="hawkes-credit-sep">&middot;</span><a href="https://hawkesgen.ai" target="_blank" rel="noopener" data-hawkes-credit="gen">Powered by <strong>HAWKES GEN</strong></a></p>
     </footer>
     <script>
