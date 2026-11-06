@@ -1,10 +1,10 @@
-// Playtest contract (v1) for the landing page: the "trailer", "hero" and "about" scenarios. Loaded only when the URL has
+// Playtest contract (v1) for the landing page: the "trailer", "hero", "about" and "share" scenarios. Loaded only when the URL has
 // ?playtest=trailer, hero or about, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. The Unity game's own
 // scenarios live on Game/ (index.html sends every other ?playtest there).
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  if (which !== 'trailer' && which !== 'hero' && which !== 'about') return;
+  if (['trailer', 'hero', 'about', 'share'].indexOf(which) < 0) return;
   var run = null, t0 = 0;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var round = function (n) { return Math.round(n * 10) / 10; };
@@ -152,17 +152,57 @@
     finish('done');
   }
 
+  // Share: the share-card tags (title, designed image that really loads), then click through to the press page like a
+  // player and count the logo and screenshot downloads that really exist.
+  async function share() {
+    var meta = function (doc, sel) { var m = doc.querySelector(sel); return m ? m.getAttribute('content') : ''; };
+    var img = function (src) { return new Promise(function (res) { var i = new Image(); i.onload = function () { res(i.naturalWidth + 'x' + i.naturalHeight); }; i.onerror = function () { res(''); }; i.src = src; }); };
+    var local = function (u) { try { return new URL(u).pathname.replace(/^.*\/play\/sickofit\//, ''); } catch (e) { return u; } };
+    run.state.scene = 'Landing: share cards'; ev('scene', 'Landing: share cards');
+    await sleep(800);
+    var title = meta(document, 'meta[property="og:title"]'), image = meta(document, 'meta[property="og:image"]');
+    var card = meta(document, 'meta[name="twitter:card"]');
+    ev('og-title', title || 'MISSING'); ev('og-image', image || 'MISSING'); ev('twitter-card', card || 'MISSING');
+    if (!title) problem('bug', 'no og:title'); if (!image) problem('bug', 'no og:image'); if (card !== 'summary_large_image') problem('bug', 'twitter:card is not summary_large_image');
+    var size = image ? await img(local(image)) : '';
+    ev('og-image-loads', size || 'FAILED to load'); run.metrics.ogImage = size;
+    if (!size) problem('bug', 'the og:image does not load from this site');
+    run.state.progress = 0.4;
+    var a = document.querySelector('a[href$="press.html"]');
+    ev('press-link', a ? a.textContent.trim() + ' -> ' + a.getAttribute('href') : 'MISSING');
+    if (!a) { problem('bug', 'no link to the press page on the landing page'); finish('error'); return; }
+    a.scrollIntoView({ block: 'center' }); await sleep(800);
+    var html = await (await fetch(a.getAttribute('href'))).text();
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    ev('press-title', doc.title);
+    var dl = Array.prototype.slice.call(doc.querySelectorAll('a[download]')).map(function (x) { return x.getAttribute('href'); });
+    var logos = dl.filter(function (h) { return /logo|icon/i.test(h); }), shots = dl.filter(function (h) { return /\.jpg$/i.test(h) && !/share\//.test(h); });
+    var zip = dl.filter(function (h) { return /\.zip$/i.test(h); });
+    ev('press-downloads', 'logos ' + logos.length + ', screenshots ' + shots.length + ', zip ' + zip.length);
+    run.metrics.logos = logos.length; run.metrics.screenshots = shots.length;
+    if (!logos.length) problem('bug', 'press page offers no logo download'); if (!shots.length) problem('bug', 'press page offers no screenshot download');
+    var bad = 0;
+    for (var i = 0; i < dl.length; i++) { var r = await fetch(new URL(dl[i], a.href).href, { method: 'HEAD' }); if (!r.ok) { bad++; problem('bug', 'download ' + dl[i] + ' answers ' + r.status); } }
+    ev('press-downloads-reachable', (dl.length - bad) + ' of ' + dl.length);
+    ev('share-buttons', doc.querySelectorAll('[data-share] a, [data-share] button').length);
+    run.state.progress = 0.9;
+    a.click(); ev('click', 'press page link');
+    await sleep(1500);
+    finish('done');
+  }
+
   window.hawkesPlaytest = {
     version: 1, product: 'sickofit',
     scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
+      { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
     start: async function (id, options) {
-      if (id !== 'trailer' && id !== 'hero' && id !== 'about') throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, about)');
+      if (['trailer', 'hero', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, about, share)');
       t0 = performance.now();
       run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
       ev('start', id);
-      try { await (id === 'hero' ? hero() : id === 'about' ? about() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
+      try { await (id === 'hero' ? hero() : id === 'about' ? about() : id === 'share' ? share() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },
     stop: function () { if (run) finish('done'); },
     state: function () {
