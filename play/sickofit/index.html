@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sick Of It</title>
+  <!--
+    Studio opens this product's beta at the live path /play/sickofit/ (hawkesgames.com/play/sickofit/).
+    In this website repo the Unity loader and window.hawkesPlaytest live on Game/. Send the bot (and anyone
+    who hits this path on beta) there, keeping ?playtest= / hash so the contract still registers.
+  -->
+  <meta http-equiv="refresh" content="0;url=../../Game/">
+  <script>
+    (function () {
+      var dest = new URL('../../Game/', location.href);
+      dest.search = location.search;
+      dest.hash = location.hash;
+      location.replace(dest.href);
+    })();
+  </script>
+</head>
+<body>
+  <p>Opening the game… <a id="go" href="../../Game/">Continue</a></p>
+  <script>
+    document.getElementById('go').href = '../../Game/' + location.search + location.hash;
+  </script>
+</body>
+</html>
