@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+  <meta charset="utf-8">
+  <style>html,body{background:#0a0405;color:#f0cdbf;margin:0;color-scheme:dark}</style>
   <script>window.HAWKES_BUILD_BASE = "https://sites.hawkesgen.ai/builds/sickofit/";</script>
     <!-- Hawkes sound prompt: installed by the deploy from sickofitgame-unity Tools/Web; must load before Unity's loader -->
     <script src="https://sites.hawkesgen.ai/builds/sickofit/v272/hawkes-sound.js"></script>
-    <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -1073,46 +1074,13 @@
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('../sw.js').then(function(reg) {
             console.log('Service worker registered.', reg);
-            
-            // Check for updates on visibility change and periodically (every 60 seconds)
-            let updateCheckInterval;
-            
-            const checkForUpdates = () => {
+            document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'visible') {
                 reg.update();
               }
-            };
-            
-            // Check on visibility change
-            document.addEventListener('visibilitychange', checkForUpdates);
-            
-            // Also check every 60 seconds when visible
-            updateCheckInterval = setInterval(checkForUpdates, 60000);
-            
-            // Handle service worker updates
-            reg.addEventListener('updatefound', function() {
-              const newWorker = reg.installing;
-              console.log('Service worker update found!');
-              
-              newWorker.addEventListener('statechange', function() {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker is installed, prompt user to refresh
-                  console.log('New version available! Activating...');
-                  newWorker.postMessage({ action: 'skipWaiting' });
-                }
-              });
             });
           }).catch(function(err) {
             console.error('Service worker registration failed:', err);
-          });
-          
-          // Reload page when new service worker takes control
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', function() {
-            if (refreshing) return;
-            refreshing = true;
-            console.log('Service worker updated, reloading page...');
-            window.location.reload();
           });
         });
       }
