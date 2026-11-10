@@ -1,6 +1,6 @@
 // Playtest contract (v1) for the landing page: the "trailer", "hero", "about" and "share" scenarios. Loaded only when the URL has
-// ?playtest=trailer, hero or about, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. The Unity game's own
-// scenarios live on Game/ (index.html sends every other ?playtest there).
+// ?playtest=trailer, hero, about or share, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
+// game-start and game-fail (js/game-playtest.js); index.html sends every other ?playtest there.
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
