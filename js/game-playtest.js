@@ -87,8 +87,10 @@
   };
 
   // Alias: ?playtest=fail-load runs game-fail (and Game/index.html forces a failed build fetch).
+  // smoke → game-start so product playtests named smoke@local find the same contract.
   var resolveId = function (id) {
     if (id === 'fail-load') return 'game-fail';
+    if (id === 'smoke') return 'game-start';
     return id;
   };
 
@@ -335,6 +337,13 @@
     scenarios: function () {
       return [
         {
+          id: 'smoke',
+          title: 'Game/: smoke (same as game-start)',
+          seconds: 180,
+          tags: ['smoke'],
+          description: 'Alias of game-start for product playtests named smoke.'
+        },
+        {
           id: 'game-start',
           title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play; then fail-load frame',
           seconds: 180,
@@ -353,7 +362,7 @@
     start: async function (id) {
       id = resolveId(id);
       if (id !== 'game-start' && id !== 'game-fail') {
-        throw new Error('no playtest scenario "' + id + '" (have: game-start, game-fail; alias fail-load)');
+        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail; alias fail-load)');
       }
       t0 = performance.now();
       run = {
