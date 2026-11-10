@@ -264,6 +264,27 @@
     finish('done');
   }
 
+  async function climbersWatch() {
+    var down = /[?&]playtest=net-down\b/.test(location.search);
+    var seen = { count: 0, join: 0, leave: 0, offline: 0 }, warns = 0, errs = 0;
+    var ow = console.warn, oe = console.error;
+    console.warn = function () { warns++; return ow.apply(console, arguments); };
+    console.error = function () { errs++; return oe.apply(console, arguments); };
+    ['count', 'join', 'leave', 'offline'].forEach(function (k) {
+      window.addEventListener('climbers:' + k, function (e) { seen[k]++; ev('climbers:' + k, JSON.stringify(e.detail)); });
+    });
+    ev('setup-shortcut', down ? 'net-down: lobby treated as unreachable' : 'server up: spectator joins t-lobby');
+    await sleep(down ? 6000 : 8000);
+    run.metrics.countEvents = seen.count; run.metrics.joinEvents = seen.join; run.metrics.leaveEvents = seen.leave;
+    run.metrics.offlineEvents = seen.offline; run.metrics.consoleWarnings = warns; run.metrics.consoleErrors = errs;
+    if (down) {
+      if (!seen.offline) problem('bug', 'no climbers:offline with the server down');
+      if (errs) problem('bug', 'console errors with the server down');
+    } else if (!seen.count && !seen.offline) problem('bug', 'no climber count or offline event after 8 s');
+    console.warn = ow; console.error = oe;
+    finish('done');
+  }
+
   async function gameFail() {
     // The page only simulates a failed fetch when the URL says so (set before the loader runs).
     if (!/[?&]playtest=(fail-load|game-fail)\b/.test(location.search)) {
@@ -318,6 +339,13 @@
           seconds: 180,
           tags: ['smoke'],
           description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.'
+        },
+        {
+          id: 'climbers',
+          title: 'Game/: spectator climber count over the lobby socket; with ?playtest=net-down, offline and at most one warning per retry',
+          seconds: 30,
+          tags: ['full'],
+          description: 'Logs climbers:count/join/leave/offline events; run again with ?playtest=net-down.'
         },
         {
           id: 'game-fail',
@@ -411,7 +439,7 @@
         return new Promise(function () {});
       }
       id = resolveId(id);
-      if (id !== 'game-start' && id !== 'game-fail') {
+      if (id !== 'game-start' && id !== 'game-fail' && id !== 'climbers') {
         throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, descent-assets)');
       }
       if (run && !run.done && run.id === id) return;
@@ -423,7 +451,8 @@
       };
       ev('start', id);
       try {
-        if (id === 'game-fail') await gameFail();
+        if (id === 'climbers') await climbersWatch();
+        else if (id === 'game-fail') await gameFail();
         else await gameStart();
       } catch (e) {
         problem('bug', 'bot error: ' + (e && e.message || e));
@@ -466,8 +495,9 @@
     window.hawkesPlaytest.start(which, { at: q.get('at') || undefined });
     return;
   }
+  if (which === 'net-down') which = 'climbers';
   var auto = resolveId(which);
-  if (auto === 'game-start' || auto === 'game-fail') {
+  if (auto === 'game-start' || auto === 'game-fail' || auto === 'climbers') {
     var go = function () {
       if (document.getElementById('guide')) window.hawkesPlaytest.start(auto);
       else setTimeout(go, 100);
