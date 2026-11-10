@@ -221,8 +221,10 @@ desktop.ini
 *.log
 logs/
 
-# Docker volumes and data
-data/
+# Docker volumes and data (keep descent story pack trackable)
+data/*
+!data/descent/
+!data/descent/**
 volumes/
 
 # SSH keys and certificates
