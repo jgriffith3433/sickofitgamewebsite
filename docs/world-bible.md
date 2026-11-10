@@ -20,3 +20,12 @@ Quips are the hero's opening voiced line from each floor's Unity level JSON, not
 (those stay unvoiced narration in-game). Every floor in this pack has a voice clip copied from
 `Assets/Audio/Generated/`; `captionOnly` in the JSON stays empty until a later floor lacks VO.
 Preview / playtest: `data/descent/preview.html?playtest=descent-assets`.
+
+## Landing hero (site)
+
+The landing hero is a one-screen taste of Floor 1000 before the fall: shaft walls, a ledge, heat embers, falling
+village diamonds to snag, bullets to dodge, hold to rewind. A first-second hint ("Drag to dodge. Hold to rewind.")
+fades once the visitor moves; a near-miss dodge counter ticks while they play. After a short bout the payoff card
+speaks in the hero's sardonic register — "Now do it for 1,000 floors." — with PLAY NOW into `Game/` (optional VO at
+`sounds/toy-payoff.wav` when Gen has imported it). With prefers-reduced-motion or no canvas, the looping rewind clip
+stands in for the toy.

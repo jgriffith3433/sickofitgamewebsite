@@ -1,10 +1,10 @@
-// Playtest contract (v1) for the landing page: the "trailer", "hero", "about" and "share" scenarios. Loaded only when the URL has
-// ?playtest=trailer, hero, toy, about or share, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
+// Playtest contract (v1) for the landing page: the "trailer", "hero", "toy", "toy-wrap", "about" and "share" scenarios.
+// Loaded only when the URL has ?playtest=…, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
 // game-start and game-fail (js/game-playtest.js); index.html sends every other ?playtest there.
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  if (['trailer', 'hero', 'toy', 'about', 'share'].indexOf(which) < 0) return;
+  if (['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'].indexOf(which) < 0) return;
   var run = null, t0 = 0;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var round = function (n) { return Math.round(n * 10) / 10; };
@@ -49,11 +49,12 @@
     finish('done');
   }
 
-  // Hero: premise, looping rewind clip and Play above the fold; clip muted, pauses off-screen; no layout shift.
+  // Hero: premise and PLAY NOW above the fold; toy in play mode (or looping clip in clip/reduced-motion); no layout shift.
   async function hero() {
     var v = document.querySelector('[data-hero-loop]');
     var play = document.getElementById('start-button');
     var premise = document.querySelector('.hero .premise');
+    var toyBox = document.querySelector('[data-rewind-toy]');
     var shifts = 0, shiftSum = 0;
     try {
       new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { if (!e.hadRecentInput) { shifts++; shiftSum += e.value; } }); }).observe({ type: 'layout-shift', buffered: true });
@@ -63,33 +64,42 @@
     await sleep(1500);
     var h = window.innerHeight;
     var fold = function (el) { if (!el) return 'MISSING'; var r = el.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.top < h ? 'visible above fold (top ' + Math.round(r.top) + ' of ' + h + ')' : 'NOT above fold (top ' + Math.round(r.top) + ' of ' + h + ')'; };
+    var heroRoot = document.querySelector('[data-hero]');
+    var mode = window.sickofitHero ? window.sickofitHero.mode() : (heroRoot && heroRoot.getAttribute('data-hero-mode')) || '';
+    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    ev('hero-mode', mode + ' reducedMotion=' + rm);
     ev('hero-premise', (premise ? premise.textContent.trim() + ' | ' : '') + fold(premise));
     ev('hero-play-button', fold(play));
-    ev('hero-clip-above-fold', fold(v));
     if (!premise || fold(premise).indexOf('NOT') === 0 || fold(premise) === 'MISSING') problem('bug', 'premise is not above the fold');
     if (!play || fold(play).indexOf('visible') !== 0) problem('bug', 'Play button is not above the fold');
     if (!v) { problem('bug', 'hero rewind clip is missing'); finish('error'); return; }
     run.state.progress = 0.3;
-    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    ev('hero-clip-state', 'muted=' + v.muted + ' loop=' + v.loop + ' paused=' + v.paused + ' time=' + round(v.currentTime) + ' reducedMotion=' + rm);
+    ev('hero-clip-state', 'muted=' + v.muted + ' loop=' + v.loop + ' paused=' + v.paused + ' time=' + round(v.currentTime) + ' mode=' + mode);
     if (!v.muted) problem('bug', 'hero clip is not muted');
     if (!v.loop) problem('bug', 'hero clip does not loop');
-    if (!rm) {
+    if (mode === 'play' && !rm) {
+      ev('hero-toy-above-fold', fold(toyBox));
+      if (!toyBox || fold(toyBox).indexOf('visible') !== 0) problem('bug', 'rewind toy is not above the fold in play mode');
+      if (!window.sickofitToy) problem('bug', 'rewind toy did not boot');
+    } else {
+      ev('hero-clip-above-fold', fold(v));
       var t1 = v.currentTime; await sleep(1500);
       ev('hero-clip-playing', v.paused ? 'PAUSED on load' : 'advancing ' + round(t1) + ' -> ' + round(v.currentTime));
-      if (v.paused || v.currentTime === t1) problem('bug', 'hero clip is not playing above the fold');
+      if (!rm && (v.paused || v.currentTime === t1)) problem('bug', 'hero clip is not playing above the fold');
     }
     run.state.progress = 0.5;
-    // scroll the hero off-screen the way a player does, then check the clip paused
     var far = document.getElementById('trailer') || document.body;
     window.scrollTo(0, far.getBoundingClientRect().top + window.scrollY + 200);
     await sleep(1500);
-    ev('hero-scrolled-away', 'scrollY=' + Math.round(window.scrollY) + ' clip paused=' + v.paused);
+    var toyPaused = mode === 'play' && window.sickofitToy ? !window.sickofitToy.state().running : v.paused;
+    ev('hero-scrolled-away', 'scrollY=' + Math.round(window.scrollY) + ' clip paused=' + v.paused + ' toy idle=' + toyPaused);
     if (!v.paused) problem('bug', 'hero clip keeps playing while off-screen');
+    if (mode === 'play' && window.sickofitToy && window.sickofitToy.state().running) problem('bug', 'toy keeps running while scrolled away');
     window.scrollTo(0, 0);
     await sleep(1500);
-    ev('hero-scrolled-back', 'clip paused=' + v.paused);
-    if (!rm && v.paused) problem('bug', 'hero clip did not resume on return');
+    ev('hero-scrolled-back', 'clip paused=' + v.paused + ' mode=' + mode);
+    if (mode !== 'play' && !rm && v.paused) problem('bug', 'hero clip did not resume on return');
+    if (mode === 'play' && window.sickofitToy && !window.sickofitToy.state().running) problem('bug', 'toy did not resume on return');
     run.state.progress = 0.8;
     await sleep(1500);
     run.metrics.layoutShifts = shifts; run.metrics.layoutShiftScore = Math.round(shiftSum * 1000) / 1000;
@@ -165,14 +175,17 @@
     ev('toy-rewind-release', 'resumed from game time ' + round(t2r.time) + 's -> ' + round(t3r.time) + 's, meter ' + round(t2r.meter) + ' -> ' + round(t3r.meter));
     if (t3r.rewinding || t3r.time <= t2r.time) problem('bug', 'letting go did not resume forward play');
     if (t3r.meter <= t2r.meter) problem('bug', 'rewind meter did not refill after release');
-    var rb = box.querySelectorAll('button')[0], bb = rb.getBoundingClientRect();
+    var rb = Array.prototype.slice.call(box.querySelectorAll('button')).filter(function (b) { return /Rewind/i.test(b.textContent); })[0];
+    var bb = rb ? rb.getBoundingClientRect() : { width: 0, height: 0 };
     ev('toy-rewind-button', Math.round(bb.width) + 'x' + Math.round(bb.height) + ' css');
-    if (bb.height < 48 || bb.width < 48) problem('bug', 'rewind button is under 48 px');
-    rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
-    await sleep(500);
-    ev('toy-rewind-button-hold', 'rewinding=' + T.state().rewinding);
-    if (!T.state().rewinding) problem('bug', 'holding the Rewind button did not rewind');
-    rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+    if (!rb || bb.height < 48 || bb.width < 48) problem('bug', 'rewind button is under 48 px');
+    if (rb) {
+      rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+      await sleep(500);
+      ev('toy-rewind-button-hold', 'rewinding=' + T.state().rewinding);
+      if (!T.state().rewinding) problem('bug', 'holding the Rewind button did not rewind');
+      rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+    }
     await sleep(300);
     window.scrollTo(0, box.getBoundingClientRect().top + window.scrollY + 900);
     await sleep(800);
@@ -187,6 +200,115 @@
     run.metrics.layoutShifts = shifts; run.metrics.layoutShiftScore = Math.round(shiftSum * 1000) / 1000;
     ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore + '; toy top at load ' + Math.round(top0));
     if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
+    finish('done');
+  }
+
+  // Toy wrap: first-second hint fades on move, dodge counter, payoff card (PLAY NOW + Try again), PLAY NOW beside the
+  // toy, 390 px no sideways scroll, and clip fallback (named start "clip" / setMode) instead of the toy.
+  async function toyWrap(opts) {
+    opts = opts || {};
+    var at = opts.at || q.get('at') || '';
+    run.state.scene = 'Landing: toy wrap'; ev('scene', 'Landing: toy wrap');
+    window.scrollTo(0, 0);
+    await sleep(600);
+
+    if (at === 'clip') {
+      if (window.sickofitHero && window.sickofitHero.setMode) window.sickofitHero.setMode('clip');
+      await sleep(400);
+      var mode = window.sickofitHero ? window.sickofitHero.mode() : '';
+      var toyBox = document.querySelector('[data-rewind-toy]');
+      var clip = document.querySelector('[data-hero-loop]');
+      var toyHidden = !toyBox || toyBox.hasAttribute('hidden') || getComputedStyle(toyBox).display === 'none';
+      ev('hero-mode', mode + '; toy hidden=' + toyHidden + '; clip present=' + !!clip);
+      if (mode !== 'clip') problem('bug', 'clip start did not set hero mode to clip');
+      if (!toyHidden) problem('bug', 'reduced-motion/clip path still shows the toy');
+      if (!clip) problem('bug', 'rewind clip is missing in clip mode');
+      run.metrics.heroMode = mode;
+      finish('done');
+      return;
+    }
+
+    var box = document.querySelector('[data-rewind-toy]');
+    var cv = box && box.querySelector('canvas');
+    var T = window.sickofitToy;
+    var play = document.getElementById('start-button');
+    if (!box || !cv || !T) { problem('bug', 'rewind toy is missing in play mode'); finish('error'); return; }
+    box.scrollIntoView({ block: 'center' });
+    await until(function () { return T.state().running || T.state().bullets > 0; }, 4000, 'toy running');
+    var s0 = T.state();
+    ev('toy-hint', 'hint=' + round(s0.hint) + ' moved=' + s0.moved);
+    if (s0.hint < 0.5 || s0.moved) problem('bug', 'first-second hint is not showing before the visitor moves');
+    run.state.progress = 0.15;
+
+    var fold = function (el) {
+      if (!el) return 'MISSING';
+      var r = el.getBoundingClientRect(), h = window.innerHeight;
+      return r.width > 0 && r.top < h && r.bottom > 0 ? 'visible' : 'NOT visible';
+    };
+    ev('play-beside-toy', fold(play) + '; ' + fold(box));
+    if (!play || fold(play) !== 'visible') problem('bug', 'PLAY NOW is not visible beside the toy');
+    run.metrics.dodges = s0.dodges;
+
+    var r = cv.getBoundingClientRect();
+    var fire = function (type, x, y) { cv.dispatchEvent(new PointerEvent(type, { pointerId: 21, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y })); };
+    var sx = r.left + 28, sy = r.top + 28;
+    fire('pointerdown', sx, sy);
+    for (var i = 1; i <= 16; i++) { fire('pointermove', sx + i * 5, sy - i * 2); await sleep(20); }
+    fire('pointerup', sx + 80, sy - 32);
+    await sleep(500);
+    var s1 = T.state();
+    ev('toy-hint-after-move', 'hint=' + round(s1.hint) + ' moved=' + s1.moved + ' dodges=' + s1.dodges);
+    if (!s1.moved) problem('bug', 'moving the hero did not mark the visitor as moved');
+    try { await until(function () { return T.state().hint < 0.2; }, 2500, 'hint fade'); } catch (e) { problem('bug', 'hint did not fade after move'); }
+    ev('toy-hint-faded', 'hint=' + round(T.state().hint));
+    run.state.progress = 0.35;
+
+    // Payoff via a successful rewind (faster than waiting 15 s)
+    cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    await sleep(700);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+    await sleep(900);
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    try { await until(function () { return T.state().payoff; }, 4000, 'payoff card'); } catch (e) {
+      // stand still for hits as a backup
+      try { await until(function () { return T.state().hits >= 3 || T.state().payoff; }, 14000, '3 hits or payoff'); } catch (e2) { problem('bug', 'payoff card never appeared after play'); }
+    }
+    var s2 = T.state();
+    var card = box.querySelector('.toy-payoff');
+    var line = card && card.querySelector('.toy-payoff-line');
+    var again = card && card.querySelector('[data-payoff-again]');
+    var cardPlay = card && card.querySelector('[data-payoff-play]');
+    ev('toy-payoff', 'on=' + s2.payoff + ' reason=' + s2.payoffReason + ' line=' + (line ? line.textContent.trim() : 'MISSING'));
+    if (!s2.payoff || !card || card.hidden) problem('bug', 'payoff card is not shown after short play');
+    if (!line || line.textContent.indexOf('1,000') < 0) problem('bug', 'payoff line is not in the game\'s voice');
+    if (!cardPlay || cardPlay.getAttribute('href').indexOf('Game') < 0) problem('bug', 'payoff PLAY NOW does not link to Game/');
+    if (!again) problem('bug', 'Try again is missing on the payoff card');
+    ev('play-still-beside', fold(play));
+    if (fold(play) !== 'visible') problem('bug', 'PLAY NOW beside the toy was covered by the payoff');
+    run.state.progress = 0.7;
+
+    again.click();
+    await sleep(400);
+    ev('toy-try-again', 'payoff=' + T.state().payoff + ' cardHidden=' + T.state().cardHidden);
+    if (T.state().payoff || (card && !card.hidden)) problem('bug', 'Try again did not clear the payoff card');
+
+    var overflow = document.documentElement.scrollWidth - window.innerWidth;
+    ev('hero-width', 'inner=' + window.innerWidth + ' scrollWidth=' + document.documentElement.scrollWidth + ' overflow=' + overflow);
+    run.metrics.horizontalOverflow = overflow;
+    if (window.innerWidth <= 400 && overflow > 1) problem('bug', 'hero causes sideways scroll at phone width (' + overflow + 'px)');
+
+    // Criterion 3: switch to the clip fallback the same way reduced-motion / no-canvas does
+    if (window.sickofitHero && window.sickofitHero.setMode) window.sickofitHero.setMode('clip');
+    await sleep(350);
+    var mode2 = window.sickofitHero.mode();
+    var toyHidden2 = box.hasAttribute('hidden') || getComputedStyle(box).display === 'none';
+    var clip2 = document.querySelector('[data-hero-loop]');
+    ev('hero-clip-fallback', mode2 + '; toy hidden=' + toyHidden2 + '; clip opacity=' + (clip2 ? getComputedStyle(clip2).opacity : 'MISSING'));
+    if (mode2 !== 'clip' || !toyHidden2) problem('bug', 'clip fallback still shows the toy');
+    if (!clip2) problem('bug', 'rewind clip missing after clip fallback');
+    run.metrics.heroMode = mode2;
+    run.metrics.dodges = T.state ? (window.sickofitToy && window.sickofitToy.state ? window.sickofitToy.state().dodges : s2.dodges) : s2.dodges;
     finish('done');
   }
 
@@ -287,14 +409,22 @@
     scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
       { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift', seconds: 25, tags: [] },
+      { id: 'toy-wrap', title: 'Hero toy wrap: hint fades on move, dodge counter, payoff card with PLAY NOW and Try again, PLAY NOW beside toy, no sideways scroll, clip fallback', seconds: 35, tags: ['full'], starts: ['play', 'clip'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
     start: async function (id, options) {
-      if (['trailer', 'hero', 'toy', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, toy, about, share)');
+      if (['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, toy, toy-wrap, about, share)');
       t0 = performance.now();
       run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
       ev('start', id);
-      try { await (id === 'hero' ? hero() : id === 'toy' ? toy() : id === 'about' ? about() : id === 'share' ? share() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
+      try {
+        if (id === 'hero') await hero();
+        else if (id === 'toy') await toy();
+        else if (id === 'toy-wrap') await toyWrap(options || {});
+        else if (id === 'about') await about();
+        else if (id === 'share') await share();
+        else await play();
+      } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },
     stop: function () { if (run) finish('done'); },
     state: function () {
