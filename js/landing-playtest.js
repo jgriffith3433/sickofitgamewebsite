@@ -1,10 +1,10 @@
 // Playtest contract (v1) for the landing page: the "trailer", "hero", "about" and "share" scenarios. Loaded only when the URL has
-// ?playtest=trailer, hero, about or share, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
+// ?playtest=trailer, hero, toy, about or share, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
 // game-start and game-fail (js/game-playtest.js); index.html sends every other ?playtest there.
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  if (['trailer', 'hero', 'about', 'share'].indexOf(which) < 0) return;
+  if (['trailer', 'hero', 'toy', 'about', 'share'].indexOf(which) < 0) return;
   var run = null, t0 = 0;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var round = function (n) { return Math.round(n * 10) / 10; };
@@ -96,6 +96,69 @@
     ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore);
     if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
     ev('hero-play-href', play ? play.getAttribute('href') : 'MISSING');
+    finish('done');
+  }
+
+  // Toy: the hero's arena. Drag the hero with real pointer events, see bullets, get hit and flash, scroll away (loop stops).
+  async function toy() {
+    var box = document.querySelector('[data-rewind-toy]');
+    var cv = box && box.querySelector('canvas');
+    var T = window.sickofitToy;
+    var shifts = 0, shiftSum = 0;
+    try {
+      new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { if (!e.hadRecentInput) { shifts++; shiftSum += e.value; } }); }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) { ev('layout-shift-observer', 'unsupported'); }
+    run.state.scene = 'Landing: rewind toy'; ev('scene', 'Landing: rewind toy');
+    if (!box || !cv || !T) { problem('bug', 'rewind toy is missing'); finish('error'); return; }
+    window.scrollTo(0, 0);
+    var top0 = box.getBoundingClientRect().top;
+    box.scrollIntoView({ block: 'center' });
+    var s0 = performance.now();
+    await until(function () { return T.state().bullets > 0; }, 3000, 'bullets');
+    var first = (performance.now() - s0) / 1000;
+    ev('toy-first-bullet', round(first) + 's after the toy came into view');
+    if (first > 1) problem('bug', 'first bullet took ' + round(first) + 's');
+    run.state.progress = 0.25;
+    var r = cv.getBoundingClientRect(), a = T.state();
+    ev('toy-size', Math.round(r.width) + 'x' + Math.round(r.height) + ' css, canvas ' + cv.width + 'x' + cv.height);
+    var fire = function (type, x, y) { cv.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y })); };
+    // relative drag: start away from the hero, finger never over it
+    var sx = r.left + 30, sy = r.top + 30;
+    fire('pointerdown', sx, sy);
+    for (var i = 1; i <= 20; i++) { fire('pointermove', sx - i * 4, sy + i * 2); await sleep(25); }
+    fire('pointerup', sx - 80, sy + 40);
+    var b = T.state();
+    ev('toy-drag', 'hero ' + Math.round(a.x) + ',' + Math.round(a.y) + ' -> ' + Math.round(b.x) + ',' + Math.round(b.y));
+    if (Math.abs(b.x - a.x) < 20) problem('bug', 'dragging did not move the hero');
+    run.state.progress = 0.4;
+    // keys
+    var kx = T.state().x;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
+    await sleep(400);
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', bubbles: true }));
+    ev('toy-keys', 'd moved hero x ' + Math.round(kx) + ' -> ' + Math.round(T.state().x));
+    if (T.state().x - kx < 20) problem('bug', 'keys did not move the hero');
+    // wait for a hit (the hero sits still in the bullet stream)
+    var h0 = T.state().hits;
+    try { await until(function () { return T.state().hits > h0; }, 12000, 'a hit'); } catch (e) { problem('bug', 'the hero was never hit in 12 s'); }
+    var f = T.state();
+    ev('toy-hit', 'hits ' + f.hits + ', flash ' + round(f.flash));
+    if (f.hits > h0 && f.flash <= 0) problem('bug', 'getting hit did not flash the hero');
+    run.state.progress = 0.7;
+    ev('toy-recorded', f.recorded + ' frames in the ring buffer');
+    window.scrollTo(0, box.getBoundingClientRect().top + window.scrollY + 900);
+    await sleep(800);
+    var c1 = T.state().steps; await sleep(600);
+    var c2 = T.state().steps;
+    ev('toy-scrolled-away', 'running=' + T.state().running + ' steps ' + c1 + ' -> ' + c2);
+    if (T.state().running || c2 !== c1) problem('bug', 'toy keeps running while scrolled away');
+    window.scrollTo(0, 0);
+    await sleep(800);
+    ev('toy-scrolled-back', 'running=' + T.state().running);
+    if (!T.state().running) problem('bug', 'toy did not resume on return');
+    run.metrics.layoutShifts = shifts; run.metrics.layoutShiftScore = Math.round(shiftSum * 1000) / 1000;
+    ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore + '; toy top at load ' + Math.round(top0));
+    if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
     finish('done');
   }
 
@@ -195,14 +258,15 @@
     version: 1, product: 'sickofit',
     scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
+      { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, stops off-screen, no page shift', seconds: 25, tags: [] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
     start: async function (id, options) {
-      if (['trailer', 'hero', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, about, share)');
+      if (['trailer', 'hero', 'toy', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, toy, about, share)');
       t0 = performance.now();
       run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
       ev('start', id);
-      try { await (id === 'hero' ? hero() : id === 'about' ? about() : id === 'share' ? share() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
+      try { await (id === 'hero' ? hero() : id === 'toy' ? toy() : id === 'about' ? about() : id === 'share' ? share() : play()); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },
     stop: function () { if (run) finish('done'); },
     state: function () {
