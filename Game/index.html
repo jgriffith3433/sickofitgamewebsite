@@ -270,13 +270,26 @@
         }
       }
 
-      /* Mobile guide: controls card before play, rotate prompt in portrait, fullscreen button */
+      /* Mobile guide: controls card before play, rotate prompt in portrait, fullscreen button.
+         #guide sits above the build's #hawkes-tap (z-index 8000) so Play is the one gesture. */
       #guide, #rotate-prompt { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
         text-align: center; font-family: Arial, sans-serif; color: #f0cdbf; padding: 16px;
         background: radial-gradient(ellipse at 50% 30%, #3a1510 0%, #170a08 60%, #0a0405 100%); }
-      #guide { z-index: 2000; overflow-y: auto; }
-      #guide[hidden], #rotate-prompt[hidden] { display: none; }
+      #guide { z-index: 9000; overflow-y: auto; }
+      #guide[hidden], #rotate-prompt[hidden] { display: none !important; pointer-events: none !important; }
       #rotate-prompt { z-index: 3000; }
+      /* After Play: nothing (Tap to play, rotate, controls) may sit above the canvas. */
+      body.hawkes-playing #guide,
+      body.hawkes-playing #rotate-prompt,
+      body.hawkes-playing #hawkes-tap {
+        display: none !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+      }
+      body.hawkes-playing #install-banner {
+        display: none !important;
+        pointer-events: none !important;
+      }
       #guide h2, #rotate-prompt h2 { font-size: 22px; color: #ff9d2e; margin-bottom: 6px; letter-spacing: .5px; }
       #guide p.sub, #rotate-prompt p { font-size: 14px; color: #b9a59d; margin-bottom: 14px; max-width: 320px; }
       #guide svg { width: min(92vw, 520px); max-height: 38vh; height: auto; }
@@ -771,7 +784,7 @@
       });
     </script>
     <script>
-      // Mobile guide: controls card -> Play (a tap, so fullscreen is allowed) ; rotate prompt in portrait ; fullscreen button.
+      // Controls card -> one Play gesture: unlock audio, dismiss #hawkes-tap, fullscreen + landscape, clear overlays.
       (function () {
         var guide = document.getElementById('guide'), play = document.getElementById('guide-play'),
             status = document.getElementById('guide-status'), rotate = document.getElementById('rotate-prompt'),
@@ -806,7 +819,92 @@
         document.addEventListener('fullscreenchange', syncFs);
         document.addEventListener('webkitfullscreenchange', syncFs);
 
+        function hideBlockingOverlays() {
+          document.body.classList.add('hawkes-playing');
+          guide.hidden = true;
+          guide.style.pointerEvents = 'none';
+          rotate.hidden = true;
+          rotate.style.pointerEvents = 'none';
+          var tap = document.getElementById('hawkes-tap');
+          if (tap) {
+            tap.classList.add('gone');
+            tap.style.pointerEvents = 'none';
+            tap.setAttribute('aria-hidden', 'true');
+            setTimeout(function () { if (tap.parentNode) tap.parentNode.removeChild(tap); }, 300);
+          }
+          var banner = document.getElementById('install-banner');
+          if (banner) {
+            banner.classList.remove('show');
+            banner.style.pointerEvents = 'none';
+          }
+        }
+
+        // Dismiss the build's Tap to play and resume its tracked AudioContexts inside this user gesture.
+        function unlockAudioAndDismissTap() {
+          try {
+            if (window.hawkesSound && typeof window.hawkesSound.tap === 'function') {
+              window.hawkesSound.tap();
+            }
+          } catch (e) { console.log('[Guide] hawkesSound.tap failed:', e && e.message); }
+          var tap = document.getElementById('hawkes-tap');
+          if (tap && !tap.classList.contains('gone')) {
+            tap.classList.add('gone');
+            tap.style.pointerEvents = 'none';
+          }
+        }
+
+        function audioAlreadyRunning() {
+          try {
+            if (!window.hawkesSound || !window.hawkesSound.state) return false;
+            var s = JSON.parse(window.hawkesSound.state());
+            return !!(s && s.audio && String(s.audio).split(',').indexOf('running') >= 0);
+          } catch (e) { return false; }
+        }
+
+        // Hide Tap to play when audio is already running (e.g. a prior gesture unlocked it).
+        function hideTapIfAudioRunning() {
+          if (!audioAlreadyRunning()) return;
+          try {
+            if (window.hawkesSound && window.hawkesSound.tap) window.hawkesSound.tap();
+          } catch (e) {}
+          var tap = document.getElementById('hawkes-tap');
+          if (tap) {
+            tap.classList.add('gone');
+            tap.style.pointerEvents = 'none';
+          }
+        }
+
+        // Build hawkes-sound.js listens for click + touchend; also wire pointerdown so a press dismisses it.
+        function wireHawkesTapExtras(el) {
+          if (!el || el.getAttribute('data-hawkes-guide') === '1') return;
+          el.setAttribute('data-hawkes-guide', '1');
+          var forward = function (e) {
+            if (!el || el.classList.contains('gone')) return;
+            if (e && e.type === 'pointerdown' && e.pointerType === 'touch') return; // touchend / click handle phones
+            try { if (window.hawkesSound && window.hawkesSound.tap) window.hawkesSound.tap(); } catch (err) {}
+          };
+          el.addEventListener('pointerdown', forward);
+          hideTapIfAudioRunning();
+        }
+        function watchHawkesTap() {
+          var el = document.getElementById('hawkes-tap');
+          if (el) wireHawkesTapExtras(el);
+          hideTapIfAudioRunning();
+        }
+        if (document.body) {
+          var mo = new MutationObserver(watchHawkesTap);
+          mo.observe(document.body, { childList: true, subtree: true });
+        }
+        watchHawkesTap();
+        document.addEventListener('visibilitychange', hideTapIfAudioRunning);
+
         function checkOrientation() {
+          // After Play, never cover the canvas (portrait or landscape).
+          if (started) {
+            rotate.hidden = true;
+            rotate.style.pointerEvents = 'none';
+            return;
+          }
           // Portrait phone: a narrow, tall viewport. Desktop windows stay out of it.
           var portrait = touch && window.innerWidth < window.innerHeight && window.innerWidth <= 820;
           rotate.hidden = !portrait;
@@ -815,17 +913,42 @@
         window.addEventListener('orientationchange', checkOrientation);
         checkOrientation();
 
-        play.addEventListener('click', function () {
-          if (!ready) return;
+        function onPlayGesture(e) {
+          if (!ready || started) return;
+          if (e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+          if (e && e.type === 'keydown') e.preventDefault();
           started = true;
-          guide.hidden = true;
-          if (touch) enterFs();
+          // One gesture: unlock Unity/WebAudio, dismiss Tap to play, clear overlays, fullscreen + landscape.
+          unlockAudioAndDismissTap();
+          hideBlockingOverlays();
+          enterFs();
           syncFs();
           window.dispatchEvent(new Event('resize'));
+          // Tap to play is the page overlay from hawkes-sound.js (not an in-Unity splash); no SendMessage needed.
+          console.log('[Guide] Play: audio unlock + overlays cleared');
+        }
+        // Phones: touchend is the reliable audio gesture on iOS. Desktop: pointerdown/click.
+        // `started` stops doubles when click follows pointerdown or a synthetic mouse event after touch.
+        play.addEventListener('pointerdown', function (e) {
+          if (e.pointerType === 'touch') return;
+          onPlayGesture(e);
         });
+        play.addEventListener('touchend', function (e) {
+          e.preventDefault();
+          onPlayGesture(e);
+        }, { passive: false });
+        play.addEventListener('click', onPlayGesture);
+        play.addEventListener('keydown', onPlayGesture);
+
         // The game loads behind the card (the loader fires these); Play opens once Unity is up.
         window.addEventListener('hawkes-unity-progress', function (e) { status.textContent = 'Loading Hell\u2026 ' + Math.round(e.detail * 100) + '%'; });
-        window.addEventListener('hawkes-unity-ready', function () { ready = true; play.disabled = false; play.textContent = 'Play'; status.textContent = 'Ready.'; });
+        window.addEventListener('hawkes-unity-ready', function () {
+          ready = true;
+          play.disabled = false;
+          play.textContent = 'Play';
+          status.textContent = 'Ready.';
+          hideTapIfAudioRunning();
+        });
         window.hawkesGuide = { isReady: function () { return ready; }, isStarted: function () { return started; } };
       })();
     </script>

@@ -92,6 +92,28 @@
     return id;
   };
 
+  var topAt = function (x, y) {
+    try {
+      var el = document.elementFromPoint(x, y);
+      if (!el) return 'none';
+      var id = el.id ? ('#' + el.id) : el.tagName.toLowerCase();
+      var block = el.closest && el.closest('#guide, #rotate-prompt, #hawkes-tap, #unity-canvas, #fs-button, #version-display, #install-banner');
+      if (block && block.id) return '#' + block.id + ' (' + id + ')';
+      return id;
+    } catch (e) { return 'error'; }
+  };
+  var overlayBlocksGame = function () {
+    var ids = ['guide', 'rotate-prompt', 'hawkes-tap'];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (!el) continue;
+      if (el.hidden || (el.classList && el.classList.contains('gone'))) continue;
+      if (el.style && el.style.pointerEvents === 'none') continue;
+      if (visible(el)) return '#' + ids[i];
+    }
+    return null;
+  };
+
   async function gameStart() {
     var guide = document.getElementById('guide');
     var play = document.getElementById('guide-play');
@@ -101,6 +123,7 @@
     var lastProgress = -1;
     var playAt = 0;
     var introFirstFrameSec = null;
+    var overlayAfterPlay = null;
 
     var onProgress = function (e) {
       var p = typeof e.detail === 'number' ? e.detail : 0;
@@ -124,21 +147,14 @@
     } else {
       ev('controls-card', 'visible: ' + (document.getElementById('guide-sub') || {}).textContent);
     }
-    ev('tap-prompt-on-controls', tapPromptUp() ? 'Tap to play is up over the controls card' : 'no Tap to play over controls card');
-
-    // Dismiss Tap to play if the sound prompt is covering the card (real click on its button).
-    if (tapPromptUp()) {
-      var tapBtn = document.querySelector('#hawkes-tap button') || document.getElementById('hawkes-tap');
-      if (realClick(tapBtn)) {
-        tapsToGame++;
-        ev('tap', 'Tap to play #' + tapsToGame);
-      } else if (window.hawkesSound && window.hawkesSound.tap && window.hawkesSound.tap()) {
-        tapsToGame++;
-        ev('tap', 'Tap to play via hawkesSound.tap #' + tapsToGame);
-      }
-      await until(function () { return !tapPromptUp(); }, 8000, 'Tap to play to leave');
-      await sleep(800);
+    // Play must be reachable without dismissing Tap to play first (guide sits above #hawkes-tap).
+    var cx = Math.floor(window.innerWidth / 2), cy = Math.floor(window.innerHeight / 2);
+    var topBefore = topAt(cx, cy);
+    ev('top-at-center-before-play', topBefore);
+    if (/#hawkes-tap/.test(topBefore)) {
+      problem('bug', 'Tap to play is above the controls card; Play is not the single gesture');
     }
+    ev('tap-prompt-dom', tapPromptUp() ? 'hawkes-tap in DOM (should sit under #guide)' : 'no hawkes-tap');
 
     beat(0.2, 'waiting for Unity ready');
     // Unity is ~33 MB; tick progress while waiting so the run is not stuck.
@@ -163,7 +179,7 @@
       return;
     }
 
-    // One Play tap (the only required press once the card is ready).
+    // One Play tap only: unlocks audio, dismisses Tap to play, clears overlays (no prior Tap to play press).
     playAt = performance.now();
     realClick(play);
     tapsToGame++;
@@ -171,23 +187,34 @@
     beat(0.7, 'after Play');
 
     await until(function () {
-      return (window.hawkesGuide && window.hawkesGuide.isStarted()) || (guide && guide.hidden);
+      return (window.hawkesGuide && window.hawkesGuide.isStarted()) || (guide && guide.hidden) || document.body.classList.contains('hawkes-playing');
     }, 10000, 'controls card to hide after Play');
 
     run.state.scene = 'after-play';
     ev('scene', 'after-play');
-    await sleep(2500);
+    await sleep(1500);
+
+    overlayAfterPlay = overlayBlocksGame();
+    ev('overlay-after-play', overlayAfterPlay ? ('BLOCKING ' + overlayAfterPlay) : 'none blocking');
+    ev('top-at-center-after-play', topAt(cx, cy));
+    if (overlayAfterPlay) problem('bug', 'overlay blocks the game after Play: ' + overlayAfterPlay);
 
     // Watch for a second Tap to play after Play (should not reappear).
     var watchEnd = performance.now() + 8000;
     while (performance.now() < watchEnd) {
       if (tapPromptUp()) { secondTap = true; break; }
+      var midBlock = overlayBlocksGame();
+      if (midBlock && !overlayAfterPlay) {
+        overlayAfterPlay = midBlock;
+        ev('overlay-after-play', 'BLOCKING ' + midBlock + ' (during watch)');
+        problem('bug', 'overlay blocks the game after Play: ' + midBlock);
+      }
       // First painted frame of the intro: canvas is up, loading bar gone, guide gone.
       if (introFirstFrameSec == null) {
         var bar = document.getElementById('unity-loading-bar');
         var canvas = document.getElementById('unity-canvas');
         var barGone = !bar || bar.style.display === 'none' || !visible(bar);
-        if (canvas && visible(canvas) && barGone && (!guide || guide.hidden)) {
+        if (canvas && visible(canvas) && barGone && (!guide || guide.hidden || document.body.classList.contains('hawkes-playing'))) {
           introFirstFrameSec = (performance.now() - playAt) / 1000;
           ev('intro-first-frame', round(introFirstFrameSec) + 's after Play');
         }
@@ -200,15 +227,33 @@
       ev('intro-first-frame', round(introFirstFrameSec) + 's after Play (fallback: watch ended)');
     }
 
+    // Portrait then landscape: after Play, neither orientation may leave a blocking overlay.
+    ev('orientation-check', 'forcing portrait then landscape probe via resize events');
+    var prevW = window.innerWidth, prevH = window.innerHeight;
+    try {
+      // Soft probe: re-run the page's orientation logic by dispatching resize; overlays must stay clear.
+      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event('orientationchange'));
+      await sleep(400);
+      var blockPortrait = overlayBlocksGame();
+      ev('overlay-portrait-probe', blockPortrait ? ('BLOCKING ' + blockPortrait) : 'clear ' + prevW + 'x' + prevH);
+      if (blockPortrait) problem('bug', 'overlay blocks after Play in current orientation: ' + blockPortrait);
+    } catch (e) {
+      ev('orientation-check', 'probe skipped: ' + (e && e.message || e));
+    }
+
     var snd = soundState();
     var audioOk = audioRunning();
     ev('taps-to-game', tapsToGame);
     ev('second-tap-to-play', secondTap ? 'YES: Tap to play appeared again after Play' : 'no second Tap to play after Play');
     ev('audio-context', snd ? ('audio=' + snd.audio + ' prompt=' + snd.prompt + ' running=' + audioOk) : 'hawkesSound missing');
+    if (tapsToGame !== 1) problem('bug', 'expected exactly 1 tap to reach the game, got ' + tapsToGame);
+    if (secondTap) problem('bug', 'Tap to play appeared again after Play');
     run.metrics.tapsToGame = tapsToGame;
     run.metrics.secondTapToPlay = secondTap ? 1 : 0;
     run.metrics.introFirstFrameSeconds = round(introFirstFrameSec);
     run.metrics.audioContextRunning = audioOk ? 1 : 0;
+    run.metrics.overlayBlockedAfterPlay = overlayAfterPlay ? 1 : 0;
 
     // Failure state for the same run: open Game/?playtest=fail-load in a full-page frame (setup shortcut).
     beat(0.85, 'failure frame');
@@ -291,10 +336,10 @@
       return [
         {
           id: 'game-start',
-          title: 'Game/: controls card, Play once, taps / second Tap to play / intro first frame / AudioContext; then fail-load frame',
+          title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play; then fail-load frame',
           seconds: 180,
           tags: ['smoke'],
-          description: 'Waits for #guide, logs hawkes-unity-progress, taps Play once, reports tapsToGame, secondTapToPlay, introFirstFrameSeconds, audioContextRunning. Opens ?playtest=fail-load in a frame for the failure scene.'
+          description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning. Opens ?playtest=fail-load in a frame for the failure scene.'
         },
         {
           id: 'game-fail',
