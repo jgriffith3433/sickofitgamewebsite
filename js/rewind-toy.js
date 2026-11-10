@@ -130,15 +130,18 @@
 
   // Optional VO: play sounds/toy-payoff.wav when present (Gen import). Text line stays the beat if the file is missing.
   var payoffBuf = null, payoffLoading = false;
+  // Resolves to a decoded AudioBuffer, or null when the clip is missing, an HTML fallback page, or undecodable: never rejects.
+  function loadClip(url) {
+    return fetch(url).then(function (r) {
+      var type = (r.headers.get('content-type') || '').toLowerCase();
+      if (!r.ok || type.indexOf('text/') === 0) return null;
+      return r.arrayBuffer().then(function (b) { return b.byteLength ? actx.decodeAudioData(b) : null; });
+    }).catch(function () { return null; });
+  }
   function loadPayoffVo() {
     if (payoffLoading || payoffBuf || !actx) return;
     payoffLoading = true;
-    fetch(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (r) {
-      if (!r.ok) throw new Error('no vo');
-      return r.arrayBuffer();
-    }).then(function (b) {
-      return actx.decodeAudioData(b);
-    }).then(function (d) { payoffBuf = d; payoffLoading = false; }, function () { payoffLoading = false; });
+    loadClip(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
   }
   function sayPayoff() {
     if (!unlocked || !soundOn || !actx) return;
@@ -347,9 +350,8 @@
       actx = new AC();
       if (actx.state === 'suspended') actx.resume();
       loading = true;
-      fetch(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav').then(function (r) { if (!r.ok) throw new Error('no whoosh'); return r.arrayBuffer(); })
-        .then(function (b) { return actx.decodeAudioData(b); })
-        .then(function (d) { wbuf = d; loading = false; if (rewinding) whoosh(true); loadPayoffVo(); }, function () { loading = false; loadPayoffVo(); });
+      loadClip(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav')
+        .then(function (d) { wbuf = d; loading = false; if (rewinding) whoosh(true); loadPayoffVo(); });
     } catch (e) {}
   }
   function whoosh(on) {
