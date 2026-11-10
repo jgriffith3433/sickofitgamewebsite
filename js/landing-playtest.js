@@ -1,10 +1,19 @@
-// Playtest contract (v1) for the landing page: the "trailer", "hero", "toy", "toy-wrap", "about" and "share" scenarios.
-// Loaded only when the URL has ?playtest=…, so visitors never run it. Spec: hawkesstudio/docs/playtest.md. Game/ carries
-// game-start and game-fail (js/game-playtest.js); index.html sends every other ?playtest there.
+// Playtest contract (v1) for the landing page: "trailer", "hero", "toy", "toy-wrap", "about" and "share", plus product
+// scenarios ("smoke", "game-start", "game-fail" on Game/ and "descent-assets" on data/descent/preview.html) so Studio
+// discovers every scenario on whatever entry page it opens. Loaded only for automation or ?playtest=.
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  if (['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'].indexOf(which) < 0) return;
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'];
+  var GAME_IDS = ['smoke', 'game-start', 'game-fail', 'fail-load'];
+  var playtestOn = false;
+  try {
+    playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest') || sessionStorage.getItem('hawkes.playtest'));
+    if (playtestOn) sessionStorage.setItem('hawkes.playtest', '1');
+  } catch (e) {
+    playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest'));
+  }
+  if (!playtestOn) return;
   var run = null, t0 = 0;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var round = function (n) { return Math.round(n * 10) / 10; };
@@ -120,6 +129,7 @@
     } catch (e) { ev('layout-shift-observer', 'unsupported'); }
     run.state.scene = 'Landing: rewind toy'; ev('scene', 'Landing: rewind toy');
     if (!box || !cv || !T) { problem('bug', 'rewind toy is missing'); finish('error'); return; }
+    if (T.reset) T.reset();
     window.scrollTo(0, 0);
     var top0 = box.getBoundingClientRect().top;
     box.scrollIntoView({ block: 'center' });
@@ -233,6 +243,7 @@
     var T = window.sickofitToy;
     var play = document.getElementById('start-button');
     if (!box || !cv || !T) { problem('bug', 'rewind toy is missing in play mode'); finish('error'); return; }
+    if (T.reset) T.reset();
     box.scrollIntoView({ block: 'center' });
     await until(function () { return T.state().running || T.state().bullets > 0; }, 4000, 'toy running');
     var s0 = T.state();
@@ -406,21 +417,52 @@
 
   window.hawkesPlaytest = {
     version: 1, product: 'sickofit',
-    scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
-      { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
+    scenarios: function () { return [
+      { id: 'smoke', title: 'Game/: smoke (same as game-start)', seconds: 180, tags: ['smoke'], description: 'Alias of game-start for product playtests named smoke.' },
+      { id: 'game-start', title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play', seconds: 180, tags: ['smoke'], description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.' },
+      { id: 'game-fail', title: 'Game/?playtest=fail-load: loader simulates a failed build fetch and shows the error', seconds: 45, tags: ['smoke'], description: 'Requires ?playtest=fail-load (or game-fail): the page loads a missing loader and the scenario photographs the failure banner.' },
       { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift', seconds: 25, tags: [] },
       { id: 'toy-wrap', title: 'Hero toy wrap: hint fades on move, dodge counter, payoff card with PLAY NOW and Try again, PLAY NOW beside toy, no sideways scroll, clip fallback', seconds: 35, tags: ['full'], starts: ['play', 'clip'] },
+      { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
+      { id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
+      { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
-      { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
+      { id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }]; },
     start: async function (id, options) {
-      if (['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'].indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: trailer, hero, toy, toy-wrap, about, share)');
+      options = options || {};
+      if (id === 'fail-load') id = 'game-fail';
+      if (GAME_IDS.indexOf(id) >= 0) {
+        t0 = performance.now();
+        run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0.02 }, metrics: {}, events: [], problems: [], log: [] };
+        ev('start', id);
+        var gq = new URLSearchParams(location.search);
+        gq.set('playtest', id === 'game-fail' ? 'fail-load' : id);
+        setTimeout(function () {
+          location.replace('Game/index.html?' + gq.toString() + location.hash);
+        }, 20);
+        return new Promise(function () {});
+      }
+      if (id === 'descent-assets') {
+        t0 = performance.now();
+        run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0.02 }, metrics: {}, events: [], problems: [], log: [] };
+        ev('start', id);
+        var dq = new URLSearchParams(location.search);
+        dq.set('playtest', 'descent-assets');
+        setTimeout(function () {
+          location.replace('data/descent/preview.html?' + dq.toString() + location.hash);
+        }, 20);
+        return new Promise(function () {});
+      }
+      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, about, share, descent-assets)');
+      var reqAt = String(options.at || q.get('at') || '');
+      if (run && !run.done && run.id === id && String(run.at || '') === reqAt) return;
       t0 = performance.now();
-      run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
+      run = { id: id, at: reqAt, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
       ev('start', id);
       try {
         if (id === 'hero') await hero();
         else if (id === 'toy') await toy();
-        else if (id === 'toy-wrap') await toyWrap(options || {});
+        else if (id === 'toy-wrap') await toyWrap(options);
         else if (id === 'about') await about();
         else if (id === 'share') await share();
         else await play();
@@ -428,8 +470,11 @@
     },
     stop: function () { if (run) finish('done'); },
     state: function () {
-      var ready = document.readyState !== 'loading' && !!document.getElementById('trailer-play');
-      if (!run) return { ready: ready, status: 'idle' };
+      var ready = document.readyState !== 'loading' && !!document.getElementById('trailer-play') && !!(window.sickofitToy || window.sickofitHero);
+      if (!run) {
+        if (LANDING_IDS.indexOf(which) >= 0) return { ready: ready, status: 'running', progress: 0.02 };
+        return { ready: ready, status: 'idle' };
+      }
       return { ready: ready, status: run.state.status, scene: run.state.scene, progress: run.state.progress, metrics: run.metrics };
     },
     report: function () {
@@ -438,6 +483,14 @@
         metrics: run.metrics, events: run.events.slice(), problems: run.problems.slice(), log: run.log.slice() };
     }
   };
-  var go = function () { if (document.getElementById('trailer-play')) window.hawkesPlaytest.start(which, {}); else setTimeout(go, 100); };
-  go();
+  if (LANDING_IDS.indexOf(which) >= 0) {
+    var go = function () {
+      if (document.getElementById('trailer-play') && (window.sickofitToy || window.sickofitHero)) {
+        window.hawkesPlaytest.start(which, { at: q.get('at') || undefined });
+      } else {
+        setTimeout(go, 100);
+      }
+    };
+    go();
+  }
 })();
