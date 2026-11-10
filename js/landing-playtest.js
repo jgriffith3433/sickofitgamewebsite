@@ -146,6 +146,34 @@
     if (f.hits > h0 && f.flash <= 0) problem('bug', 'getting hit did not flash the hero');
     run.state.progress = 0.7;
     ev('toy-recorded', f.recorded + ' frames in the ring buffer');
+    // rewind: tap first (unlocks sound), hold R, then the on-screen button, with real input events
+    cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
+    cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
+    await sleep(900);
+    var t0r = T.state();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+    await sleep(1200);
+    var t1r = T.state();
+    ev('toy-rewind', 'game time ' + round(t0r.time) + 's -> ' + round(t1r.time) + 's, meter ' + round(t0r.meter) + ' -> ' + round(t1r.meter) + ', rewinding=' + t1r.rewinding);
+    if (!t1r.rewinding || t1r.time >= t0r.time) problem('bug', 'holding R did not run the toy backwards');
+    if (t1r.meter >= t0r.meter) problem('bug', 'rewind meter did not drain');
+    ev('toy-rewind-whoosh', 'sound unlocked=' + t1r.soundUnlocked + ', whooshing=' + t1r.whooshing + ', played ' + t1r.whooshes);
+    if (t1r.soundOn && t1r.soundUnlocked && !t1r.whooshing && t1r.whooshes < 1) problem('bug', 'no reverse whoosh during rewind after a tap');
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    await sleep(150);
+    var t2r = T.state(); await sleep(600); var t3r = T.state();
+    ev('toy-rewind-release', 'resumed from game time ' + round(t2r.time) + 's -> ' + round(t3r.time) + 's, meter ' + round(t2r.meter) + ' -> ' + round(t3r.meter));
+    if (t3r.rewinding || t3r.time <= t2r.time) problem('bug', 'letting go did not resume forward play');
+    if (t3r.meter <= t2r.meter) problem('bug', 'rewind meter did not refill after release');
+    var rb = box.querySelectorAll('button')[0], bb = rb.getBoundingClientRect();
+    ev('toy-rewind-button', Math.round(bb.width) + 'x' + Math.round(bb.height) + ' css');
+    if (bb.height < 48 || bb.width < 48) problem('bug', 'rewind button is under 48 px');
+    rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+    await sleep(500);
+    ev('toy-rewind-button-hold', 'rewinding=' + T.state().rewinding);
+    if (!T.state().rewinding) problem('bug', 'holding the Rewind button did not rewind');
+    rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+    await sleep(300);
     window.scrollTo(0, box.getBoundingClientRect().top + window.scrollY + 900);
     await sleep(800);
     var c1 = T.state().steps; await sleep(600);
@@ -258,7 +286,7 @@
     version: 1, product: 'sickofit',
     scenarios: function () { return [{ id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
-      { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, stops off-screen, no page shift', seconds: 25, tags: [] },
+      { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift', seconds: 25, tags: [] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] }]; },
     start: async function (id, options) {
