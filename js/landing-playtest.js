@@ -169,9 +169,10 @@
     // rewind: tap first (unlocks sound), hold R, then the on-screen button, with real input events
     cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
     cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
-    // Unlock builds a whoosh buffer immediately (file or synth); short beat so AudioContext can resume.
-    await sleep(400);
+    // Unlock builds a whoosh buffer immediately (bundled WAV / file / synth); beat so AudioContext can resume.
+    await sleep(700);
     try { await until(function () { return T.state().soundUnlocked; }, 2000, 'sound unlock'); } catch (e) { problem('bug', 'tap did not unlock toy sound'); }
+    try { await until(function () { return T.state().whooshReady; }, 2000, 'whoosh buffer'); } catch (e) { problem('bug', 'whoosh buffer not ready after tap'); }
     var t0r = T.state();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
     await sleep(1200);
@@ -179,8 +180,8 @@
     ev('toy-rewind', 'game time ' + round(t0r.time) + 's -> ' + round(t1r.time) + 's, meter ' + round(t0r.meter) + ' -> ' + round(t1r.meter) + ', rewinding=' + t1r.rewinding);
     if (!t1r.rewinding || t1r.time >= t0r.time) problem('bug', 'holding R did not run the toy backwards');
     if (t1r.meter >= t0r.meter) problem('bug', 'rewind meter did not drain');
-    ev('toy-rewind-whoosh', 'sound unlocked=' + t1r.soundUnlocked + ', whooshing=' + t1r.whooshing + ', played ' + t1r.whooshes);
-    if (t1r.soundOn && t1r.soundUnlocked && !t1r.whooshing && t1r.whooshes < 1) problem('bug', 'no reverse whoosh during rewind after a tap');
+    ev('toy-rewind-whoosh', 'sound unlocked=' + t1r.soundUnlocked + ', whooshReady=' + t1r.whooshReady + ', whooshing=' + t1r.whooshing + ', played ' + t1r.whooshes);
+    if (t1r.soundOn && t1r.soundUnlocked && t1r.whooshes < 1) problem('bug', 'no reverse whoosh during rewind after a tap');
     document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
     await sleep(150);
     var t2r = T.state(); await sleep(600); var t3r = T.state();
