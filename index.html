@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <meta charset="utf-8">
+    <style>html,body{background:#0a0405;color:#eadfd8;color-scheme:dark}</style>
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; Game/ carries game-start and game-fail
          (js/game-playtest.js). Landing keeps trailer, hero, toy, toy-wrap, about, share (js/landing-playtest.js). Descent asset
          pack lives at data/descent/preview.html. Every other ?playtest= goes to Game/. Visitors never have ?playtest. -->
     <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
-    <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -39,7 +40,7 @@
     <style>
       .share{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:18px 0}.share span{color:#d9c8c0;font-weight:700}.share .btn.small{border:2px solid #6b2a1e;cursor:pointer;font:inherit;font-size:14px;font-weight:900}
       *{margin:0;padding:0;box-sizing:border-box}
-      html{scroll-behavior:smooth}
+      html{scroll-behavior:smooth;background:#0a0405;color-scheme:dark}
       html,body{overflow-x:hidden}
       body{background:#0a0405;color:#eadfd8;font:16px/1.6 Arial,sans-serif}
       a{color:#ff7a3d}
@@ -67,7 +68,7 @@
       @keyframes ovShotA{0%{background-position:13.636% 0}16.667%{background-position:86.364% 0}33.333%{background-position:13.636% 36.48%}50%{background-position:86.364% 36.48%}66.667%{background-position:13.636% 72.959%}83.333%{background-position:86.364% 72.959%}}
       @keyframes bkA{0.000%{background-position:0.000% 0.000%}6.250%{background-position:33.333% 0.000%}12.500%{background-position:66.667% 0.000%}18.750%{background-position:100.000% 0.000%}25.000%{background-position:0.000% 33.333%}31.250%{background-position:33.333% 33.333%}37.500%{background-position:66.667% 33.333%}43.750%{background-position:100.000% 33.333%}50.000%{background-position:0.000% 66.667%}56.250%{background-position:33.333% 66.667%}62.500%{background-position:66.667% 66.667%}68.750%{background-position:100.000% 66.667%}75.000%{background-position:0.000% 100.000%}81.250%{background-position:33.333% 100.000%}87.500%{background-position:66.667% 100.000%}93.750%{background-position:100.000% 100.000%}}
       @keyframes fbA{0.000%{background-position:0.000% 0%}7.143%{background-position:16.667% 0%}14.286%{background-position:33.333% 0%}21.429%{background-position:50.000% 0%}28.571%{background-position:66.667% 0%}35.714%{background-position:83.333% 0%}42.857%{background-position:100.000% 0%}50.000%{background-position:0.000% 100%}57.143%{background-position:16.667% 100%}64.286%{background-position:33.333% 100%}71.429%{background-position:50.000% 100%}78.571%{background-position:66.667% 100%}85.714%{background-position:83.333% 100%}92.857%{background-position:100.000% 100%}}
-      .hero .loop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+      .hero .loop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.22;pointer-events:none}
       .hero .shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(10,4,5,.3) 0,rgba(10,4,5,.75) 80%)}
       .hero .wrap{position:relative}
       .hero h1{font-size:clamp(44px,10vw,96px);font-weight:900;letter-spacing:.04em;color:#fff;text-shadow:0 0 30px rgba(255,80,20,.6)}
@@ -85,7 +86,7 @@
       .toy-payoff-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
       .hero[data-hero-mode="play"] .loop{opacity:.22;pointer-events:none}
       .hero[data-hero-mode="clip"] .rewind-toy{display:none!important}
-      .hero[data-hero-mode="clip"] .loop{opacity:1}
+      .hero[data-hero-mode="clip"] .loop{opacity:1;pointer-events:auto}
       .hero .sub{margin-top:14px;font-size:13px;color:#a8928a}
       section{padding:56px 0}
       h2{font-size:clamp(26px,5vw,38px);color:#fff;margin-bottom:8px;letter-spacing:.03em}
@@ -142,12 +143,12 @@
       #install-banner-buttons{display:flex;gap:10px}
       #install-banner button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 20px;font-size:13px;border-radius:6px;cursor:pointer}
     </style>
-    <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
-    <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
-    <script src="js/hawkes-site.js" defer></script>
     <script src="js/rewind-toy.js" defer></script>
     <script src="js/descent.js" defer></script>
     <script src="js/landing-playtest.js" defer></script>
+    <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
+    <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
+    <script src="js/hawkes-site.js" defer></script>
   </head>
   <body>
     <div id="install-banner">
@@ -161,7 +162,7 @@
       <a class="btn small" href="Game/index.html" data-play="nav">PLAY</a>
     </div></nav>
 
-    <header class="hero" data-hero>
+    <header class="hero" data-hero data-hero-mode="play">
       <video class="loop" data-hero-loop autoplay muted loop playsinline preload="metadata" width="960" height="720" disablepictureinpicture poster="images/hero-rewind.jpg" aria-hidden="true"><source src="images/hero-rewind.mp4" type="video/mp4"></video><script>(function(){var v=document.querySelector('[data-hero-loop]');if(!v)return;v.muted=true;var sync=function(){var mode=(document.querySelector('[data-hero]')||{}).getAttribute&&document.querySelector('[data-hero]').getAttribute('data-hero-mode');var on=document.visibilityState!=='hidden';if(mode==='play'){v.pause();return;}if(!on){v.pause();return;}var p=v.play();if(p&&p.catch)p.catch(function(){});};if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)sync();else v.pause();});},{threshold:0.15}).observe(v);}document.addEventListener('visibilitychange',sync);setTimeout(sync,0);})();</script>
       <div class="shade" aria-hidden="true"></div>
       <div class="wrap">
@@ -275,46 +276,13 @@
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('sw.js').then(function(reg) {
             console.log('Service worker registered.', reg);
-            
-            // Check for updates on visibility change and periodically (every 60 seconds)
-            let updateCheckInterval;
-            
-            const checkForUpdates = () => {
+            document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'visible') {
                 reg.update();
               }
-            };
-            
-            // Check on visibility change
-            document.addEventListener('visibilitychange', checkForUpdates);
-            
-            // Also check every 60 seconds when visible
-            updateCheckInterval = setInterval(checkForUpdates, 60000);
-            
-            // Handle service worker updates
-            reg.addEventListener('updatefound', function() {
-              const newWorker = reg.installing;
-              console.log('Service worker update found!');
-              
-              newWorker.addEventListener('statechange', function() {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker is installed, prompt user to refresh
-                  console.log('New version available! Activating...');
-                  newWorker.postMessage({ action: 'skipWaiting' });
-                }
-              });
             });
           }).catch(function(err) {
             console.error('Service worker registration failed:', err);
-          });
-          
-          // Reload page when new service worker takes control
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', function() {
-            if (refreshing) return;
-            refreshing = true;
-            console.log('Service worker updated, reloading page...');
-            window.location.reload();
           });
         });
       }

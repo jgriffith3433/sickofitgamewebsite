@@ -130,15 +130,18 @@
 
   // Optional VO: play sounds/toy-payoff.wav when present (Gen import). Text line stays the beat if the file is missing.
   var payoffBuf = null, payoffLoading = false;
+  // Resolves to a decoded AudioBuffer, or null when the clip is missing, an HTML fallback page, or undecodable: never rejects.
+  function loadClip(url) {
+    return fetch(url).then(function (r) {
+      var type = (r.headers.get('content-type') || '').toLowerCase();
+      if (!r.ok || type.indexOf('text/') === 0) return null;
+      return r.arrayBuffer().then(function (b) { return b.byteLength ? actx.decodeAudioData(b) : null; });
+    }).catch(function () { return null; });
+  }
   function loadPayoffVo() {
     if (payoffLoading || payoffBuf || !actx) return;
     payoffLoading = true;
-    fetch(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (r) {
-      if (!r.ok) throw new Error('no vo');
-      return r.arrayBuffer();
-    }).then(function (b) {
-      return actx.decodeAudioData(b);
-    }).then(function (d) { payoffBuf = d; payoffLoading = false; }, function () { payoffLoading = false; });
+    loadClip(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
   }
   function sayPayoff() {
     if (!unlocked || !soundOn || !actx) return;
@@ -370,17 +373,18 @@
       // Ready immediately so a hold-R right after the first tap still whooshes; file replaces this when it loads.
       wbuf = makeWhooshBuf();
       loading = true;
-      fetch(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav').then(function (r) { if (!r.ok) throw new Error('no whoosh'); return r.arrayBuffer(); })
-        .then(function (b) { return actx.decodeAudioData(b); })
+      // loadClip never rejects (beta #49); keep procedural buffer if the WAV is missing/HTML/undecodable.
+      loadClip(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav')
         .then(function (d) {
-          wbuf = d; loading = false;
-          if (rewinding && !wsrc) whoosh(true);
-          else if (rewinding && wsrc) { whoosh(false); whoosh(true); }
-          loadPayoffVo();
-        }, function () {
-          if (!wbuf) wbuf = makeWhooshBuf();
+          if (d) {
+            wbuf = d;
+            if (rewinding && wsrc) { whoosh(false); whoosh(true); }
+            else if (rewinding && !wsrc) whoosh(true);
+          } else if (!wbuf) {
+            wbuf = makeWhooshBuf();
+            if (rewinding && !wsrc) whoosh(true);
+          }
           loading = false;
-          if (rewinding && !wsrc) whoosh(true);
           loadPayoffVo();
         });
     } catch (e) {}
