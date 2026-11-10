@@ -137,7 +137,7 @@
       if (!r.ok) throw new Error('no vo');
       return r.arrayBuffer();
     }).then(function (b) {
-      return new Promise(function (ok, no) { actx.decodeAudioData(b, ok, no); });
+      return actx.decodeAudioData(b);
     }).then(function (d) { payoffBuf = d; payoffLoading = false; }, function () { payoffLoading = false; });
   }
   function sayPayoff() {
@@ -347,8 +347,8 @@
       actx = new AC();
       if (actx.state === 'suspended') actx.resume();
       loading = true;
-      fetch(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav').then(function (r) { return r.arrayBuffer(); })
-        .then(function (b) { return new Promise(function (ok, no) { actx.decodeAudioData(b, ok, no); }); })
+      fetch(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav').then(function (r) { if (!r.ok) throw new Error('no whoosh'); return r.arrayBuffer(); })
+        .then(function (b) { return actx.decodeAudioData(b); })
         .then(function (d) { wbuf = d; loading = false; if (rewinding) whoosh(true); loadPayoffVo(); }, function () { loading = false; loadPayoffVo(); });
     } catch (e) {}
   }
