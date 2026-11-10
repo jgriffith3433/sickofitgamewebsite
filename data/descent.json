@@ -1,0 +1,99 @@
+{
+  "id": "descent",
+  "product": "sickofit",
+  "title": "The descent",
+  "note": "Landing-story package for Shaft + Floors 1000–997. Quips are the hero's opening voiced line from each floor (Unity level JSON); Story.md warm-grey beats stay unvoiced narration in-game. Paths are relative to this file. Lazy-load layers and audio per floor.",
+  "source": {
+    "story": "sickofitgame-unity Docs/Story.md (level beats table)",
+    "levels": "Assets/GameConfig/levels/Floor{1000,999,998,997}.json",
+    "art": "Shaft band/meadow/marker WebPs from Tools/Web/site-images.sh; press-kit village shots and character art already on this site",
+    "audio": "Assets/Audio/Generated/*.mp3 from the Unity repo (no new GPU generation)"
+  },
+  "captionOnly": [],
+  "floors": [
+    {
+      "id": "shaft",
+      "floor": null,
+      "label": "The Shaft",
+      "title": "The fall",
+      "quip": "...Great.",
+      "voice": "descent/shaft/voice.mp3",
+      "voiceId": "vo_shaft_great",
+      "ambience": "descent/shaft/ambience.mp3",
+      "ambienceId": "shaft_fall",
+      "layers": [
+        { "id": "far", "src": "descent/shaft/layer-far.webp", "parallax": 0.15, "from": "Assets/Art/Shaft/meadow.png → blog/lore/img/meadow.webp" },
+        { "id": "mid", "src": "descent/shaft/layer-mid.webp", "parallax": 0.35, "from": "Assets/Art/Shaft/band_X.png → blog/lore/img/band-X.webp" },
+        { "id": "near", "src": "descent/shaft/layer-near.webp", "parallax": 0.7, "from": "Assets/Art/Shaft/marker.png → blog/lore/img/hero.webp" }
+      ]
+    },
+    {
+      "id": "1000",
+      "floor": 1000,
+      "label": "Floor 1000",
+      "title": "The Landing",
+      "quip": "Floor one thousand. Of course it's a thousand.",
+      "voice": "descent/1000/voice.mp3",
+      "voiceId": "vo_landing_intro",
+      "ambience": "descent/1000/ambience.mp3",
+      "ambienceId": "lava_bubble",
+      "beat": "The bottom of Hell. He is already sick of it.",
+      "layers": [
+        { "id": "far", "src": "descent/1000/layer-far.webp", "parallax": 0.15, "from": "band-X.webp (lower crop)" },
+        { "id": "mid", "src": "descent/1000/layer-mid.webp", "parallax": 0.4, "from": "Portal_scorch → blog/lore/img/scorch.webp" },
+        { "id": "near", "src": "descent/1000/layer-near.webp", "parallax": 0.75, "from": "images/Overlord.png → blog/lore/img/overlord.webp" }
+      ]
+    },
+    {
+      "id": "999",
+      "floor": 999,
+      "label": "Floor 999",
+      "title": "Only 999 To Go",
+      "quip": "You said that already.",
+      "voice": "descent/999/voice.mp3",
+      "voiceId": "vo_landing_999",
+      "ambience": "descent/999/ambience.mp3",
+      "ambienceId": "magma_rumble",
+      "beat": "One floor up. Hell is counting along.",
+      "layers": [
+        { "id": "far", "src": "descent/999/layer-far.webp", "parallax": 0.15, "from": "band-X.webp (upper crop)" },
+        { "id": "mid", "src": "descent/999/layer-mid.webp", "parallax": 0.4, "from": "MagmaKing_idle → blog/lore/img/magma-king.webp" },
+        { "id": "near", "src": "descent/999/layer-near.webp", "parallax": 0.75, "from": "images/Fireball.png → blog/lore/img/thumb-fireball.webp" }
+      ]
+    },
+    {
+      "id": "998",
+      "floor": 998,
+      "label": "Floor 998",
+      "title": "The Spill",
+      "quip": "Oh, sure. Take the rocket launcher. Take it.",
+      "voice": "descent/998/voice.mp3",
+      "voiceId": "vo_f998_taken",
+      "ambience": "descent/998/ambience.mp3",
+      "ambienceId": "portal_suck_whoosh",
+      "beat": "They took the village. Now they take the gun.",
+      "layers": [
+        { "id": "far", "src": "descent/998/layer-far.webp", "parallax": 0.15, "from": "images/QuietVillageBefore.jpg" },
+        { "id": "mid", "src": "descent/998/layer-mid.webp", "parallax": 0.4, "from": "images/QuietVillageAfter.jpg" },
+        { "id": "near", "src": "descent/998/layer-near.webp", "parallax": 0.75, "from": "images/Fireball.png" }
+      ]
+    },
+    {
+      "id": "997",
+      "floor": 997,
+      "label": "Floor 997",
+      "title": "Imp Run",
+      "quip": "Those are ours.",
+      "voice": "descent/997/voice.mp3",
+      "voiceId": "vo_imprun_ours",
+      "ambience": "descent/997/ambience.mp3",
+      "ambienceId": "impSack_attack",
+      "beat": "Imps haul his village's diamonds. Same sack, every loop.",
+      "layers": [
+        { "id": "far", "src": "descent/997/layer-far.webp", "parallax": 0.15, "from": "band-X.webp (bottom crop)" },
+        { "id": "mid", "src": "descent/997/layer-mid.webp", "parallax": 0.4, "from": "images/Bork.png" },
+        { "id": "near", "src": "descent/997/layer-near.webp", "parallax": 0.75, "from": "yooba_idle → blog/lore/img/yooba-idle.webp (first frame)" }
+      ]
+    }
+  ]
+}
