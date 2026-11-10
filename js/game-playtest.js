@@ -4,7 +4,7 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'];
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
   var playtestOn = false;
   try {
     playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest') || sessionStorage.getItem('hawkes.playtest'));
@@ -358,6 +358,12 @@
           tags: ['smoke']
         },
         {
+          id: 'descent',
+          title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion',
+          seconds: 30,
+          tags: ['full']
+        },
+        {
           id: 'share',
           title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist',
           seconds: 12,
@@ -406,7 +412,7 @@
       }
       id = resolveId(id);
       if (id !== 'game-start' && id !== 'game-fail') {
-        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, share, descent-assets)');
+        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, descent-assets)');
       }
       if (run && !run.done && run.id === id) return;
       t0 = performance.now();

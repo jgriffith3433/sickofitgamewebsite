@@ -4,7 +4,7 @@
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; Game/ carries game-start and game-fail
          (js/game-playtest.js). Landing keeps trailer, hero, toy, toy-wrap, about, share (js/landing-playtest.js). Descent asset
          pack lives at data/descent/preview.html. Every other ?playtest= goes to Game/. Visitors never have ?playtest. -->
-    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='share')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
+    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
