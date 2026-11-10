@@ -1,5 +1,5 @@
 // Rewind toy: a tiny dependency-free bullet-dodger for the landing hero. Drag (relative, so a finger never covers the
-// hero) or arrows/WASD. Every fixed step is written into a ring buffer (last ~5 s) so a later task can play it backwards.
+// hero) or arrows/WASD. Every fixed step is written into a ring buffer (last ~5 s); hold Rewind or R to play it backwards.
 // Runs requestAnimationFrame only while the arena is on screen and the tab is visible.
 (function () {
   var box = document.querySelector('[data-rewind-toy]');
@@ -14,7 +14,7 @@
 
   var STEP = 1 / 60, SECONDS = 5, FRAMES = SECONDS * 60, MAXB = 48, HERO_R = 13, FLASH = 0.45, GRACE = 0.9;
   // Ring buffer: one fixed slab, nothing allocated while playing. Per frame: t, hero x/y, flash, bullet count, bullets (x, y).
-  var BSTRIDE = 5 + MAXB * 2;
+  var BSTRIDE = 6 + MAXB * 4;
   var ring = new Float32Array(FRAMES * BSTRIDE), head = 0, filled = 0;
 
   var W = 0, H = 0, dpr = 1;
@@ -22,6 +22,9 @@
   var bx = new Float32Array(MAXB), by = new Float32Array(MAXB), bvx = new Float32Array(MAXB), bvy = new Float32Array(MAXB), bn = 0;
   var time = 0, acc = 0, last = 0, spawnA = 0, spawnB = 2, spawnC = 4, spin = 0, hits = 0, steps = 0;
   var onScreen = false, raf = 0, keys = {}, drag = null;
+  // Rewind: hold the button or R. Plays the ring buffer backwards at 1.5x; the meter drains while held and refills after.
+  var RATE = 1.5, DRAIN = 1 / 3.5, REFILL = 1 / 6;
+  var meter = 1, rewinding = false, holdBtn = false, holdKey = false, racc = 0, rewound = 0, rewindFrames = 0, noise = 0;
 
   var img = new Image();
   img.src = box.getAttribute('data-sprite') || 'blog/lore/img/hero.webp';
@@ -92,17 +95,135 @@
 
   function record() {
     var o = head * BSTRIDE;
-    ring[o] = time; ring[o + 1] = hero.x; ring[o + 2] = hero.y; ring[o + 3] = hero.flash; ring[o + 4] = bn;
-    for (var i = 0; i < bn; i++) { ring[o + 5 + i * 2] = bx[i]; ring[o + 6 + i * 2] = by[i]; }
+    ring[o] = time; ring[o + 1] = hero.x; ring[o + 2] = hero.y; ring[o + 3] = hero.flash; ring[o + 4] = bn; ring[o + 5] = hero.grace;
+    for (var i = 0; i < bn; i++) { var q = o + 6 + i * 4; ring[q] = bx[i]; ring[q + 1] = by[i]; ring[q + 2] = bvx[i]; ring[q + 3] = bvy[i]; }
     head = (head + 1) % FRAMES;
     if (filled < FRAMES) filled++;
   }
+
+  function restore(f) {
+    var o = f * BSTRIDE;
+    time = ring[o]; hero.x = ring[o + 1]; hero.y = ring[o + 2]; hero.flash = ring[o + 3]; bn = ring[o + 4]; hero.grace = ring[o + 5];
+    for (var i = 0; i < bn; i++) { var q = o + 6 + i * 4; bx[i] = ring[q]; by[i] = ring[q + 1]; bvx[i] = ring[q + 2]; bvy[i] = ring[q + 3]; }
+  }
+
+  // One recorded frame back. The newest frame is the present, so restore the one before it.
+  function back() {
+    if (filled < 2) return false;
+    head = (head - 1 + FRAMES) % FRAMES; filled--;
+    restore((head - 1 + FRAMES) % FRAMES);
+    rewindFrames++;
+    return true;
+  }
+
+  function setRewinding(on) {
+    if (on === rewinding) return;
+    rewinding = on;
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.classList.toggle('on', on);
+    if (on) { racc = 0; rewound++; whoosh(true); } else { whoosh(false); }
+  }
+
+  function tickRewind(dt) {
+    var want = (holdBtn || holdKey) && meter > 0 && filled > 1;
+    if (want && !rewinding) setRewinding(true);
+    if (!want && rewinding) setRewinding(false);
+    if (rewinding) {
+      meter = Math.max(0, meter - DRAIN * dt);
+      racc += dt * RATE / STEP;
+      while (racc >= 1) { racc -= 1; if (!back()) break; }
+      if (meter <= 0 || filled < 2) setRewinding(false);
+    } else {
+      meter = Math.min(1, meter + REFILL * dt);
+    }
+    var pct = Math.round(meter * 100);
+    fill.style.width = pct + '%';
+    btn.disabled = false;
+  }
+
+  function drawRewind() {
+    // cold tint, scanlines, noise, REWIND tag: the look of the hero clip
+    ctx.fillStyle = 'rgba(70,150,255,.22)'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(0,10,30,.28)';
+    for (var y = (steps % 4); y < H; y += 4) ctx.fillRect(0, y, W, 1.5);
+    for (var i = 0; i < 70; i++) {
+      noise = (noise * 9301 + 49297 + i * 17) % 233280;
+      ctx.fillStyle = 'rgba(200,225,255,' + (0.08 + (noise % 100) / 700) + ')';
+      ctx.fillRect(noise % W, (noise * 7) % H, 2 + noise % 14, 1);
+    }
+    var by0 = (steps * 3) % (H + 40) - 20;
+    ctx.fillStyle = 'rgba(160,210,255,.12)'; ctx.fillRect(0, by0, W, 10);
+    ctx.font = '900 14px Arial,sans-serif'; ctx.textBaseline = 'top';
+    var tw = ctx.measureText('REWIND').width;
+    ctx.fillStyle = 'rgba(10,30,60,.8)'; ctx.fillRect(10, 10, tw + 38, 24);
+    ctx.fillStyle = '#bfe3ff'; ctx.fillText('\u25C0\u25C0 REWIND', 18, 15);
+  }
+
+  var actx = null, wbuf = null, wsrc = null, wgain = null, unlocked = false, soundOn = true, whooshes = 0, loading = false;
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true; refreshSound();
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      actx = new AC();
+      if (actx.state === 'suspended') actx.resume();
+      loading = true;
+      fetch(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav').then(function (r) { return r.arrayBuffer(); })
+        .then(function (b) { return new Promise(function (ok, no) { actx.decodeAudioData(b, ok, no); }); })
+        .then(function (d) { wbuf = d; loading = false; if (rewinding) whoosh(true); }, function () { loading = false; });
+    } catch (e) {}
+  }
+  function whoosh(on) {
+    if (on) {
+      if (!unlocked || !soundOn || !actx || !wbuf || wsrc) return;
+      wsrc = actx.createBufferSource(); wsrc.buffer = wbuf;
+      wgain = actx.createGain(); wgain.gain.value = 0.5;
+      // pitch ramp: the reverse whoosh climbs while the hold lasts
+      wsrc.playbackRate.setValueAtTime(0.8, actx.currentTime);
+      wsrc.playbackRate.linearRampToValueAtTime(1.6, actx.currentTime + 3.5);
+      wsrc.connect(wgain); wgain.connect(actx.destination); wsrc.start(); whooshes++;
+    } else if (wsrc) {
+      try { wgain.gain.setTargetAtTime(0, actx.currentTime, 0.04); wsrc.stop(actx.currentTime + 0.2); } catch (e) {}
+      wsrc = null;
+    }
+  }
+  function refreshSound() {
+    snd.textContent = !unlocked ? '\uD83D\uDD07 Sound: tap to enable' : soundOn ? '\uD83D\uDD0A Sound on' : '\uD83D\uDD07 Sound off';
+    snd.setAttribute('aria-pressed', unlocked && soundOn ? 'true' : 'false');
+  }
+  document.addEventListener('pointerdown', unlock, true);
+  document.addEventListener('keydown', unlock, true);
+
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.setAttribute('aria-pressed', 'false');
+  btn.innerHTML = '<span aria-hidden="true">\u25C0\u25C0</span> Rewind<i><b></b></i>';
+  btn.style.cssText = 'position:absolute;right:8px;bottom:8px;min-width:112px;min-height:52px;padding:6px 14px;border-radius:10px;border:2px solid #6fb4ff;background:rgba(10,24,48,.82);color:#cfe8ff;font:900 15px Arial,sans-serif;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;-webkit-tap-highlight-color:transparent';
+  var bar = btn.querySelector('i'), fill = btn.querySelector('b');
+  bar.style.cssText = 'display:block;width:84px;height:5px;border-radius:3px;background:rgba(111,180,255,.25);overflow:hidden';
+  fill.style.cssText = 'display:block;height:100%;width:100%;background:#8fd0ff';
+  box.appendChild(btn);
+  var snd = document.createElement('button');
+  snd.type = 'button';
+  snd.style.cssText = 'position:absolute;left:8px;bottom:8px;min-height:32px;padding:4px 10px;border-radius:8px;border:1px solid #4a3a36;background:rgba(10,4,5,.7);color:#d9c3ba;font:700 12px Arial,sans-serif;cursor:pointer';
+  box.appendChild(snd); refreshSound();
+  snd.addEventListener('click', function () {
+    if (!unlocked) { unlock(); return; }
+    soundOn = !soundOn; if (!soundOn) whoosh(false); else if (rewinding) whoosh(true);
+    refreshSound();
+  });
+  btn.addEventListener('pointerdown', function (e) { e.preventDefault(); holdBtn = true; try { btn.setPointerCapture(e.pointerId); } catch (x) {} });
+  function btnUp() { holdBtn = false; }
+  btn.addEventListener('pointerup', btnUp); btn.addEventListener('pointercancel', btnUp); btn.addEventListener('lostpointercapture', btnUp);
+  btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  btn.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') { holdBtn = true; e.preventDefault(); } });
+  btn.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') holdBtn = false; });
 
   function draw() {
     if (!W) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(10,4,5,.55)';
+    ctx.fillStyle = rewinding ? 'rgba(4,10,24,.65)' : 'rgba(10,4,5,.55)';
     ctx.fillRect(0, 0, W, H);
     ctx.strokeStyle = 'rgba(255,120,60,.35)'; ctx.lineWidth = 2;
     ctx.strokeRect(1, 1, W - 2, H - 2);
@@ -127,6 +248,7 @@
       ctx.beginPath(); ctx.arc(hero.x, hero.y, HERO_R * (1.2 + (1 - f) * 0.8), 0, 6.2832); ctx.fill();
       ctx.strokeStyle = 'rgba(255,255,255,' + f + ')'; ctx.lineWidth = 3; ctx.stroke();
     }
+    if (rewinding) drawRewind();
   }
 
   function frame(now) {
@@ -134,7 +256,8 @@
     if (!onScreen || document.hidden) return;
     var dt = Math.min((now - last) / 1000, 0.1);
     last = now; acc += dt;
-    while (acc >= STEP) { step(); acc -= STEP; }
+    tickRewind(dt);
+    if (rewinding) acc = 0; else while (acc >= STEP) { step(); acc -= STEP; }
     draw();
     raf = requestAnimationFrame(frame);
   }
@@ -142,7 +265,7 @@
   function update() {
     var go = onScreen && !document.hidden;
     if (go && !raf) { last = performance.now(); acc = 0; size(); raf = requestAnimationFrame(frame); }
-    if (!go && raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (!go && raf) { cancelAnimationFrame(raf); raf = 0; holdKey = false; holdBtn = false; setRewinding(false); }
   }
 
   // Relative drag: the hero moves by how far the pointer moved, so a finger can sit beside it.
@@ -164,6 +287,11 @@
   var map = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
   function key(down) {
     return function (e) {
+      if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        var tg = e.target && e.target.tagName;
+        if (tg !== 'INPUT' && tg !== 'TEXTAREA' && tg !== 'SELECT' && (!down || onScreen)) holdKey = down;
+        return;
+      }
       var k = map[e.key];
       if (!k || e.ctrlKey || e.metaKey || e.altKey) return;
       var t = e.target && e.target.tagName;
@@ -176,7 +304,7 @@
   }
   document.addEventListener('keydown', key(true));
   document.addEventListener('keyup', key(false));
-  window.addEventListener('blur', function () { keys = {}; });
+  window.addEventListener('blur', function () { keys = {}; holdKey = false; holdBtn = false; });
   document.addEventListener('visibilitychange', update);
   window.addEventListener('resize', size);
 
@@ -189,6 +317,6 @@
   // Read-only view for the playtest and for the rewind task to come.
   window.sickofitToy = {
     ring: function () { return { buffer: ring, stride: BSTRIDE, frames: FRAMES, head: head, filled: filled, maxBullets: MAXB }; },
-    state: function () { return { running: !!raf, onScreen: onScreen, x: hero.x, y: hero.y, w: W, h: H, bullets: bn, hits: hits, flash: hero.flash, steps: steps, recorded: filled, dpr: dpr }; }
+    state: function () { return { running: !!raf, onScreen: onScreen, x: hero.x, y: hero.y, w: W, h: H, bullets: bn, hits: hits, flash: hero.flash, steps: steps, rewinding: rewinding, meter: meter, time: time, rewound: rewound, rewindFrames: rewindFrames, soundUnlocked: unlocked, soundOn: soundOn, whooshes: whooshes, whooshing: !!wsrc, recorded: filled, dpr: dpr }; }
   };
 })();
