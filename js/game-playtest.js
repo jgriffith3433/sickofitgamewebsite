@@ -257,39 +257,6 @@
     run.metrics.audioContextRunning = audioOk ? 1 : 0;
     run.metrics.overlayBlockedAfterPlay = overlayAfterPlay ? 1 : 0;
 
-    // Failure state for the same run: open Game/?playtest=fail-load in a full-page frame (setup shortcut).
-    beat(0.85, 'failure frame');
-    ev('setup-shortcut', 'iframe Game/?playtest=fail-load for failure state');
-    var frame = document.createElement('iframe');
-    frame.setAttribute('title', 'playtest fail-load');
-    frame.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:2147483000;background:#000';
-    var failUrl = new URL('index.html', location.href);
-    failUrl.search = '?playtest=fail-load';
-    document.body.appendChild(frame);
-    frame.src = failUrl.href;
-    try {
-      await until(function () {
-        try {
-          var doc = frame.contentDocument;
-          if (!doc) return false;
-          var warn = doc.getElementById('unity-warning');
-          var hasErr = warn && warn.children && warn.children.length > 0;
-          var g = doc.getElementById('guide-status');
-          var statusFail = g && /fail|error|could not|check your connection/i.test(g.textContent || '');
-          return !!(hasErr || statusFail);
-        } catch (e) { return false; }
-      }, 45000, 'fail-load error UI');
-      run.state.scene = 'failure';
-      ev('scene', 'failure');
-      ev('failure-state', 'fail-load showed an error');
-      await sleep(2500);
-    } catch (e) {
-      problem('warning', 'failure frame: ' + (e && e.message || e));
-      run.state.scene = 'failure';
-      ev('scene', 'failure');
-      await sleep(2000);
-    }
-
     window.removeEventListener('hawkes-unity-progress', onProgress);
     beat(1, 'done');
     finish('done');
@@ -345,10 +312,10 @@
         },
         {
           id: 'game-start',
-          title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play; then fail-load frame',
+          title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play',
           seconds: 180,
           tags: ['smoke'],
-          description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning. Opens ?playtest=fail-load in a frame for the failure scene.'
+          description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.'
         },
         {
           id: 'game-fail',
