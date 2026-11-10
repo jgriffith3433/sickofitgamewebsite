@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sick Of It</title>
+  <!--
+    Studio opens this product's beta at the live path /play/sickofit/ (hawkesgames.com/play/sickofit/).
+    Send landing playtests (and regular visitors) to the root landing page (index.html, where js/landing-playtest.js
+    lists toy, toy-wrap, hero, trailer, about, share, smoke, game-start, game-fail and forwards Game/ scenarios to Game/),
+    and send every other ?playtest= (including an empty one, which the bot opens for the default smoke run) straight to Game/.
+  -->
+  <style>html,body{margin:0;background:#0a0405;color:#eadfd8;font:16px/1.6 Arial,sans-serif;padding:24px}</style>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var pt = q.get('playtest');
+      try {
+        if (navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest')) {
+          sessionStorage.setItem('hawkes.playtest', '1');
+        }
+      } catch (e) {}
+      var rel = '../../';
+      if (pt === 'descent-assets') {
+        rel = '../../data/descent/preview.html';
+      } else if (q.has('playtest') && ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'].indexOf(pt) < 0) {
+        rel = '../../Game/';
+      }
+      var dest = new URL(rel, location.href);
+      dest.search = location.search;
+      dest.hash = location.hash;
+      location.replace(dest.href);
+    })();
+  </script>
+</head>
+<body>
+  <p>Opening Sick Of It… <a id="go" href="../../">Continue</a></p>
+  <script>
+    document.getElementById('go').href = '../../' + location.search + location.hash;
+  </script>
+</body>
+</html>

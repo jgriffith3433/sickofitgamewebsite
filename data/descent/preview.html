@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Descent assets — Sick Of It</title>
+  <meta name="robots" content="noindex">
+  <style>
+    :root { --bg:#0b0605; --ink:#f4e8d8; --mute:#c9b8a6; --accent:#ff7a1a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 Georgia, "Times New Roman", serif; }
+    h1 { font-size: clamp(1.4rem, 4vw, 2rem); margin: 0 0 .4rem; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    .lead { color: var(--mute); margin: 0 0 1.25rem; max-width: 36em; }
+    .floor {
+      position: relative; min-height: 70vh; margin: 0 0 1.5rem; overflow: hidden;
+      border: 1px solid rgba(255,122,26,.25); background: #140705;
+    }
+    .layers { position: absolute; inset: 0; }
+    .layer {
+      position: absolute; inset: 0; background: center / cover no-repeat;
+      opacity: 0; transition: opacity .4s ease;
+    }
+    .floor.is-on .layer { opacity: 1; }
+    .layer[data-depth="far"] { transform: scale(1.08); filter: brightness(.7); }
+    .layer[data-depth="mid"] { mix-blend-mode: screen; opacity: 0 !important; }
+    .floor.is-on .layer[data-depth="mid"] { opacity: .85 !important; }
+    .layer[data-depth="near"] {
+      background-size: contain; background-position: 70% 80%; mix-blend-mode: normal;
+    }
+    .caption {
+      position: relative; z-index: 2; padding: 1rem 1.1rem; margin-top: 42vh;
+      background: linear-gradient(transparent, rgba(11,6,5,.92) 30%);
+    }
+    .floor-num { letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-size: .75rem; }
+    .quip { font-size: clamp(1.1rem, 3.2vw, 1.45rem); margin: .35rem 0 0; }
+    .meta { color: var(--mute); font-size: .85rem; margin-top: .5rem; }
+    .sound {
+      position: sticky; top: .5rem; z-index: 5; float: right;
+      background: rgba(0,0,0,.7); color: var(--ink); border: 1px solid var(--accent);
+      padding: .4rem .7rem; cursor: pointer; font: inherit;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .layer { transition: none; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <button type="button" class="sound" data-sound aria-pressed="false">Sound off</button>
+    <h1>The descent — asset pack</h1>
+    <p class="lead">Shaft and Floors 1000–997: layered art from the game, one hero quip each, voice and ambience where the Unity build already has them. Scroll. Lazy-loads every floor.</p>
+    <div data-floors></div>
+  </div>
+  <script>
+(function () {
+  var root = document.querySelector('[data-floors]');
+  var soundOn = false;
+  var played = {};
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function loadJson() {
+    return fetch('../descent.json').then(function (r) {
+      if (!r.ok) throw new Error('descent.json ' + r.status);
+      return r.json();
+    });
+  }
+
+  function abs(path) {
+    return new URL(path.replace(/^descent\//, ''), location.href).href;
+  }
+
+  function build(data) {
+    data.floors.forEach(function (f) {
+      var el = document.createElement('section');
+      el.className = 'floor';
+      el.dataset.floorId = f.id;
+      el.setAttribute('data-floor', f.floor == null ? 'shaft' : String(f.floor));
+      var layers = document.createElement('div');
+      layers.className = 'layers';
+      f.layers.forEach(function (L) {
+        var d = document.createElement('div');
+        d.className = 'layer';
+        d.dataset.depth = L.id;
+        d.dataset.src = abs(L.src);
+        layers.appendChild(d);
+      });
+      var cap = document.createElement('div');
+      cap.className = 'caption';
+      cap.innerHTML = '<div class="floor-num">' + (f.label || f.id) + ' · ' + (f.title || '') + '</div>' +
+        '<p class="quip" data-quip>' + f.quip + '</p>' +
+        '<p class="meta">' + (f.voice ? 'Voice: ' + f.voiceId : 'Caption only') +
+        ' · Ambience: ' + (f.ambienceId || 'none') + '</p>';
+      el.appendChild(layers);
+      el.appendChild(cap);
+      el._data = f;
+      root.appendChild(el);
+    });
+  }
+
+  function paint(el) {
+    if (el.dataset.painted) return;
+    el.dataset.painted = '1';
+    Array.prototype.forEach.call(el.querySelectorAll('.layer'), function (L) {
+      L.style.backgroundImage = 'url("' + L.dataset.src + '")';
+    });
+  }
+
+  var ambLoop = null;
+  function stopAmb() {
+    if (ambLoop) { try { ambLoop.pause(); } catch (e) {} ambLoop = null; }
+  }
+  function speak(f) {
+    if (!soundOn) return;
+    if (f.ambience && (!ambLoop || ambLoop._floorId !== f.id)) {
+      stopAmb();
+      ambLoop = new Audio(abs(f.ambience));
+      ambLoop._floorId = f.id;
+      ambLoop.loop = true;
+      ambLoop.volume = 0.3;
+      ambLoop.play().catch(function () {});
+    }
+    if (played[f.id]) return;
+    played[f.id] = true;
+    if (f.voice) {
+      var v = new Audio(abs(f.voice));
+      v.volume = 0.9; v.play().catch(function () {});
+    }
+  }
+
+  function onScroll() {
+    var mid = window.innerHeight * 0.45;
+    Array.prototype.forEach.call(root.children, function (el) {
+      var r = el.getBoundingClientRect();
+      var on = r.top < mid && r.bottom > mid;
+      if (on) {
+        paint(el);
+        el.classList.add('is-on');
+        speak(el._data);
+        if (!still) {
+          var y = (r.top - mid) * 0.08;
+          Array.prototype.forEach.call(el.querySelectorAll('.layer'), function (L) {
+            var p = L.dataset.depth === 'far' ? 0.3 : L.dataset.depth === 'mid' ? 0.6 : 1;
+            L.style.transform = 'translate3d(0,' + (y * p).toFixed(1) + 'px,0)';
+          });
+        }
+      } else {
+        el.classList.remove('is-on');
+      }
+    });
+  }
+
+  document.querySelector('[data-sound]').addEventListener('click', function () {
+    soundOn = !soundOn;
+    this.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    this.textContent = soundOn ? 'Sound on' : 'Sound off';
+  });
+
+  window.hellDescentAssets = {
+    floors: function () { return Array.prototype.map.call(root.children, function (el) { return el.dataset.floorId; }); },
+    painted: function () { return Array.prototype.filter.call(root.children, function (el) { return el.dataset.painted; }).map(function (el) { return el.dataset.floorId; }); }
+  };
+
+  loadJson().then(function (data) {
+    build(data);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+    window.dispatchEvent(new Event('descent-assets-ready'));
+  }).catch(function (e) {
+    root.textContent = 'Failed to load descent.json: ' + e.message;
+  });
+})();
+  </script>
+  <script>
+/* Playtest: ?playtest=descent-assets — scrolls each floor, logs layers/quip/voice, checks sizes. */
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (q.get('playtest') !== 'descent-assets') return;
+  var run = null, t0 = 0;
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var round = function (n) { return Math.round(n * 10) / 10; };
+  var ev = function (type, detail) {
+    if (!run) return;
+    run.events.push({ t: round((performance.now() - t0) / 1000), type: type, detail: detail === undefined ? undefined : String(detail) });
+    run.moved = performance.now();
+  };
+  var problem = function (severity, message) { run.problems.push({ severity: severity, message: message }); ev('problem', severity + ': ' + message); };
+  var finish = function (o) { if (run.done) return; run.done = true; run.state.status = o; run.seconds = (performance.now() - t0) / 1000; ev('finish', o); };
+
+  async function play() {
+    run.state.scene = 'Descent assets';
+    ev('scene', 'Descent assets');
+    await new Promise(function (res) {
+      if (window.hellDescentAssets && document.querySelector('[data-floors]').children.length) return res();
+      window.addEventListener('descent-assets-ready', res, { once: true });
+      setTimeout(res, 8000);
+    });
+    var data = await (await fetch('../descent.json')).json();
+    ev('floors-in-pack', data.floors.map(function (f) { return f.id; }).join(','));
+    if (data.floors.length < 5) problem('bug', 'expected Shaft + 1000–997 (5 floors)');
+    run.state.progress = 0.1;
+    var btn = document.querySelector('[data-sound]');
+    if (btn) { btn.click(); ev('sound', 'on'); }
+    await sleep(400);
+    var totalBytes = 0;
+    for (var i = 0; i < data.floors.length; i++) {
+      var f = data.floors[i];
+      var el = document.querySelector('[data-floor-id="' + f.id + '"]');
+      if (!el) { problem('bug', 'floor ' + f.id + ' missing from preview'); continue; }
+      el.scrollIntoView({ block: 'center' });
+      await sleep(900);
+      run.state.scene = 'Floor ' + (f.label || f.id);
+      ev('scene', run.state.scene);
+      ev('floor-quip', f.id + ': ' + f.quip);
+      var quipEl = el.querySelector('[data-quip]');
+      if (!quipEl || quipEl.textContent.trim() !== f.quip) problem('bug', f.id + ' quip not shown');
+      var layerSrcs = f.layers.map(function (L) { return L.src; });
+      ev('floor-layers', f.id + ' → ' + layerSrcs.join(' | '));
+      if (f.layers.length < 2) problem('bug', f.id + ' needs 2–3 layers');
+      for (var j = 0; j < f.layers.length; j++) {
+        var url = new URL(f.layers[j].src.replace(/^descent\//, ''), location.href).href;
+        var head = await fetch(url, { method: 'HEAD' }).catch(function () { return null; });
+        var len = head && head.ok ? +(head.headers.get('content-length') || 0) : 0;
+        if (!head || !head.ok) {
+          var blob = await fetch(url).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; });
+          if (!blob) { problem('bug', f.id + ' layer missing: ' + f.layers[j].src); continue; }
+          len = blob.size;
+        }
+        totalBytes += len;
+        if (len > 150 * 1024) problem('bug', f.id + ' layer ' + f.layers[j].id + ' is ' + len + ' bytes (>150KB)');
+        ev('layer-size', f.id + '/' + f.layers[j].id + '=' + len);
+      }
+      if (f.voice) {
+        var vr = await fetch(new URL(f.voice.replace(/^descent\//, ''), location.href).href, { method: 'HEAD' }).catch(function () { return null; });
+        if (!vr || !vr.ok) {
+          var vb = await fetch(new URL(f.voice.replace(/^descent\//, ''), location.href).href).then(function (r) { return r.ok; }).catch(function () { return false; });
+          if (!vb) problem('bug', f.id + ' voice missing: ' + f.voice);
+          else ev('voice', f.id + ' ' + f.voiceId);
+        } else ev('voice', f.id + ' ' + f.voiceId);
+      } else {
+        ev('voice', f.id + ' caption-only');
+        if ((data.captionOnly || []).indexOf(f.id) < 0) problem('polish', f.id + ' has no voice and is not listed in captionOnly');
+      }
+      if (f.ambience) {
+        var ar = await fetch(new URL(f.ambience.replace(/^descent\//, ''), location.href).href).then(function (r) { return r.ok; }).catch(function () { return false; });
+        ev('ambience', f.id + ' ' + f.ambienceId + (ar ? '' : ' MISSING'));
+        if (!ar) problem('bug', f.id + ' ambience missing');
+      }
+      run.state.progress = 0.15 + (0.7 * (i + 1) / data.floors.length);
+      await sleep(600);
+    }
+    run.metrics.totalAssetBytes = totalBytes;
+    run.metrics.floors = data.floors.length;
+    ev('pack-bytes', totalBytes);
+    if (totalBytes > 2.5 * 1024 * 1024) problem('bug', 'descent pack too large for phone: ' + totalBytes + ' bytes');
+    await sleep(800);
+    finish('done');
+  }
+
+  window.hawkesPlaytest = {
+    version: 1, product: 'sickofit',
+    scenarios: function () {
+      return [{ id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }];
+    },
+    start: async function (id) {
+      if (id !== 'descent-assets') throw new Error('no scenario "' + id + '"');
+      t0 = performance.now();
+      run = { id: id, done: false, moved: t0, seconds: 0, state: { ready: true, status: 'running', progress: 0 }, metrics: {}, events: [], problems: [], log: [] };
+      ev('start', id);
+      try { await play(); } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish('error'); }
+    },
+    stop: function () { if (run) finish('done'); },
+    state: function () {
+      if (!run) return { ready: !!document.querySelector('[data-floors]'), status: 'idle' };
+      return { ready: true, status: run.state.status, scene: run.state.scene, progress: run.state.progress, metrics: run.metrics };
+    },
+    report: function () {
+      if (!run) return null;
+      return { scenario: run.id, outcome: run.done ? run.state.status : 'stuck', seconds: round(run.seconds || (performance.now() - t0) / 1000),
+        metrics: run.metrics, events: run.events.slice(), problems: run.problems.slice(), log: run.log.slice() };
+    }
+  };
+  var go = function () {
+    if (document.querySelector('[data-floors]')) window.hawkesPlaytest.start('descent-assets', {});
+    else setTimeout(go, 100);
+  };
+  go();
+})();
+  </script>
+</body>
+</html>
