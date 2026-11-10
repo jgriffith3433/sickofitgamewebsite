@@ -4,11 +4,13 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'];
   var playtestOn = false;
   try {
-    playtestOn = !!(navigator.webdriver || q.has('playtest') || sessionStorage.getItem('hawkes.playtest'));
+    playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest') || sessionStorage.getItem('hawkes.playtest'));
+    if (playtestOn) sessionStorage.setItem('hawkes.playtest', '1');
   } catch (e) {
-    playtestOn = !!(navigator.webdriver || q.has('playtest'));
+    playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest'));
   }
   if (!playtestOn) return;
 
@@ -323,14 +325,90 @@
           seconds: 45,
           tags: ['smoke'],
           description: 'Requires ?playtest=fail-load (or game-fail): the page loads a missing loader and the scenario photographs the failure banner.'
+        },
+        {
+          id: 'toy',
+          title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift',
+          seconds: 25,
+          tags: []
+        },
+        {
+          id: 'toy-wrap',
+          title: 'Hero toy wrap: hint fades on move, dodge counter, payoff card with PLAY NOW and Try again, PLAY NOW beside toy, no sideways scroll, clip fallback',
+          seconds: 35,
+          tags: ['full'],
+          starts: ['play', 'clip']
+        },
+        {
+          id: 'hero',
+          title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift',
+          seconds: 15,
+          tags: ['smoke']
+        },
+        {
+          id: 'trailer',
+          title: 'Landing page: poster, play click, Watch on YouTube link',
+          seconds: 20,
+          tags: ['smoke']
+        },
+        {
+          id: 'about',
+          title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits',
+          seconds: 15,
+          tags: ['smoke']
+        },
+        {
+          id: 'share',
+          title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist',
+          seconds: 12,
+          tags: []
+        },
+        {
+          id: 'descent-assets',
+          title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997',
+          seconds: 45,
+          tags: ['full']
         }
       ];
     },
-    start: async function (id) {
+    start: async function (id, options) {
+      options = options || {};
+      if (LANDING_IDS.indexOf(id) >= 0) {
+        t0 = performance.now();
+        run = {
+          id: id, done: false, moved: t0, seconds: 0,
+          state: { ready: true, status: 'running', progress: 0.02 },
+          metrics: {}, events: [], problems: [], log: []
+        };
+        ev('start', id);
+        var lq = new URLSearchParams(location.search);
+        lq.set('playtest', id);
+        if (options.at) lq.set('at', String(options.at));
+        setTimeout(function () {
+          location.replace('../?' + lq.toString() + location.hash);
+        }, 20);
+        return new Promise(function () {});
+      }
+      if (id === 'descent-assets') {
+        t0 = performance.now();
+        run = {
+          id: id, done: false, moved: t0, seconds: 0,
+          state: { ready: true, status: 'running', progress: 0.02 },
+          metrics: {}, events: [], problems: [], log: []
+        };
+        ev('start', id);
+        var dq = new URLSearchParams(location.search);
+        dq.set('playtest', 'descent-assets');
+        setTimeout(function () {
+          location.replace('../data/descent/preview.html?' + dq.toString() + location.hash);
+        }, 20);
+        return new Promise(function () {});
+      }
       id = resolveId(id);
       if (id !== 'game-start' && id !== 'game-fail') {
-        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail; alias fail-load)');
+        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, share, descent-assets)');
       }
+      if (run && !run.done && run.id === id) return;
       t0 = performance.now();
       run = {
         id: id, done: false, moved: t0, seconds: 0,
@@ -349,7 +427,11 @@
     stop: function () { if (run) finish('done'); },
     state: function () {
       var ready = document.readyState !== 'loading' && !!document.getElementById('guide');
-      if (!run) return { ready: ready, status: 'idle' };
+      if (!run) {
+        var pend = resolveId(which);
+        if (pend === 'game-start' || pend === 'game-fail') return { ready: ready, status: 'running', progress: 0.02 };
+        return { ready: ready, status: 'idle' };
+      }
       return {
         ready: ready,
         status: run.state.status,
@@ -374,6 +456,10 @@
   };
 
   // Auto-start from ?playtest=<id> once the controls card exists (fail-load → game-fail).
+  if (LANDING_IDS.indexOf(which) >= 0 || which === 'descent-assets') {
+    window.hawkesPlaytest.start(which, { at: q.get('at') || undefined });
+    return;
+  }
   var auto = resolveId(which);
   if (auto === 'game-start' || auto === 'game-fail') {
     var go = function () {

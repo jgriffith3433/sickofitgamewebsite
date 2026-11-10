@@ -77,7 +77,7 @@
   var RATE = 1.5, DRAIN = 1 / 3.5, REFILL = 1 / 6;
   var meter = 1, rewinding = false, holdBtn = false, holdKey = false, racc = 0, rewound = 0, rewindFrames = 0, noise = 0;
   var holdRewound = 0;
-  var hint = 1, moved = false, payoff = false, payoffReason = '';
+  var hint = 1, moved = false, payoff = false, payoffReason = '', payoffDelay = 0;
   // Near-miss dodge radius; gem is a second verb (touch a diamond from the village sack).
   var NEAR = HERO_R + 18;
   var gem = { x: 0, y: 0, vx: 0, vy: 0, on: false, next: 3.2 };
@@ -161,14 +161,15 @@
     sayPayoff();
   }
 
-  function resetToy() {
+  function resetToy(keepMoved) {
     head = 0; filled = 0;
     bn = 0; time = 0; acc = 0; spawnA = 0; spawnB = 2; spawnC = 4; spin = 0;
     hits = 0; dodges = 0; gems = 0; steps = 0; rewound = 0; rewindFrames = 0; holdRewound = 0;
     meter = 1; rewinding = false; holdBtn = false; holdKey = false; racc = 0;
     hero.x = W / 2; hero.y = H * 0.72; hero.flash = 0; hero.grace = 0;
     gem.on = false; gem.next = 2.5;
-    payoff = false; payoffReason = ''; card.hidden = true;
+    payoff = false; payoffReason = ''; payoffDelay = 0; card.hidden = true;
+    if (!keepMoved) moved = false;
     hint = moved ? 0 : 1;
     keys = {}; drag = null;
     draw();
@@ -227,6 +228,10 @@
     }
     bn = w;
     record();
+    if (payoffDelay > 0) {
+      payoffDelay -= STEP;
+      if (payoffDelay <= 0) offerPayoff('rewind');
+    }
     if (time >= 15) offerPayoff('time');
   }
 
@@ -258,10 +263,10 @@
     rewinding = on;
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     btn.classList.toggle('on', on);
-    if (on) { racc = 0; holdRewound = 0; rewound++; whoosh(true); }
+    if (on) { racc = 0; holdRewound = 0; payoffDelay = 0; rewound++; whoosh(true); }
     else {
       whoosh(false);
-      if (holdRewound >= 20) offerPayoff('rewind');
+      if (holdRewound >= 20) payoffDelay = 1.4;
     }
   }
 
@@ -392,7 +397,7 @@
     '<button type="button" class="btn ghost small" data-payoff-again>Try again</button>' +
     '</div>';
   box.appendChild(card);
-  card.querySelector('[data-payoff-again]').addEventListener('click', function () { resetToy(); });
+  card.querySelector('[data-payoff-again]').addEventListener('click', function () { resetToy(true); });
   snd.addEventListener('click', function () {
     if (!unlocked) { unlock(); return; }
     soundOn = !soundOn; if (!soundOn) whoosh(false); else if (rewinding) whoosh(true);
