@@ -631,10 +631,14 @@
         }
       }
       
+      // Playtest setup shortcut: ?playtest=fail-load (or game-fail) behaves as if the build could not be fetched.
+      // Only active when a playtest query is present — players never see this path.
+      var forceFail = /[?&]playtest=(fail-load|game-fail)\b/.test(location.search);
+
       // Load Unity game immediately (user is already authenticated)
       function loadUnityGame() {
         var script = document.createElement("script");
-        script.src = loaderUrl;
+        script.src = forceFail ? (window.HAWKES_BUILD_BASE || "").replace(/\/?$/, "/") + "loadfail-missing.js" : loaderUrl;
         script.onload = function() {
           createUnityInstance(canvas, config, function(progress) {
             document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
@@ -823,6 +827,21 @@
         window.addEventListener('hawkes-unity-progress', function (e) { status.textContent = 'Loading Hell\u2026 ' + Math.round(e.detail * 100) + '%'; });
         window.addEventListener('hawkes-unity-ready', function () { ready = true; play.disabled = false; play.textContent = 'Play'; status.textContent = 'Ready.'; });
         window.hawkesGuide = { isReady: function () { return ready; }, isStarted: function () { return started; } };
+      })();
+    </script>
+    <script>
+      // Studio playtest contract (js/game-playtest.js): only load when a bot or ?playtest= is present.
+      (function () {
+        var on = false;
+        try {
+          on = !!(navigator.webdriver || /[?&]playtest=/.test(location.search) || sessionStorage.getItem('hawkes.playtest'));
+        } catch (e) {
+          on = !!(navigator.webdriver || /[?&]playtest=/.test(location.search));
+        }
+        if (!on) return;
+        var s = document.createElement('script');
+        s.src = '../js/game-playtest.js';
+        document.body.appendChild(s);
       })();
     </script>
     <script>
