@@ -169,7 +169,9 @@
     // rewind: tap first (unlocks sound), hold R, then the on-screen button, with real input events
     cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
     cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
-    await sleep(900);
+    // Unlock builds a whoosh buffer immediately (file or synth); short beat so AudioContext can resume.
+    await sleep(400);
+    try { await until(function () { return T.state().soundUnlocked; }, 2000, 'sound unlock'); } catch (e) { problem('bug', 'tap did not unlock toy sound'); }
     var t0r = T.state();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
     await sleep(1200);

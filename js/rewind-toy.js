@@ -341,6 +341,27 @@
   }
 
   var actx = null, wbuf = null, wsrc = null, wgain = null, unlocked = false, soundOn = true, whooshes = 0, loading = false;
+  // Procedural reverse whoosh when sounds/rewind-whoosh.wav is missing (404) or fails to decode.
+  function makeWhooshBuf() {
+    if (!actx) return null;
+    var sr = actx.sampleRate || 22050, dur = 3.5, n = Math.max(1, Math.floor(sr * dur));
+    var buf = actx.createBuffer(1, n, sr), ch = buf.getChannelData(0);
+    var seed = 0x51c0f17, phase = 0;
+    function rnd() { seed = (1103515245 * seed + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+    for (var i = 0; i < n; i++) {
+      var t = i / sr;
+      var env = t < 0.04 ? t / 0.04 : (t > dur - 0.25 ? Math.max(0, (dur - t) / 0.25) : 1);
+      var f0 = 180 + 720 * (t / dur);
+      phase += 6.283185307179586 * f0 / sr;
+      var flutter = 0.85 + 0.15 * Math.sin(6.283185307179586 * (7 + 3 * t / dur) * t);
+      var grit = ((rnd() * 2 - 1) * 0.55 + (rnd() * 2 - 1) * 0.25) * flutter * (0.55 + 0.45 * (t / dur));
+      var motor = 0.12 * Math.sin(6.283185307179586 * (48 + 20 * t / dur) * t);
+      var tone = Math.sin(phase) * (0.25 + 0.55 * (t / dur)) * 0.35;
+      var s = (grit + tone + motor) * env * 0.55;
+      ch[i] = s > 1 ? 1 : (s < -1 ? -1 : s);
+    }
+    return buf;
+  }
   function unlock() {
     if (unlocked) return;
     unlocked = true; refreshSound();
@@ -349,15 +370,31 @@
       if (!AC) return;
       actx = new AC();
       if (actx.state === 'suspended') actx.resume();
+      // Ready immediately so a hold-R right after the first tap still whooshes; file replaces this when it loads.
+      wbuf = makeWhooshBuf();
       loading = true;
+      // loadClip never rejects (beta #49); keep procedural buffer if the WAV is missing/HTML/undecodable.
       loadClip(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav')
-        .then(function (d) { wbuf = d; loading = false; if (rewinding) whoosh(true); loadPayoffVo(); });
+        .then(function (d) {
+          if (d) {
+            wbuf = d;
+            if (rewinding && wsrc) { whoosh(false); whoosh(true); }
+            else if (rewinding && !wsrc) whoosh(true);
+          } else if (!wbuf) {
+            wbuf = makeWhooshBuf();
+            if (rewinding && !wsrc) whoosh(true);
+          }
+          loading = false;
+          loadPayoffVo();
+        });
     } catch (e) {}
   }
   function whoosh(on) {
     if (on) {
-      if (!unlocked || !soundOn || !actx || !wbuf || wsrc) return;
-      wsrc = actx.createBufferSource(); wsrc.buffer = wbuf;
+      if (!unlocked || !soundOn || !actx || wsrc) return;
+      if (!wbuf) wbuf = makeWhooshBuf();
+      if (!wbuf) return;
+      wsrc = actx.createBufferSource(); wsrc.buffer = wbuf; wsrc.loop = true;
       wgain = actx.createGain(); wgain.gain.value = 0.5;
       wsrc.playbackRate.setValueAtTime(0.8, actx.currentTime);
       wsrc.playbackRate.linearRampToValueAtTime(1.6, actx.currentTime + 3.5);
