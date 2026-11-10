@@ -4,7 +4,7 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'share'];
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
   var GAME_IDS = ['smoke', 'game-start', 'game-fail', 'fail-load'];
   var playtestOn = false;
   try {
@@ -342,11 +342,80 @@
     window.scrollTo(0, 0);
     await sleep(1000);
     await go('nav a[href="#about"]', 'about', 'About');
+    run.state.progress = 0.35;
+
+    // Payoff via a successful rewind (faster than waiting 15 s)
+    cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    await sleep(700);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+    await sleep(900);
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    try { await until(function () { return T.state().payoff; }, 4000, 'payoff card'); } catch (e) {
+      // stand still for hits as a backup
+      try { await until(function () { return T.state().hits >= 3 || T.state().payoff; }, 14000, '3 hits or payoff'); } catch (e2) { problem('bug', 'payoff card never appeared after play'); }
+    }
+    var s2 = T.state();
+    var card = box.querySelector('.toy-payoff');
+    var line = card && card.querySelector('.toy-payoff-line');
+    var again = card && card.querySelector('[data-payoff-again]');
+    var cardPlay = card && card.querySelector('[data-payoff-play]');
+    ev('toy-payoff', 'on=' + s2.payoff + ' reason=' + s2.payoffReason + ' line=' + (line ? line.textContent.trim() : 'MISSING'));
+    if (!s2.payoff || !card || card.hidden) problem('bug', 'payoff card is not shown after short play');
+    if (!line || line.textContent.indexOf('1,000') < 0) problem('bug', 'payoff line is not in the game\'s voice');
+    if (!cardPlay || cardPlay.getAttribute('href').indexOf('Game') < 0) problem('bug', 'payoff PLAY NOW does not link to Game/');
+    if (!again) problem('bug', 'Try again is missing on the payoff card');
+    ev('play-still-beside', fold(play));
+    if (fold(play) !== 'visible') problem('bug', 'PLAY NOW beside the toy was covered by the payoff');
+    run.state.progress = 0.7;
+
+    again.click();
+    await sleep(400);
+    ev('toy-try-again', 'payoff=' + T.state().payoff + ' cardHidden=' + T.state().cardHidden);
+    if (T.state().payoff || (card && !card.hidden)) problem('bug', 'Try again did not clear the payoff card');
+
+    var overflow = document.documentElement.scrollWidth - window.innerWidth;
+    ev('hero-width', 'inner=' + window.innerWidth + ' scrollWidth=' + document.documentElement.scrollWidth + ' overflow=' + overflow);
+    run.metrics.horizontalOverflow = overflow;
+    if (window.innerWidth <= 400 && overflow > 1) problem('bug', 'hero causes sideways scroll at phone width (' + overflow + 'px)');
+
+    // Criterion 3: switch to the clip fallback the same way reduced-motion / no-canvas does
+    if (window.sickofitHero && window.sickofitHero.setMode) window.sickofitHero.setMode('clip');
+    await sleep(350);
+    var mode2 = window.sickofitHero.mode();
+    var toyHidden2 = box.hasAttribute('hidden') || getComputedStyle(box).display === 'none';
+    var clip2 = document.querySelector('[data-hero-loop]');
+    ev('hero-clip-fallback', mode2 + '; toy hidden=' + toyHidden2 + '; clip opacity=' + (clip2 ? getComputedStyle(clip2).opacity : 'MISSING'));
+    if (mode2 !== 'clip' || !toyHidden2) problem('bug', 'clip fallback still shows the toy');
+    if (!clip2) problem('bug', 'rewind clip missing after clip fallback');
+    run.metrics.heroMode = mode2;
+    run.metrics.dodges = T.state ? (window.sickofitToy && window.sickofitToy.state ? window.sickofitToy.state().dodges : s2.dodges) : s2.dodges;
+    finish('done');
+  }
+
+  // About: click the nav About / FAQ links and the footer Credits link like a player; log the story word count, the FAQ
+  // answers (free, account, phone support) and the credits list.
+  async function about() {
+    var words = function (t) { return (t.trim().match(/\S+/g) || []).length; };
+    var visible = function (el) { if (!el) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.top < window.innerHeight && r.bottom > 0; };
+    var go = async function (sel, id, label) {
+      var a = document.querySelector(sel);
+      if (!a) { problem('bug', label + ' link is missing'); return null; }
+      a.click(); ev('click', label + ' link');
+      await sleep(1200);
+      var sec = document.getElementById(id);
+      ev(id + '-in-view', sec ? (visible(sec) ? 'visible' : 'NOT visible') : 'MISSING');
+      if (!sec || !visible(sec)) problem('bug', '#' + id + ' is not on screen after clicking ' + label);
+      return sec;
+    };
+    run.state.scene = 'Landing: about'; ev('scene', 'Landing: about');
+    window.scrollTo(0, 0);
+    await sleep(1000);
+    await go('nav a[href="#about"]', 'about', 'About');
     var st = document.querySelector('[data-about-story]');
     var n = st ? words(st.textContent) : 0;
     ev('story-text', st ? st.textContent.trim().replace(/\s+/g, ' ') : 'MISSING');
     ev('story-words', n);
-    run.metrics.storyWords = n;
     if (n < 80 || n > 150) problem('bug', 'story section has ' + n + ' words (want 80 to 150)');
     run.state.progress = 0.35;
     var faq = await go('nav a[href="#faq"]', 'faq', 'FAQ');
@@ -415,6 +484,32 @@
     finish('done');
   }
 
+  // Descent: scroll through each floor with real wheel-sized steps, log the counting number and arrival; screenshots are taken by Studio at 1280x720 and 390x844.
+  async function descent() {
+    run.state.scene = 'Landing: descent'; ev('scene', 'Landing: descent');
+    var btn = document.querySelector('[data-descent-sound]');
+    await until(function () { return document.querySelectorAll('.d-floor').length > 0; }, 8000, 'descent floors');
+    if (btn) { btn.scrollIntoView({ block: 'center' }); await sleep(400); btn.click(); ev('click', 'sound ' + btn.textContent); }
+    var floors = Array.prototype.slice.call(document.querySelectorAll('.d-floor'));
+    ev('viewport', innerWidth + 'x' + innerHeight);
+    for (var i = 0; i < floors.length; i++) {
+      var f = floors[i], top = f.getBoundingClientRect().top + scrollY, h = f.offsetHeight - innerHeight;
+      for (var s = 0; s <= 4; s++) {
+        window.scrollTo(0, top + h * s / 4); await sleep(450);
+        ev('floor-' + f.dataset.floor, 'step ' + s + ' number ' + f.querySelector('.d-num').textContent + ' progress ' + (f.dataset.progress || 'n/a'));
+      }
+      ev('quip', f.querySelector('.d-quip').textContent);
+      run.state.progress = (i + 1) / floors.length;
+    }
+    ev('arrived-with-voice', (window.sickofitDescent.arrived || []).join(','));
+    var over = document.documentElement.scrollWidth > innerWidth;
+    ev('sideways-scroll', over ? 'YES' : 'none');
+    if (over) problem('bug', 'descent causes sideways scroll');
+    run.metrics.floors = floors.length;
+    var cr = document.querySelector('footer a[href="#credits"]'); if (cr) { cr.click(); await sleep(800); ev('credits-open', document.getElementById('credits').open); }
+    finish('done');
+  }
+
   window.hawkesPlaytest = {
     version: 1, product: 'sickofit',
     scenarios: function () { return [
@@ -426,6 +521,7 @@
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
       { id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
+      { id: 'descent', title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion', seconds: 30, tags: ['full'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }]; },
     start: async function (id, options) {
@@ -453,7 +549,7 @@
         }, 20);
         return new Promise(function () {});
       }
-      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, about, share, descent-assets)');
+      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, about, descent, share, descent-assets)');
       var reqAt = String(options.at || q.get('at') || '');
       if (run && !run.done && run.id === id && String(run.at || '') === reqAt) return;
       t0 = performance.now();
@@ -464,6 +560,7 @@
         else if (id === 'toy') await toy();
         else if (id === 'toy-wrap') await toyWrap(options);
         else if (id === 'about') await about();
+        else if (id === 'descent') await descent();
         else if (id === 'share') await share();
         else await play();
       } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }

@@ -2,7 +2,7 @@
 
 Canon for this site mirrors `sickofitgame-unity` `Docs/Story.md` and the Floor JSON under
 `Assets/GameConfig/levels/`. The descent asset pack below is the landing-story slice for the Shaft and
-Floors 1000–997; UI that scrolls it is a later task.
+Floors 1000–997; `js/descent.js` scrolls it on the landing page (sticky floors, counting number, sound toggle off by default).
 
 ## The descent (Shaft → 997)
 

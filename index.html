@@ -105,6 +105,21 @@
       .story p{max-width:720px;margin-bottom:14px}
       .story .quote{color:#ff9d2e;font-style:italic}
       .about-text p{max-width:720px;margin-bottom:14px}
+      .descent{background:#0b0605;border-block:1px solid #3a1510;overflow-x:clip}
+      .descent-head{padding-bottom:12px}
+      .d-floor{position:relative;height:190vh}
+      .d-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#140705}
+      .d-layer{position:absolute;inset:-12% 0;background:center/cover no-repeat;will-change:transform}
+      .d-layer.near{background-size:contain;background-position:70% 90%}
+      .d-layer.mid{mix-blend-mode:screen;opacity:.8}
+      .d-layer.far{filter:brightness(.7)}
+      .d-streaks{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(255,200,140,.35) 14px 16px,transparent 16px 40px);background-size:100% 400px;filter:blur(1px)}
+      .d-info{position:absolute;left:0;right:0;bottom:0;padding:48px 20px 28px;background:linear-gradient(transparent,rgba(11,6,5,.92) 40%)}
+      .d-num{font:900 clamp(48px,14vw,120px)/1 Arial,sans-serif;color:#ff9d2e;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px #000}
+      .d-label{letter-spacing:.12em;text-transform:uppercase;color:#b9a59d;font-size:13px}
+      .d-quip{font-size:clamp(18px,4.5vw,28px);font-style:italic;color:#fff;max-width:720px;margin-top:6px;transition:opacity .4s}
+      .faq details.credits ul{margin-top:12px}
+      @media(prefers-reduced-motion:reduce){.d-floor{height:auto}.d-stage{position:relative;height:auto;min-height:60vh;margin-bottom:8px}.d-layer{inset:0;transform:none!important}.d-streaks{display:none}.d-info{position:relative;margin-top:50vh}}
       .faq details{background:#170a08;border:1px solid #3a1510;border-radius:10px;padding:14px 20px;margin-bottom:10px;max-width:720px}
       .faq summary{cursor:pointer;font-weight:900;color:#ff9d2e}
       .faq details p{margin-top:8px}
@@ -131,6 +146,7 @@
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
     <script src="js/hawkes-site.js" defer></script>
     <script src="js/rewind-toy.js" defer></script>
+    <script src="js/descent.js" defer></script>
     <script src="js/landing-playtest.js" defer></script>
   </head>
   <body>
@@ -200,36 +216,32 @@
       <p class="quote">"Fine. Up, then."</p>
     </div></section>
 
-    <section id="about"><div class="wrap about-text">
-      <h2>Why the dodger exists</h2>
-      <p class="lead">Asked politely. Answered honestly.</p>
-      <div data-about-story>
-        <p>Look, I never wanted a dodger. I wanted a quiet afternoon. Then a portal ate me and dropped me at the bottom of Hell, where everything is on a loop: the same bullets, the same Overlord, the same floor, one thousand times.</p>
-        <p>So I made a deal with the loop. If Hell insists on repeating itself, I'll repeat it right back, only better. Dodge what I can. Rewind what I can't. Climb anyway.</p>
-        <p>That's the whole game. It's free because nobody should pay to be this annoyed. Up we go.</p>
+    <section id="about" class="descent" aria-label="The descent">
+      <div class="wrap descent-head">
+        <h2>The descent</h2>
+        <p class="lead">Asked politely. Answered honestly. Scroll down; Hell does the rest.</p>
+        <button type="button" class="btn ghost small" data-descent-sound aria-pressed="false">Sound off</button>
       </div>
-    </div></section>
+      <div data-descent><noscript><p class="wrap">A tired nobody falls a thousand floors and is sick of every one. Free to play, no account. Up we go.</p></noscript></div>
+    </section>
 
     <section id="faq" class="story faq"><div class="wrap">
-      <h2>FAQ</h2>
+      <h2>FAQ &amp; credits</h2>
       <p class="lead">Short answers. Hell has enough paperwork.</p>
-      <details open><summary>Is it free?</summary><p>Yes. Free to play in your browser, start to finish. No paywall, no tricks.</p></details>
-      <details open><summary>Do I need an account?</summary><p>No account, no sign-up, no email. Press PLAY NOW and fall.</p></details>
-      <details open><summary>Is there phone support?</summary><p>No phone support. There is no phone number, and no one will pick up in Hell. The blog and What's new page are where the answers live.</p></details>
-      <details open><summary>Do I have to download anything?</summary><p>No. It runs in your browser. You can install it as an app for faster loads if you like.</p></details>
-      <details open><summary>Can I play on my phone?</summary><p>Yes. The game page has touch controls and a controls guide.</p></details>
-    </div></section>
-
-    <section id="credits" class="credits"><div class="wrap">
-      <h2>Credits</h2>
-      <p class="lead">The team. Nobody was asked if they were sick of it.</p>
-      <ul>
-        <li><strong>J</strong><span>Creator. Design and direction.</span></li>
-        <li><strong>Hawkes Studio</strong><span>The AI agents that write, build and playtest the game, one request at a time.</span></li>
-        <li><strong>Hawkes Gen</strong><span>Art, voices, sound and music, made to order.</span></li>
-        <li><strong>Hawkes Biomedical</strong><span>Publisher. Single-use fever shots, now with bullets.</span></li>
-      </ul>
-      <p class="cast">Starring the Hero, the Overlord, Yooba, Bork, and a booming Announcer who loves a show.</p>
+      <details><summary>Is it free?</summary><p>Yes. Free to play in your browser, start to finish. No paywall, no tricks.</p></details>
+      <details><summary>Do I need an account?</summary><p>No account, no sign-up, no email. Press PLAY NOW and fall.</p></details>
+      <details><summary>Is there phone support?</summary><p>No phone support. There is no phone number, and no one will pick up in Hell. The blog and What's new page are where the answers live.</p></details>
+      <details><summary>Do I have to download anything?</summary><p>No. It runs in your browser. You can install it as an app for faster loads if you like.</p></details>
+      <details><summary>Can I play on my phone?</summary><p>Yes. The game page has touch controls and a controls guide.</p></details>
+      <details id="credits" class="credits"><summary>Credits</summary>
+        <ul>
+          <li><strong>J</strong><span>Creator. Design and direction.</span></li>
+          <li><strong>Hawkes Studio</strong><span>The AI agents that write, build and playtest the game, one request at a time.</span></li>
+          <li><strong>Hawkes Gen</strong><span>Art, voices, sound and music, made to order.</span></li>
+          <li><strong>Hawkes Biomedical</strong><span>Publisher. Single-use fever shots, now with bullets.</span></li>
+        </ul>
+        <p class="cast">Starring the Hero, the Overlord, Yooba, Bork, and a booming Announcer who loves a show.</p>
+      </details>
     </div></section>
 
     <section class="cta"><div class="wrap">
