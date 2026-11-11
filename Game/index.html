@@ -1051,6 +1051,35 @@
           status.textContent = 'Ready.';
           hideTapIfAudioRunning();
         });
+        // The build installs its own window.hawkesPlaytest (engine 'unity') when it loads and a bot starts a run through it
+        // (Level 1 behind the card). A bot can't press Play, so a started run means the card must not stay over the canvas.
+        // The page's own game-start scenario clicks Play itself (hawkesPageClicksPlay), so it is left alone.
+        // Players never call start(); for them nothing changes.
+        function startedByBot() {
+          if (started || window.hawkesPageClicksPlay) return;
+          started = true;
+          hideBlockingOverlays();
+          syncFs();
+          window.dispatchEvent(new Event('resize'));
+          console.log('[Guide] a playtest run started in the build: controls card cleared (no Play gesture)');
+        }
+        (function () {
+          var current = window.hawkesPlaytest;
+          function wrap(pt) {
+            if (!pt || pt.engine !== 'unity' || typeof pt.start !== 'function' || pt.__guideWrapped) return pt;
+            var inner = pt.start;
+            pt.start = function () { startedByBot(); return inner.apply(this, arguments); };
+            pt.__guideWrapped = true;
+            return pt;
+          }
+          try {
+            Object.defineProperty(window, 'hawkesPlaytest', {
+              configurable: true, enumerable: true,
+              get: function () { return current; },
+              set: function (v) { current = wrap(v); }
+            });
+          } catch (e) { /* not configurable: leave the contract alone */ }
+        })();
         window.hawkesGuide = { isReady: function () { return ready; }, isStarted: function () { return started; } };
       })();
     </script>
