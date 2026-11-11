@@ -106,7 +106,7 @@
     });
   }
 
-  var ambLoop = null;
+  var ambLoop = null, voiceClip = typeof Audio !== 'undefined' ? new Audio() : null;
   function stopAmb() {
     if (ambLoop) { try { ambLoop.pause(); } catch (e) {} ambLoop = null; }
   }
@@ -123,8 +123,14 @@
     if (played[f.id]) return;
     played[f.id] = true;
     if (f.voice) {
-      var v = new Audio(abs(f.voice));
-      v.volume = 0.9; v.play().catch(function () {});
+      try {
+        var v = voiceClip || new Audio();
+        v.pause();
+        v.src = abs(f.voice);
+        v.currentTime = 0;
+        v.volume = 0.9;
+        v.play().catch(function () {});
+      } catch (e) {}
     }
   }
 
@@ -154,6 +160,12 @@
     soundOn = !soundOn;
     this.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
     this.textContent = soundOn ? 'Sound on' : 'Sound off';
+    if (!soundOn) {
+      stopAmb();
+      if (voiceClip) { try { voiceClip.pause(); } catch (e) {} }
+    } else {
+      onScroll();
+    }
   });
 
   window.hellDescentAssets = {
@@ -201,7 +213,14 @@
     if (data.floors.length < 5) problem('bug', 'expected Shaft + 1000–997 (5 floors)');
     run.state.progress = 0.1;
     var btn = document.querySelector('[data-sound]');
-    if (btn) { btn.click(); ev('sound', 'on'); }
+    if (btn) {
+      if (typeof PointerEvent === 'function') {
+        btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, isPrimary: true }));
+        btn.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, isPrimary: true }));
+      }
+      btn.click();
+      ev('sound', 'on');
+    }
     await sleep(400);
     var totalBytes = 0;
     for (var i = 0; i < data.floors.length; i++) {
