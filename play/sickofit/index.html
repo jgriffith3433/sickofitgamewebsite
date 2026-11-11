@@ -22,7 +22,7 @@
       var rel = '../../';
       if (pt === 'descent-assets') {
         rel = '../../data/descent/preview.html';
-      } else if (q.has('playtest') && ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'].indexOf(pt) < 0) {
+      } else if (q.has('playtest') && ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence'].indexOf(pt) < 0) {
         rel = '../../Game/';
       }
       var dest = new URL(rel, location.href);

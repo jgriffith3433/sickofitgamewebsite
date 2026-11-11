@@ -6,7 +6,7 @@
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; Game/ carries game-start and game-fail
          (js/game-playtest.js). Landing keeps trailer, hero, toy, toy-wrap, about, share (js/landing-playtest.js). Descent asset
          pack lives at data/descent/preview.html. Every other ?playtest= goes to Game/. Visitors never have ?playtest. -->
-    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share')location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
+    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share'&&pt!=='hero-presence'&&pt!=='pages'&&!/^climbers=\d+$/.test(pt))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -87,6 +87,22 @@
       .hero[data-hero-mode="play"] .loop{opacity:.22;pointer-events:none}
       .hero[data-hero-mode="clip"] .rewind-toy{display:none!important}
       .hero[data-hero-mode="clip"] .loop{opacity:1;pointer-events:auto}
+      .presence{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;height:34px;margin:12px auto 0;max-width:100%;font:700 14px/1 Arial,sans-serif;color:#cfe2f5;letter-spacing:.04em}
+      .presence .pill{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 14px;border:1px solid rgba(160,200,240,.35);border-radius:30px;background:rgba(120,170,230,.10);box-shadow:0 0 14px rgba(140,190,255,.18);white-space:nowrap}
+      .presence .dot{width:8px;height:8px;border-radius:50%;background:#9fd0ff;box-shadow:0 0 8px #9fd0ff;opacity:.55}
+      .presence[data-state="live"] .dot{opacity:1}
+      .presence [data-presence-num]{font-variant-numeric:tabular-nums;color:#fff}
+      .presence.pulse .pill{animation:presPulse .9s ease-out}
+      @keyframes presPulse{0%{box-shadow:0 0 0 0 rgba(159,208,255,.55)}100%{box-shadow:0 0 0 14px rgba(159,208,255,0)}}
+      .ghosts{position:absolute;inset:0;pointer-events:none;overflow:hidden;contain:layout paint}
+      .ghost{position:absolute;top:0;height:100%;width:0;opacity:0;transition:opacity 1.2s ease}
+      .ghost.in{opacity:.3}.ghost.out{opacity:0}
+      .ghost i{position:absolute;left:0;top:0;display:block;width:calc(34px*var(--s,1));height:calc(52px*var(--s,1));margin-left:calc(-17px*var(--s,1));border-radius:50% 50% 8px 8px/42% 42% 8px 8px;background:linear-gradient(#cfe6ff,rgba(150,200,255,.15));box-shadow:0 0 18px rgba(150,200,255,.5);will-change:transform;animation:ghostDrift var(--dur,12s) linear var(--delay,0s) infinite}
+      .ghost i::before,.ghost i::after{content:"";position:absolute;top:30%;width:18%;height:14%;border-radius:50%;background:#0a0405}
+      .ghost i::before{left:24%}.ghost i::after{right:24%}
+      .ghosts.paused .ghost i{animation-play-state:paused}
+      @keyframes ghostDrift{0%{transform:translate3d(0,-80px,0)}25%{transform:translate3d(var(--sway,16px),calc(var(--travel,600px)*.25 - 80px),0)}50%{transform:translate3d(0,calc(var(--travel,600px)*.5 - 80px),0)}75%{transform:translate3d(calc(var(--sway,16px)*-1),calc(var(--travel,600px)*.75 - 80px),0)}100%{transform:translate3d(0,calc(var(--travel,600px) - 80px),0)}}
+      @media(prefers-reduced-motion:reduce){.ghosts{display:none}.presence.pulse .pill{animation:none}}
       .hero .sub{margin-top:14px;font-size:13px;color:#a8928a}
       section{padding:56px 0}
       h2{font-size:clamp(26px,5vw,38px);color:#fff;margin-bottom:8px;letter-spacing:.03em}
@@ -143,8 +159,34 @@
       #install-banner-buttons{display:flex;gap:10px}
       #install-banner button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 20px;font-size:13px;border-radius:6px;cursor:pointer}
     </style>
+    <style>
+      /* Pages pass: 44 px tap targets, visible keyboard focus, no sideways scroll at 390 px */
+      :focus-visible{outline:3px solid #ffd27a;outline-offset:3px;border-radius:6px}
+      .video button:focus-visible{outline-offset:-6px}
+      nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 4px}
+      nav .brand{padding:0 4px 0 0}
+      .btn{min-height:44px;min-width:44px;text-align:center}
+      .btn.small{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 22px}
+      .share button.btn.small{min-height:44px}
+      .faq summary{display:flex;align-items:center;min-height:44px}
+      .card a{display:inline-flex;align-items:center;min-height:44px}
+      .watch-yt a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px}
+      footer .links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;margin:0 4px;padding:0 8px}
+      footer .hawkes-credit a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;white-space:normal;color:rgba(255,255,255,.72)}
+      footer .hawkes-credit{color:rgba(255,255,255,.65)}
+      #install-banner button{min-height:44px;min-width:44px}
+      .d-info,.descent,.faq,.story{max-width:100%}
+      @media(max-width:600px){
+        nav .wrap{flex-wrap:nowrap;gap:8px;padding:6px 16px}
+        nav a:not(.brand):not(.btn){display:none}
+        nav .btn.small{padding:8px 20px}
+        .hawkes-credit a{margin-top:0}
+      }
+    </style>
     <script src="js/rewind-toy.js" defer></script>
     <script src="js/descent.js" defer></script>
+    <script src="js/hero-presence.js" defer></script>
+    <script src="js/climbers.js" defer></script>
     <script src="js/landing-playtest.js" defer></script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
     <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
@@ -165,6 +207,7 @@
     <header class="hero" data-hero data-hero-mode="play">
       <video class="loop" data-hero-loop autoplay muted loop playsinline preload="metadata" width="960" height="720" disablepictureinpicture poster="images/hero-rewind.jpg" aria-hidden="true"><source src="images/hero-rewind.mp4" type="video/mp4"></video><script>(function(){var v=document.querySelector('[data-hero-loop]');if(!v)return;v.muted=true;var sync=function(){var mode=(document.querySelector('[data-hero]')||{}).getAttribute&&document.querySelector('[data-hero]').getAttribute('data-hero-mode');var on=document.visibilityState!=='hidden';if(mode==='play'){v.pause();return;}if(!on){v.pause();return;}var p=v.play();if(p&&p.catch)p.catch(function(){});};if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)sync();else v.pause();});},{threshold:0.15}).observe(v);}document.addEventListener('visibilitychange',sync);setTimeout(sync,0);})();</script>
       <div class="shade" aria-hidden="true"></div>
+      <div class="ghosts" data-ghosts aria-hidden="true"></div>
       <div class="wrap">
         <h1>SICK OF IT</h1>
         <p class="tag premise">Dodge the bullets. Rewind the hits. Stay sick of it.</p>
@@ -173,6 +216,7 @@
           <a class="btn big" id="start-button" href="Game/index.html" data-play="landing">PLAY NOW</a>
           <div class="rewind-toy" data-rewind-toy data-sprite="blog/lore/img/hero.webp" data-whoosh="sounds/rewind-whoosh.wav"></div>
         </div>
+        <p class="presence" data-presence role="status" aria-live="polite"><span class="pill"><span class="dot" aria-hidden="true"></span><span><b data-presence-num></b><span data-presence-text>Quiet down there. Be the first.</span></span></span></p>
         <p class="sub">Free in your browser. No download. <a href="whatsnew.html" id="site-version" data-hawkes-version hidden></a></p>
       </div>
     </header>
