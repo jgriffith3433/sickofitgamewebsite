@@ -165,6 +165,7 @@
     ev('toy-hit', 'hits ' + f.hits + ', flash ' + round(f.flash));
     if (f.hits > h0 && f.flash <= 0) problem('bug', 'getting hit did not flash the hero');
     run.state.progress = 0.7;
+    ev('toy-dodge', 'dodges ' + f.dodges + ', hits ' + f.hits);
     ev('toy-recorded', f.recorded + ' frames in the ring buffer');
     // rewind: tap first (unlocks sound), hold R, then the on-screen button, with real input events
     cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
