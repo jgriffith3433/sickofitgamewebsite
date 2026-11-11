@@ -6,7 +6,7 @@
     <!-- Playtests: Hawkes Studio opens the site with ?playtest=<scenario>; Game/ carries game-start and game-fail
          (js/game-playtest.js). Landing keeps trailer, hero, toy, toy-wrap, about, share (js/landing-playtest.js). Descent asset
          pack lives at data/descent/preview.html. Every other ?playtest= goes to Game/. Visitors never have ?playtest. -->
-    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share'&&pt!=='hero-presence'&&!/^climbers=\d+$/.test(pt))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
+    <script>(function(){try{var pt=new URLSearchParams(location.search).get('playtest');if(pt==='descent-assets')location.replace('data/descent/preview.html'+location.search+location.hash);else if(pt&&pt!=='trailer'&&pt!=='hero'&&pt!=='toy'&&pt!=='toy-wrap'&&pt!=='about'&&pt!=='descent'&&pt!=='share'&&pt!=='hero-presence'&&pt!=='pages'&&!/^climbers=\d+$/.test(pt))location.replace('Game/index.html'+location.search+location.hash);}catch(e){}})();</script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -158,6 +158,30 @@
       #install-banner-text{color:#eee;font-size:14px;flex:1;min-width:200px;text-align:center}
       #install-banner-buttons{display:flex;gap:10px}
       #install-banner button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 20px;font-size:13px;border-radius:6px;cursor:pointer}
+    </style>
+    <style>
+      /* Pages pass: 44 px tap targets, visible keyboard focus, no sideways scroll at 390 px */
+      :focus-visible{outline:3px solid #ffd27a;outline-offset:3px;border-radius:6px}
+      .video button:focus-visible{outline-offset:-6px}
+      nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 4px}
+      nav .brand{padding:0 4px 0 0}
+      .btn{min-height:44px;min-width:44px;text-align:center}
+      .btn.small{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 22px}
+      .share button.btn.small{min-height:44px}
+      .faq summary{display:flex;align-items:center;min-height:44px}
+      .card a{display:inline-flex;align-items:center;min-height:44px}
+      .watch-yt a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px}
+      footer .links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;margin:0 4px;padding:0 8px}
+      footer .hawkes-credit a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;white-space:normal;color:rgba(255,255,255,.72)}
+      footer .hawkes-credit{color:rgba(255,255,255,.65)}
+      #install-banner button{min-height:44px;min-width:44px}
+      .d-info,.descent,.faq,.story{max-width:100%}
+      @media(max-width:600px){
+        nav .wrap{flex-wrap:nowrap;gap:8px;padding:6px 16px}
+        nav a:not(.brand):not(.btn){display:none}
+        nav .btn.small{padding:8px 20px}
+        .hawkes-credit a{margin-top:0}
+      }
     </style>
     <script src="js/rewind-toy.js" defer></script>
     <script src="js/descent.js" defer></script>

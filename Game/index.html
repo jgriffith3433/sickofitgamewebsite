@@ -298,9 +298,11 @@
       #rotate-icon { width: 64px; height: 64px; margin-bottom: 12px; animation: rot 2.4s ease-in-out infinite; }
       @keyframes rot { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
       @media (prefers-reduced-motion: reduce) { #rotate-icon { animation: none; transform: rotate(-90deg); } }
-      #fs-button { position: fixed; top: 8px; right: 8px; z-index: 2500; width: 40px; height: 40px; border-radius: 8px;
+      #fs-button { position: fixed; top: 8px; right: 8px; z-index: 2500; width: 44px; height: 44px; border-radius: 8px;
         background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 20px; cursor: pointer; line-height: 1; }
       #fs-button[hidden] { display: none; }
+      #fs-button:focus-visible, #install-banner button:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
+      #install-banner button { min-width: 44px; min-height: 44px; }
       body.load-failed #unity-warning, body.load-failed #unity-loading-bar { display: none !important; }
     </style>
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
