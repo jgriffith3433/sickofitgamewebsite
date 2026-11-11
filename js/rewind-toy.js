@@ -1,64 +1,22 @@
-// Rewind toy: a tiny dependency-free bullet-dodger for the landing hero. Drag (relative, so a finger never covers the
-// hero) or arrows/WASD. Every fixed step is written into a ring buffer (last ~5 s); hold Rewind or R to play it backwards.
+// Rewind toy: a tiny dependency-free bullet-dodger. Drag (relative, so a finger never covers the hero) or arrows/WASD.
+// Every fixed step is written into a ring buffer (last ~5 s); hold Rewind or R to play it backwards.
 // First-second hint, dodge counter, and a payoff card after ~15 s / 3 hits / a real rewind. Runs rAF only while the
-// arena is on screen and the tab is visible. Prefers-reduced-motion or no canvas: leave the looping clip instead.
+// arena is on screen and the tab is visible.
+//
+// Reusable module: SickOfItToy.mount(box, opts) -> toy | null (no canvas). The toy has state(), reset(), teardown(),
+// and a load-progress mode (opts.progress or toy.setProgress(0-100) / showPlay() / onPlay(fn)) so the same toy can run
+// as the Game page's loading screen: a thin bar fills along the ledge, then a Play button appears; no payoff card there.
+// The landing hero mounts it below (data-rewind-toy) and publishes it as window.sickofitToy, exactly as before.
+// Prefers-reduced-motion or no canvas on the hero: leave the looping clip instead.
 (function () {
-  var box = document.querySelector('[data-rewind-toy]');
-  var heroEl = document.querySelector('[data-hero]') || (box && box.closest('.hero'));
-  var q = new URLSearchParams(location.search);
-  var forceClip = q.get('hero') === 'clip' || q.get('at') === 'clip';
-  var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function setMode(mode) {
-    if (heroEl) heroEl.setAttribute('data-hero-mode', mode);
-    document.documentElement.setAttribute('data-hero-mode', mode);
-    var v = document.querySelector('[data-hero-loop]');
-    if (!v) return;
-    if (mode === 'clip') {
-      v.removeAttribute('hidden');
-      if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
-      }
-    } else {
-      v.pause();
-    }
-  }
-
-  window.sickofitHero = {
-    mode: function () { return (heroEl && heroEl.getAttribute('data-hero-mode')) || 'clip'; },
-    setMode: function (m) {
-      if (m === 'clip') {
-        setMode('clip');
-        if (box) box.setAttribute('hidden', '');
-        if (window.sickofitToy && window.sickofitToy._stop) window.sickofitToy._stop();
-      } else if (m === 'play' && box) {
-        box.removeAttribute('hidden');
-        setMode('play');
-      }
-    }
-  };
-
-  if (!box) {
-    setMode('clip');
-    return;
-  }
-
-  if (rm || forceClip) {
-    box.setAttribute('hidden', '');
-    setMode('clip');
-    return;
-  }
-
+  function mount(box, opts) {
+  opts = opts || {};
+  var cleanups = [], tornDown = false;
+  function on(t, type, fn, o) { t.addEventListener(type, fn, o); cleanups.push(function () { t.removeEventListener(type, fn, o); }); }
   var cv = document.createElement('canvas');
   var ctx = cv.getContext && cv.getContext('2d');
-  if (!ctx) {
-    box.setAttribute('hidden', '');
-    setMode('clip');
-    return;
-  }
+  if (!ctx) return null;
 
-  setMode('play');
   cv.tabIndex = 0;
   cv.setAttribute('role', 'img');
   cv.setAttribute('aria-label', 'Mini game: drag or use arrow keys to dodge the bullets with the hero');
@@ -77,6 +35,7 @@
   var RATE = 1.5, DRAIN = 1 / 3.5, REFILL = 1 / 6;
   var meter = 1, rewinding = false, holdBtn = false, holdKey = false, racc = 0, rewound = 0, rewindFrames = 0, noise = 0;
   var holdRewound = 0;
+  var loader = !!opts.progress, loadPct = 0, playFn = null;
   var hint = 1, moved = false, payoff = false, payoffReason = '', payoffDelay = 0;
   // Near-miss dodge radius; gem is a second verb (touch a diamond from the village sack).
   var NEAR = HERO_R + 18;
@@ -85,7 +44,7 @@
   for (var ei = 0; ei < 14; ei++) embers.push({ x: Math.random(), y: Math.random(), s: 0.4 + Math.random() * 1.2, sp: 0.15 + Math.random() * 0.35 });
 
   var img = new Image();
-  img.src = box.getAttribute('data-sprite') || 'blog/lore/img/hero.webp';
+  img.src = opts.sprite || box.getAttribute('data-sprite') || 'blog/lore/img/hero.webp';
 
   function size() {
     var r = box.getBoundingClientRect();
@@ -141,7 +100,7 @@
   function loadPayoffVo() {
     if (payoffLoading || payoffBuf || !actx) return;
     payoffLoading = true;
-    loadClip(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
+    loadClip(opts.payoffVo || box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
   }
   function sayPayoff() {
     if (!unlocked || !soundOn || !actx) return;
@@ -155,7 +114,7 @@
   }
 
   function offerPayoff(reason) {
-    if (payoff) return;
+    if (payoff || loader) return;
     payoff = true;
     payoffReason = reason;
     holdBtn = false; holdKey = false;
@@ -321,6 +280,14 @@
     ctx.fillStyle = '#f0cdbf';
     ctx.fillText(label, 15, 12);
 
+    if (loader && loadPct < 100) {
+      ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, H - 6, W, 6);
+      ctx.fillStyle = '#ff9d2e'; ctx.fillRect(0, H - 6, W * loadPct / 100, 6);
+      ctx.font = '800 12px Arial,sans-serif';
+      var lt = 'Descending ' + Math.round(loadPct) + '%', ltw = ctx.measureText(lt).width;
+      ctx.fillStyle = 'rgba(10,4,5,.72)'; ctx.fillRect((W - ltw) / 2 - 7, 8, ltw + 14, 22);
+      ctx.fillStyle = '#ffd9a8'; ctx.fillText(lt, (W - ltw) / 2, 12);
+    }
     if (hint > 0.02) {
       var line1 = 'Drag to dodge.';
       var line2 = 'Hold to rewind.';
@@ -408,7 +375,7 @@
           wbuf = d;
           if (rewinding) { if (wsrc) whoosh(false); whoosh(true); }
         }
-        return loadClip(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav');
+        return loadClip(opts.whoosh || box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav');
       }).then(function (d) {
         if (d) {
           wbuf = d;
@@ -458,8 +425,8 @@
     snd.textContent = !unlocked ? '\uD83D\uDD07 Sound: tap to enable' : soundOn ? '\uD83D\uDD0A Sound on' : '\uD83D\uDD07 Sound off';
     snd.setAttribute('aria-pressed', unlocked && soundOn ? 'true' : 'false');
   }
-  document.addEventListener('pointerdown', unlock, true);
-  document.addEventListener('keydown', unlock, true);
+  on(document, 'pointerdown', unlock, true);
+  on(document, 'keydown', unlock, true);
 
   var btn = document.createElement('button');
   btn.type = 'button'; btn.setAttribute('aria-pressed', 'false');
@@ -623,29 +590,136 @@
       if (down && e.key.indexOf('Arrow') === 0 && document.activeElement === cv) e.preventDefault();
     };
   }
-  document.addEventListener('keydown', key(true));
-  document.addEventListener('keyup', key(false));
-  window.addEventListener('blur', function () { keys = {}; holdKey = false; holdBtn = false; });
-  document.addEventListener('visibilitychange', update);
-  window.addEventListener('resize', size);
+  on(document, 'keydown', key(true));
+  on(document, 'keyup', key(false));
+  on(window, 'blur', function () { keys = {}; holdKey = false; holdBtn = false; });
+  on(document, 'visibilitychange', update);
+  on(window, 'resize', size);
 
+  var io = null, ro = null;
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) { onScreen = es[es.length - 1].isIntersecting; update(); }, { threshold: 0.1 }).observe(box);
+    io = new IntersectionObserver(function (es) { onScreen = es[es.length - 1].isIntersecting; update(); }, { threshold: 0.1 }); io.observe(box);
   } else { onScreen = true; update(); }
-  if (window.ResizeObserver) new ResizeObserver(size).observe(box);
+  if (window.ResizeObserver) { ro = new ResizeObserver(size); ro.observe(box); }
   size();
 
-  window.sickofitToy = {
+  // Load-progress mode: setProgress(0-100) fills the bar; showPlay() swaps it for a Play button; onPlay(fn) hears the tap.
+  var playBtn = document.createElement('button');
+  playBtn.type = 'button'; playBtn.hidden = true; playBtn.setAttribute('data-toy-play', '');
+  playBtn.textContent = 'PLAY';
+  playBtn.style.cssText = 'position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:4;min-width:120px;min-height:52px;padding:6px 22px;border-radius:10px;border:2px solid #ff9d2e;background:#ff6a1a;color:#fff;font:900 20px Arial,sans-serif;letter-spacing:.06em;cursor:pointer';
+  box.appendChild(playBtn);
+  on(playBtn, 'click', function () { if (playFn) playFn(); });
+  var progressSet = false;
+  function setProgress(p) {
+    loader = true; progressSet = true;
+    p = Math.max(0, Math.min(100, Number(p) || 0));
+    loadPct = p;
+    cv.setAttribute('aria-label', 'Loading the game, ' + Math.round(p) + ' percent. You can dodge while you wait.');
+    if (!raf) draw();
+  }
+  function showPlay() {
+    loader = true; loadPct = 100;
+    playBtn.hidden = false;
+    cv.setAttribute('aria-label', 'The game is ready. Press Play.');
+    if (!raf) draw();
+  }
+  function teardown() {
+    if (tornDown) return;
+    tornDown = true;
+    stopLoop();
+    if (io) io.disconnect();
+    if (ro) ro.disconnect();
+    for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) {} }
+    cleanups = [];
+    try { if (wsrc) wsrc.stop(); } catch (e) {}
+    wsrc = null;
+    if (actx && actx.close) { try { actx.close(); } catch (e) {} }
+    actx = null;
+    if (cv.parentNode === box) box.removeChild(cv);
+    [btn, snd, card, playBtn].forEach(function (n) { if (n && n.parentNode === box) box.removeChild(n); });
+    onScreen = false;
+  }
+  if (loader) cv.setAttribute('aria-label', 'Loading the game. You can dodge while you wait.');
+
+  var api = {
     ring: function () { return { buffer: ring, stride: BSTRIDE, frames: FRAMES, head: head, filled: filled, maxBullets: MAXB }; },
     state: function () {
       return {
         running: !!raf, onScreen: onScreen, x: hero.x, y: hero.y, w: W, h: H, bullets: bn, hits: hits, flash: hero.flash,
         steps: steps, rewinding: rewinding, meter: meter, time: time, rewound: rewound, rewindFrames: rewindFrames,
         soundUnlocked: unlocked, soundOn: soundOn, whooshReady: !!wbuf, whooshes: whooshes, whooshing: !!wsrc, recorded: filled, dpr: dpr,
-        dodges: dodges, gems: gems, hint: hint, moved: moved, payoff: payoff, payoffReason: payoffReason, cardHidden: card.hidden
+        dodges: dodges, gems: gems, hint: hint, moved: moved, payoff: payoff, payoffReason: payoffReason, cardHidden: card.hidden,
+        progress: loadPct, playShown: !playBtn.hidden, loader: loader, tornDown: tornDown
       };
     },
     reset: resetToy,
+    setProgress: setProgress,
+    showPlay: showPlay,
+    onPlay: function (fn) { playFn = typeof fn === 'function' ? fn : null; },
+    teardown: teardown,
     _stop: stopLoop
   };
+  return api;
+  }
+
+  window.SickOfItToy = { mount: mount };
+
+
+  // ---- Landing hero: mounts the toy in [data-rewind-toy], or leaves the rewind clip ----
+  var box = document.querySelector('[data-rewind-toy]');
+  var heroEl = document.querySelector('[data-hero]') || (box && box.closest('.hero'));
+  var q = new URLSearchParams(location.search);
+  var forceClip = q.get('hero') === 'clip' || q.get('at') === 'clip';
+  var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setMode(mode) {
+    if (heroEl) heroEl.setAttribute('data-hero-mode', mode);
+    document.documentElement.setAttribute('data-hero-mode', mode);
+    var v = document.querySelector('[data-hero-loop]');
+    if (!v) return;
+    if (mode === 'clip') {
+      v.removeAttribute('hidden');
+      if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+      }
+    } else {
+      v.pause();
+    }
+  }
+
+  window.sickofitHero = {
+    mode: function () { return (heroEl && heroEl.getAttribute('data-hero-mode')) || 'clip'; },
+    setMode: function (m) {
+      if (m === 'clip') {
+        setMode('clip');
+        if (box) box.setAttribute('hidden', '');
+        if (window.sickofitToy && window.sickofitToy._stop) window.sickofitToy._stop();
+      } else if (m === 'play' && box) {
+        box.removeAttribute('hidden');
+        setMode('play');
+      }
+    }
+  };
+
+  if (!box) {
+    setMode('clip');
+    return;
+  }
+
+  if (rm || forceClip) {
+    box.setAttribute('hidden', '');
+    setMode('clip');
+    return;
+  }
+
+  setMode('play');
+  var toy = mount(box);
+  if (!toy) {
+    box.setAttribute('hidden', '');
+    setMode('clip');
+    return;
+  }
+  window.sickofitToy = toy;
 })();

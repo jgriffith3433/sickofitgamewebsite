@@ -313,6 +313,18 @@
       return;
     }
 
+    if (at === 'reduced') { await toyReduced(); return; }
+    if (at === 'module') { await toyModule(); return; }
+
+    var phone = window.innerWidth <= 400;
+    var touch = !!(navigator.maxTouchPoints > 0 || ('ontouchstart' in window));
+    ev('viewport', window.innerWidth + 'x' + window.innerHeight + ', touch=' + touch + ', phone=' + phone);
+    run.metrics.viewportWidth = window.innerWidth;
+    run.metrics.viewportHeight = window.innerHeight;
+    var ov0 = document.documentElement.scrollWidth - window.innerWidth;
+    ev('overflow-at-load', 'overflow=' + ov0);
+    if (phone && ov0 > 1) problem('bug', 'page scrolls sideways at phone width on load (' + ov0 + 'px)');
+
     var box = document.querySelector('[data-rewind-toy]');
     var cv = box && box.querySelector('canvas');
     var T = window.sickofitToy;
@@ -325,6 +337,10 @@
     ev('toy-hint', 'hint=' + round(s0.hint) + ' moved=' + s0.moved);
     if (s0.hint < 0.5 || s0.moved) problem('bug', 'first-second hint is not showing before the visitor moves');
     run.state.progress = 0.15;
+    await sleep(1400);
+    var sHold = T.state();
+    ev('toy-hint-holds', 'after 1.4 s untouched: hint=' + round(sHold.hint) + ' moved=' + sHold.moved + ' payoff=' + sHold.payoff);
+    if (sHold.hint < 0.9 || sHold.moved) problem('bug', 'hint did not stay up until the first drag');
 
     var fold = function (el) {
       if (!el) return 'MISSING';
@@ -349,13 +365,22 @@
     ev('toy-hint-faded', 'hint=' + round(T.state().hint));
     run.state.progress = 0.35;
 
-    // Payoff via a successful rewind (faster than waiting 15 s)
-    cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
-    cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    // Payoff via a real rewind: a touch hold on the Rewind button (faster than waiting 15 s)
+    var rb = box.querySelectorAll('button')[0];
     await sleep(700);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
-    await sleep(900);
-    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    if (rb) {
+      var rr = rb.getBoundingClientRect(), rx = rr.left + rr.width / 2, ry = rr.top + rr.height / 2;
+      ev('toy-rewind-button-size', Math.round(rr.width) + 'x' + Math.round(rr.height) + ' css (touch target)');
+      if (rr.height < 44) problem('bug', 'Rewind button is smaller than a 44 px touch target');
+      rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 23, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: rx, clientY: ry }));
+      await sleep(1100);
+      ev('toy-rewind-hold', 'rewinding=' + T.state().rewinding + ' rewound frames=' + T.state().rewindFrames);
+      rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 23, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: rx, clientY: ry }));
+    } else {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+      await sleep(900);
+      document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    }
     try { await until(function () { return T.state().payoff; }, 4000, 'payoff card'); } catch (e) {
       // stand still for hits as a backup
       try { await until(function () { return T.state().hits >= 3 || T.state().payoff; }, 14000, '3 hits or payoff'); } catch (e2) { problem('bug', 'payoff card never appeared after play'); }
@@ -370,6 +395,17 @@
     if (!line || line.textContent.indexOf('1,000') < 0) problem('bug', 'payoff line is not in the game\'s voice');
     if (!cardPlay || cardPlay.getAttribute('href').indexOf('Game') < 0) problem('bug', 'payoff PLAY NOW does not link to Game/');
     if (!again) problem('bug', 'Try again is missing on the payoff card');
+    if (card && !card.hidden) {
+      var cr = card.getBoundingClientRect(), br = box.getBoundingClientRect();
+      var inside = cr.left >= br.left - 1 && cr.right <= br.right + 1 && cr.top >= br.top - 1 && cr.bottom <= br.bottom + 1;
+      var cbtn = cardPlay ? cardPlay.getBoundingClientRect() : { height: 0, bottom: 0, right: 0 };
+      var btnIn = cbtn.bottom <= br.bottom + 1 && cbtn.right <= br.right + 1;
+      ev('toy-payoff-fit', 'card inside toy=' + inside + ', PLAY NOW ' + Math.round(cbtn.height) + ' px tall, inside=' + btnIn);
+      if (!inside || !btnIn) problem('bug', 'payoff card or its PLAY NOW spills outside the toy at ' + window.innerWidth + ' px');
+      var ovc = document.documentElement.scrollWidth - window.innerWidth;
+      ev('overflow-with-card', 'overflow=' + ovc);
+      if (window.innerWidth <= 400 && ovc > 1) problem('bug', 'payoff card causes sideways scroll at phone width (' + ovc + 'px)');
+    }
     ev('play-still-beside', fold(play));
     if (fold(play) !== 'visible') problem('bug', 'PLAY NOW beside the toy was covered by the payoff');
     run.state.progress = 0.7;
@@ -395,6 +431,93 @@
     if (!clip2) problem('bug', 'rewind clip missing after clip fallback');
     run.metrics.heroMode = mode2;
     run.metrics.dodges = T.state ? (window.sickofitToy && window.sickofitToy.state ? window.sickofitToy.state().dodges : s2.dodges) : s2.dodges;
+    finish('done');
+  }
+
+
+  // Reduced motion: the hero shows the rewind clip, not the toy. Needs the browser to emulate prefers-reduced-motion
+  // (Studio's phone run does); without it the same state is checked after the clip fallback is requested.
+  async function toyReduced() {
+    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    ev('reduced-motion', 'prefers-reduced-motion=' + rm);
+    run.metrics.reducedMotion = rm ? 1 : 0;
+    if (!rm && window.sickofitHero && window.sickofitHero.setMode) {
+      ev('reduced-motion-note', 'not emulated here: asking for the clip fallback instead');
+      window.sickofitHero.setMode('clip');
+    }
+    await sleep(500);
+    var box = document.querySelector('[data-rewind-toy]');
+    var clip = document.querySelector('[data-hero-loop]');
+    var mode = window.sickofitHero ? window.sickofitHero.mode() : '';
+    var toyShown = !!box && !box.hasAttribute('hidden') && getComputedStyle(box).display !== 'none';
+    var canvas = box && box.querySelector('canvas');
+    var cr = clip ? clip.getBoundingClientRect() : null;
+    var clipShown = !!clip && !clip.hasAttribute('hidden') && getComputedStyle(clip).display !== 'none' && parseFloat(getComputedStyle(clip).opacity) > 0.9 && cr.width > 0;
+    ev('reduced-hero', 'mode=' + mode + ', toy shown=' + toyShown + ', canvas=' + !!canvas + ', clip shown=' + clipShown + ', clip paused=' + (clip ? clip.paused : 'n/a'));
+    if (mode !== 'clip') problem('bug', 'hero is not in clip mode with reduced motion');
+    if (toyShown) problem('bug', 'hero still shows the toy with reduced motion');
+    if (rm && canvas) problem('bug', 'toy canvas was built even though reduced motion is on');
+    if (!clipShown) problem('bug', 'rewind clip is not showing with reduced motion');
+    if (rm && clip && !clip.paused) problem('bug', 'rewind clip is autoplaying with reduced motion');
+    var ov = document.documentElement.scrollWidth - window.innerWidth;
+    ev('hero-width', 'inner=' + window.innerWidth + ' overflow=' + ov);
+    run.metrics.horizontalOverflow = ov;
+    if (window.innerWidth <= 400 && ov > 1) problem('bug', 'sideways scroll at phone width (' + ov + 'px)');
+    run.metrics.heroMode = mode;
+    finish('done');
+  }
+
+  // Module: mount the toy in a scratch box like the Game page's loading screen would: progress to 100%, Play, teardown.
+  async function toyModule() {
+    var M = window.SickOfItToy;
+    if (!M || !M.mount) { problem('bug', 'SickOfItToy module is not loaded'); finish('error'); return; }
+    var errs = 0, onErr = function () { errs++; };
+    window.addEventListener('error', onErr);
+    var scratch = document.createElement('div');
+    scratch.style.cssText = 'position:relative;width:min(358px,calc(100% - 24px));height:200px;margin:12px auto;overflow:hidden';
+    scratch.setAttribute('data-toy-scratch', '');
+    var host = document.querySelector('[data-hero] .wrap') || document.body;
+    host.appendChild(scratch);
+    scratch.scrollIntoView({ block: 'center' });
+    var t = M.mount(scratch, { progress: true });
+    if (!t) { problem('bug', 'mount returned nothing'); finish('error'); return; }
+    var played = 0;
+    t.onPlay(function () { played++; });
+    t.setProgress(0);
+    await until(function () { return t.state().running; }, 4000, 'mounted toy running');
+    ev('module-mounted', 'canvas=' + !!scratch.querySelector('canvas') + ', progress=' + t.state().progress);
+    for (var p = 25; p <= 100; p += 25) { t.setProgress(p); await sleep(250); ev('module-progress', t.state().progress); }
+    var s = t.state();
+    if (s.progress !== 100) problem('bug', 'setProgress(100) did not reach 100');
+    if (s.playShown) problem('bug', 'Play showed before showPlay()');
+    t.showPlay();
+    await sleep(200);
+    var pb = scratch.querySelector('[data-toy-play]');
+    ev('module-play', 'Play shown=' + (pb && !pb.hidden));
+    if (!pb || pb.hidden) problem('bug', 'Play button is not shown after showPlay()');
+    else {
+      var r = pb.getBoundingClientRect();
+      if (r.height < 44) problem('bug', 'Play button is smaller than a 44 px touch target');
+      pb.click();
+      ev('module-play-click', 'onPlay calls=' + played);
+      if (played !== 1) problem('bug', 'onPlay was not called once by the Play button');
+    }
+    if (t.state().payoff) problem('bug', 'payoff card appeared in loader mode');
+    t.teardown();
+    await sleep(300);
+    var left = scratch.children.length;
+    ev('module-teardown', 'children left=' + left + ', running=' + t.state().running + ', errors=' + errs);
+    if (left) problem('bug', 'teardown left ' + left + ' nodes in the box');
+    if (t.state().running) problem('bug', 'toy still runs after teardown');
+    scratch.remove();
+    window.removeEventListener('error', onErr);
+    if (errs) problem('bug', errs + ' console errors during the module run');
+    run.metrics.consoleErrors = errs;
+    var T = window.sickofitToy;
+    if (T) {
+      ev('hero-toy-untouched', 'hero toy tornDown=' + T.state().tornDown + ', running=' + T.state().running);
+      if (T.state().tornDown) problem('bug', 'tearing down the scratch toy also tore down the hero toy');
+    }
     finish('done');
   }
 
@@ -652,7 +775,7 @@
       { id: 'game-start', title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play', seconds: 180, tags: ['smoke'], description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.' },
       { id: 'game-fail', title: 'Game/?playtest=fail-load: loader simulates a failed build fetch and shows the error', seconds: 45, tags: ['smoke'], description: 'Requires ?playtest=fail-load (or game-fail): the page loads a missing loader and the scenario photographs the failure banner.' },
       { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift', seconds: 25, tags: [] },
-      { id: 'toy-wrap', title: 'Hero toy wrap: hint fades on move, dodge counter, payoff card with PLAY NOW and Try again, PLAY NOW beside toy, no sideways scroll, clip fallback', seconds: 35, tags: ['full'], starts: ['play', 'clip'] },
+      { id: 'toy-wrap', title: 'Hero toy wrap (390x844 touch): hint holds until the first drag, payoff card after a touch rewind / 3 hits / 15 s, no sideways scroll, reduced motion shows the clip, module mount/progress/Play/teardown', seconds: 35, tags: ['full'], starts: ['play', 'clip', 'reduced', 'module'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
       { id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
