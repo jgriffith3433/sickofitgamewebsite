@@ -4,7 +4,8 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
+  if (/^climbers=\d+$/.test(which || '')) which = 'hero-presence';
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence', 'pages'];
   var GAME_IDS = ['smoke', 'game-start', 'game-fail', 'fail-load'];
   var playtestOn = false;
   try {
@@ -115,6 +116,190 @@
     ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore);
     if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
     ev('hero-play-href', play ? play.getAttribute('href') : 'MISSING');
+    finish('done');
+  }
+
+  // Pages: screenshots of the landing hero, trailer, story and FAQ and of the Game page (shown full-viewport in a
+  // same-size iframe) at whatever viewport Studio opens (1280x720 and 390x844), listing every element that overflows
+  // the viewport and every button or link under 44 px with where it is, and proving the trailer iframe only appears
+  // after a tap on the poster.
+  function where(el, win) {
+    var r = el.getBoundingClientRect(), d = el.ownerDocument;
+    var id = el.id ? '#' + el.id : el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).join('.') : '');
+    var txt = (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30);
+    return id + ' "' + txt + '" at x=' + Math.round(r.left) + ',y=' + Math.round(r.top + win.scrollY) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height);
+  }
+  function visible(el, win) {
+    var r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return false;
+    for (var n = el; n && n.nodeType === 1; n = n.parentElement) {
+      if (n.hidden || n.getAttribute('aria-hidden') === 'true') return false;
+      var cs = win.getComputedStyle(n);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    }
+    return true;
+  }
+  function clipped(el, win) {
+    for (var n = el.parentElement; n && n !== win.document.body && n !== win.document.documentElement; n = n.parentElement) {
+      var cs = win.getComputedStyle(n);
+      if (cs.overflowX !== 'visible' && cs.overflowX !== '') { var pr = n.getBoundingClientRect(); if (pr.left >= -1 && pr.right <= win.innerWidth + 1) return true; }
+    }
+    return false;
+  }
+  function audit(win, label) {
+    var doc = win.document, vw = win.innerWidth, small = [], over = [];
+    var sw = doc.documentElement.scrollWidth - vw;
+    Array.prototype.forEach.call(doc.querySelectorAll('a[href], button, summary, [role="button"]'), function (el) {
+      if (!visible(el, win)) return;
+      var r = el.getBoundingClientRect();
+      if (r.width < 43.5 || r.height < 43.5) small.push(where(el, win));
+    });
+    Array.prototype.forEach.call(doc.querySelectorAll('body *'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0 || (r.right <= vw + 1 && r.left >= -1)) return;
+      if (/^(script|style|link|meta|source)$/i.test(el.tagName) || !visible(el, win) || clipped(el, win)) return;
+      var cs = win.getComputedStyle(el);
+      if (cs.position === 'fixed' && r.left >= -1 && r.right <= vw + 1) return;
+      over.push(where(el, win));
+    });
+    ev(label + '-sideways-scroll', 'scrollWidth - innerWidth = ' + sw + ' at ' + vw + 'x' + win.innerHeight);
+    ev(label + '-overflows', over.length + (over.length ? ': ' + over.slice(0, 12).join(' | ') : ''));
+    ev(label + '-small-targets', small.length + (small.length ? ': ' + small.slice(0, 20).join(' | ') : ''));
+    over.forEach(function (o) { problem('bug', label + ': overflows the ' + vw + ' px viewport: ' + o); });
+    if (sw > 1) problem('bug', label + ': scrolls sideways by ' + sw + ' px');
+    small.forEach(function (o) { problem('bug', label + ': tap target under 44 px: ' + o); });
+    run.metrics[label + 'Overflows'] = over.length + (sw > 1 ? 1 : 0);
+    run.metrics[label + 'SmallTargets'] = small.length;
+  }
+  async function pages() {
+    var vw = window.innerWidth, vh = window.innerHeight, tag = vw + 'x' + vh;
+    var jump = async function (el, scene, p) { run.state.scene = scene; ev('scene', scene + ' ' + tag); el.scrollIntoView({ block: 'start' }); await sleep(1200); run.state.progress = p; };
+    ev('viewport', tag);
+    // Hero: art, one-line pitch and Play inside the first screen
+    window.scrollTo(0, 0);
+    run.state.scene = 'Landing: hero'; ev('scene', 'Landing: hero ' + tag);
+    await sleep(1800);
+    var premise = document.querySelector('.hero .premise'), play = document.getElementById('start-button');
+    var art = document.querySelector('[data-rewind-toy]'), clip = document.querySelector('[data-hero-loop]');
+    var artEl = art && art.getBoundingClientRect().height > 0 ? art : clip;
+    var bottom = function (el) { return el ? Math.round(el.getBoundingClientRect().bottom) : -1; };
+    ev('hero-fold', 'art bottom ' + bottom(artEl) + ', pitch bottom ' + bottom(premise) + ', Play bottom ' + bottom(play) + ' of ' + vh);
+    if (!artEl || bottom(artEl) > vh) problem('bug', 'hero art is not inside the first ' + vh + ' px');
+    if (!premise || bottom(premise) > vh) problem('bug', 'one-line pitch is not inside the first ' + vh + ' px');
+    if (!play || bottom(play) > vh) problem('bug', 'Play button bottom edge is below ' + vh + ' px');
+    run.metrics.playBottom = bottom(play);
+    run.state.progress = 0.1;
+    await sleep(600);
+    // Trailer: no iframe until the poster is tapped
+    var box = document.getElementById('trailer-box'), btn = document.getElementById('trailer-play');
+    await jump(document.getElementById('trailer'), 'Landing: trailer', 0.2);
+    var before = document.querySelectorAll('#trailer iframe, iframe[src*="youtube"]').length;
+    ev('trailer-iframes-before-tap', before);
+    if (before) problem('bug', 'trailer iframe is in the DOM before the poster is tapped');
+    var br = btn.getBoundingClientRect(), cx = br.left + br.width / 2, cy = br.top + br.height / 2;
+    var ptr = function (type) { btn.dispatchEvent(new PointerEvent(type, { pointerId: 31, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: cx, clientY: cy })); };
+    ptr('pointerdown'); await sleep(60); ptr('pointerup');
+    await sleep(500);
+    ev('trailer-iframes-right-after-pointer-up-before-click', document.querySelectorAll('#trailer iframe').length);
+    btn.click(); ev('trailer-tap', 'poster tapped');
+    try { await until(function () { return document.querySelector('#trailer iframe'); }, 6000, 'trailer iframe after the tap'); } catch (e) { problem('bug', 'trailer iframe did not appear after the poster was tapped'); }
+    var f = document.querySelector('#trailer iframe');
+    ev('trailer-iframes-after-tap', document.querySelectorAll('#trailer iframe').length + (f ? ' ' + f.src : ''));
+    run.metrics.trailerIframeAfterTap = f ? 1 : 0;
+    await sleep(800);
+    // Story and FAQ
+    await jump(document.getElementById('story'), 'Landing: story', 0.4);
+    var faq = document.getElementById('faq');
+    await jump(faq, 'Landing: FAQ', 0.5);
+    var sum = faq.querySelector('summary');
+    if (sum) { sum.click(); await sleep(500); ev('faq-open', sum.parentElement.open ? 'first answer open' : 'closed'); }
+    audit(window, 'landing');
+    run.state.progress = 0.6;
+    // Game page: a same-size iframe laid over the viewport so the screenshot shows it
+    run.state.scene = 'Game page'; ev('scene', 'Game page ' + tag);
+    var fr = document.createElement('iframe');
+    fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
+    fr.style.cssText = 'position:fixed;left:0;top:0;width:' + vw + 'px;height:' + vh + 'px;border:0;z-index:2147483000;background:#0a0405';
+    fr.src = 'Game/index.html';
+    document.body.appendChild(fr);
+    try { await until(function () { try { return fr.contentDocument && fr.contentDocument.readyState === 'complete' && fr.contentDocument.getElementById('guide'); } catch (e) { return false; } }, 15000, 'Game page'); }
+    catch (e) { problem('bug', 'Game page did not load in the probe frame'); fr.remove(); finish('error'); return; }
+    await sleep(3000);
+    ev('game-play-button', fr.contentDocument.querySelector('[data-toy-play]') ? 'present' : 'not shown yet (still loading)');
+    audit(fr.contentWindow, 'game');
+    await sleep(800);
+    fr.src = 'about:blank'; fr.remove();
+    run.state.progress = 0.95;
+    finish('done');
+  }
+
+  // Hero presence: the live chip and ghost climbers follow climbers:* events (faked, no network, by ?playtest=hero-presence
+  // or ?playtest=climbers=N): 0 -> 3 -> 8 -> 10 (cap) -> 2 -> offline, with the hero layout measured the whole time.
+  async function heroPresence() {
+    var P = window.sickofitPresence, C = window.hawkesClimbers;
+    var hero = document.querySelector('[data-hero]'), play = document.getElementById('start-button'), chip = document.querySelector('[data-presence]');
+    run.state.scene = 'Landing: hero presence'; ev('scene', 'Landing: hero presence');
+    if (!P || !C || !chip) { problem('bug', 'hero presence chip is missing'); finish('error'); return; }
+    window.scrollTo(0, 0);
+    await sleep(1200);
+    var shifts = 0, shiftSum = 0;
+    try { new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { if (!e.hadRecentInput) { shifts++; shiftSum += e.value; } }); }).observe({ type: 'layout-shift', buffered: true }); } catch (e) {}
+    var box = function () { var a = hero.getBoundingClientRect(), b = play.getBoundingClientRect(), c = chip.getBoundingClientRect(); return [a.height, b.top, b.left, c.top].map(Math.round).join(','); };
+    var layout0 = box();
+    var rm = P.state().reducedMotion;
+    var at = q.get('at') || '';
+    var snap = function (label) { var s = P.state(); ev('presence-' + label, 'text="' + s.text + '" ghosts=' + s.ghostEls + ' paused=' + s.paused + ' state=' + s.state); return s; };
+    var setN = async function (n, label) { if (C.fakeMode()) C.fake(n); else problem('bug', 'not in fake mode (open with ?playtest=hero-presence)'); await sleep(1500); return snap(label); };
+    var s = snap('start');
+    if (/Quiet down there\. Be the first\./.test(s.text) === false) problem('bug', 'quiet chip text is wrong: ' + s.text);
+    if (s.ghostEls) problem('bug', 'ghosts show with nobody climbing');
+    run.state.progress = 0.2;
+    if (at === 'offline') {
+      window.dispatchEvent(new CustomEvent('climbers:offline', { detail: { attempt: 1, retryIn: 2000 } }));
+      await sleep(800);
+      s = snap('offline');
+      if (s.state !== 'offline' || s.text.indexOf('Quiet down there') < 0) problem('bug', 'offline chip does not show the friendly message');
+      if (s.ghostEls) problem('bug', 'ghosts remain while offline');
+    } else {
+      s = await setN(3, 'three');
+      if (s.text.indexOf('3 climbing right now') !== 0) problem('bug', 'chip does not read "3 climbing right now": ' + s.text);
+      if (!rm && s.ghostEls !== 3) problem('bug', 'expected 3 ghosts, saw ' + s.ghostEls);
+      if (rm && s.ghostEls) problem('bug', 'ghosts show with reduced motion');
+      run.state.progress = 0.4;
+      s = await setN(8, 'eight');
+      if (s.text.indexOf('8 climbing') !== 0) problem('bug', 'chip does not read 8: ' + s.text);
+      if (!rm && s.ghostEls !== 8) problem('bug', 'expected 8 ghosts, saw ' + s.ghostEls);
+      s = await setN(10, 'ten');
+      if (s.text.indexOf('10 climbing') !== 0) problem('bug', 'chip does not read 10: ' + s.text);
+      if (s.ghostEls > 8) problem('bug', 'ghosts exceed the cap of 8: ' + s.ghostEls);
+      run.state.progress = 0.6;
+      s = await setN(2, 'two');
+      if (!rm && s.ghostEls !== 2) problem('bug', 'ghosts did not fade when climbers left: ' + s.ghostEls);
+      var far = document.getElementById('trailer') || document.body;
+      window.scrollTo(0, far.getBoundingClientRect().top + window.scrollY + 200);
+      await sleep(800);
+      s = snap('scrolled-away');
+      if (!rm && !s.paused) problem('bug', 'ghosts keep drifting while the hero is off-screen');
+      window.scrollTo(0, 0); await sleep(800);
+      s = snap('scrolled-back');
+      if (!rm && s.paused) problem('bug', 'ghosts did not resume on return');
+      await setN(0, 'zero');
+      s = P.state();
+      if (s.text.indexOf('Quiet down there') < 0) problem('bug', 'chip does not return to the quiet message at 0');
+      window.dispatchEvent(new CustomEvent('climbers:offline', { detail: { attempt: 1, retryIn: 2000 } }));
+      await sleep(600);
+      s = snap('offline');
+      if (s.state !== 'offline') problem('bug', 'offline event did not put the chip in the offline state');
+    }
+    var layout1 = box();
+    ev('hero-layout', layout0 + ' -> ' + layout1 + ' (hero height, PLAY top, PLAY left, chip top)');
+    if (layout0 !== layout1) problem('bug', 'hero layout moved while presence changed: ' + layout0 + ' -> ' + layout1);
+    var overflow = document.documentElement.scrollWidth - window.innerWidth;
+    run.metrics.horizontalOverflow = overflow;
+    ev('hero-width', 'inner=' + window.innerWidth + ' overflow=' + overflow);
+    if (overflow > 1) problem('bug', 'sideways scroll (' + overflow + 'px)');
+    run.metrics.layoutShifts = shifts; run.metrics.layoutShiftScore = Math.round(shiftSum * 1000) / 1000;
+    if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore);
     finish('done');
   }
 
@@ -242,6 +427,18 @@
       return;
     }
 
+    if (at === 'reduced') { await toyReduced(); return; }
+    if (at === 'module') { await toyModule(); return; }
+
+    var phone = window.innerWidth <= 400;
+    var touch = !!(navigator.maxTouchPoints > 0 || ('ontouchstart' in window));
+    ev('viewport', window.innerWidth + 'x' + window.innerHeight + ', touch=' + touch + ', phone=' + phone);
+    run.metrics.viewportWidth = window.innerWidth;
+    run.metrics.viewportHeight = window.innerHeight;
+    var ov0 = document.documentElement.scrollWidth - window.innerWidth;
+    ev('overflow-at-load', 'overflow=' + ov0);
+    if (phone && ov0 > 1) problem('bug', 'page scrolls sideways at phone width on load (' + ov0 + 'px)');
+
     var box = document.querySelector('[data-rewind-toy]');
     var cv = box && box.querySelector('canvas');
     var T = window.sickofitToy;
@@ -254,6 +451,10 @@
     ev('toy-hint', 'hint=' + round(s0.hint) + ' moved=' + s0.moved);
     if (s0.hint < 0.5 || s0.moved) problem('bug', 'first-second hint is not showing before the visitor moves');
     run.state.progress = 0.15;
+    await sleep(1400);
+    var sHold = T.state();
+    ev('toy-hint-holds', 'after 1.4 s untouched: hint=' + round(sHold.hint) + ' moved=' + sHold.moved + ' payoff=' + sHold.payoff);
+    if (sHold.hint < 0.9 || sHold.moved) problem('bug', 'hint did not stay up until the first drag');
 
     var fold = function (el) {
       if (!el) return 'MISSING';
@@ -278,13 +479,22 @@
     ev('toy-hint-faded', 'hint=' + round(T.state().hint));
     run.state.progress = 0.35;
 
-    // Payoff via a successful rewind (faster than waiting 15 s)
-    cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
-    cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 22, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 6, clientY: r.top + 6 }));
+    // Payoff via a real rewind: a touch hold on the Rewind button (faster than waiting 15 s)
+    var rb = box.querySelectorAll('button')[0];
     await sleep(700);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
-    await sleep(900);
-    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    if (rb) {
+      var rr = rb.getBoundingClientRect(), rx = rr.left + rr.width / 2, ry = rr.top + rr.height / 2;
+      ev('toy-rewind-button-size', Math.round(rr.width) + 'x' + Math.round(rr.height) + ' css (touch target)');
+      if (rr.height < 44) problem('bug', 'Rewind button is smaller than a 44 px touch target');
+      rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 23, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: rx, clientY: ry }));
+      await sleep(1100);
+      ev('toy-rewind-hold', 'rewinding=' + T.state().rewinding + ' rewound frames=' + T.state().rewindFrames);
+      rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 23, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: rx, clientY: ry }));
+    } else {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+      await sleep(900);
+      document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
+    }
     try { await until(function () { return T.state().payoff; }, 4000, 'payoff card'); } catch (e) {
       // stand still for hits as a backup
       try { await until(function () { return T.state().hits >= 3 || T.state().payoff; }, 14000, '3 hits or payoff'); } catch (e2) { problem('bug', 'payoff card never appeared after play'); }
@@ -299,6 +509,17 @@
     if (!line || line.textContent.indexOf('1,000') < 0) problem('bug', 'payoff line is not in the game\'s voice');
     if (!cardPlay || cardPlay.getAttribute('href').indexOf('Game') < 0) problem('bug', 'payoff PLAY NOW does not link to Game/');
     if (!again) problem('bug', 'Try again is missing on the payoff card');
+    if (card && !card.hidden) {
+      var cr = card.getBoundingClientRect(), br = box.getBoundingClientRect();
+      var inside = cr.left >= br.left - 1 && cr.right <= br.right + 1 && cr.top >= br.top - 1 && cr.bottom <= br.bottom + 1;
+      var cbtn = cardPlay ? cardPlay.getBoundingClientRect() : { height: 0, bottom: 0, right: 0 };
+      var btnIn = cbtn.bottom <= br.bottom + 1 && cbtn.right <= br.right + 1;
+      ev('toy-payoff-fit', 'card inside toy=' + inside + ', PLAY NOW ' + Math.round(cbtn.height) + ' px tall, inside=' + btnIn);
+      if (!inside || !btnIn) problem('bug', 'payoff card or its PLAY NOW spills outside the toy at ' + window.innerWidth + ' px');
+      var ovc = document.documentElement.scrollWidth - window.innerWidth;
+      ev('overflow-with-card', 'overflow=' + ovc);
+      if (window.innerWidth <= 400 && ovc > 1) problem('bug', 'payoff card causes sideways scroll at phone width (' + ovc + 'px)');
+    }
     ev('play-still-beside', fold(play));
     if (fold(play) !== 'visible') problem('bug', 'PLAY NOW beside the toy was covered by the payoff');
     run.state.progress = 0.7;
@@ -324,6 +545,93 @@
     if (!clip2) problem('bug', 'rewind clip missing after clip fallback');
     run.metrics.heroMode = mode2;
     run.metrics.dodges = T.state ? (window.sickofitToy && window.sickofitToy.state ? window.sickofitToy.state().dodges : s2.dodges) : s2.dodges;
+    finish('done');
+  }
+
+
+  // Reduced motion: the hero shows the rewind clip, not the toy. Needs the browser to emulate prefers-reduced-motion
+  // (Studio's phone run does); without it the same state is checked after the clip fallback is requested.
+  async function toyReduced() {
+    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    ev('reduced-motion', 'prefers-reduced-motion=' + rm);
+    run.metrics.reducedMotion = rm ? 1 : 0;
+    if (!rm && window.sickofitHero && window.sickofitHero.setMode) {
+      ev('reduced-motion-note', 'not emulated here: asking for the clip fallback instead');
+      window.sickofitHero.setMode('clip');
+    }
+    await sleep(500);
+    var box = document.querySelector('[data-rewind-toy]');
+    var clip = document.querySelector('[data-hero-loop]');
+    var mode = window.sickofitHero ? window.sickofitHero.mode() : '';
+    var toyShown = !!box && !box.hasAttribute('hidden') && getComputedStyle(box).display !== 'none';
+    var canvas = box && box.querySelector('canvas');
+    var cr = clip ? clip.getBoundingClientRect() : null;
+    var clipShown = !!clip && !clip.hasAttribute('hidden') && getComputedStyle(clip).display !== 'none' && parseFloat(getComputedStyle(clip).opacity) > 0.9 && cr.width > 0;
+    ev('reduced-hero', 'mode=' + mode + ', toy shown=' + toyShown + ', canvas=' + !!canvas + ', clip shown=' + clipShown + ', clip paused=' + (clip ? clip.paused : 'n/a'));
+    if (mode !== 'clip') problem('bug', 'hero is not in clip mode with reduced motion');
+    if (toyShown) problem('bug', 'hero still shows the toy with reduced motion');
+    if (rm && canvas) problem('bug', 'toy canvas was built even though reduced motion is on');
+    if (!clipShown) problem('bug', 'rewind clip is not showing with reduced motion');
+    if (rm && clip && !clip.paused) problem('bug', 'rewind clip is autoplaying with reduced motion');
+    var ov = document.documentElement.scrollWidth - window.innerWidth;
+    ev('hero-width', 'inner=' + window.innerWidth + ' overflow=' + ov);
+    run.metrics.horizontalOverflow = ov;
+    if (window.innerWidth <= 400 && ov > 1) problem('bug', 'sideways scroll at phone width (' + ov + 'px)');
+    run.metrics.heroMode = mode;
+    finish('done');
+  }
+
+  // Module: mount the toy in a scratch box like the Game page's loading screen would: progress to 100%, Play, teardown.
+  async function toyModule() {
+    var M = window.SickOfItToy;
+    if (!M || !M.mount) { problem('bug', 'SickOfItToy module is not loaded'); finish('error'); return; }
+    var errs = 0, onErr = function () { errs++; };
+    window.addEventListener('error', onErr);
+    var scratch = document.createElement('div');
+    scratch.style.cssText = 'position:relative;width:min(358px,calc(100% - 24px));height:200px;margin:12px auto;overflow:hidden';
+    scratch.setAttribute('data-toy-scratch', '');
+    var host = document.querySelector('[data-hero] .wrap') || document.body;
+    host.appendChild(scratch);
+    scratch.scrollIntoView({ block: 'center' });
+    var t = M.mount(scratch, { progress: true });
+    if (!t) { problem('bug', 'mount returned nothing'); finish('error'); return; }
+    var played = 0;
+    t.onPlay(function () { played++; });
+    t.setProgress(0);
+    await until(function () { return t.state().running; }, 4000, 'mounted toy running');
+    ev('module-mounted', 'canvas=' + !!scratch.querySelector('canvas') + ', progress=' + t.state().progress);
+    for (var p = 25; p <= 100; p += 25) { t.setProgress(p); await sleep(250); ev('module-progress', t.state().progress); }
+    var s = t.state();
+    if (s.progress !== 100) problem('bug', 'setProgress(100) did not reach 100');
+    if (s.playShown) problem('bug', 'Play showed before showPlay()');
+    t.showPlay();
+    await sleep(200);
+    var pb = scratch.querySelector('[data-toy-play]');
+    ev('module-play', 'Play shown=' + (pb && !pb.hidden));
+    if (!pb || pb.hidden) problem('bug', 'Play button is not shown after showPlay()');
+    else {
+      var r = pb.getBoundingClientRect();
+      if (r.height < 44) problem('bug', 'Play button is smaller than a 44 px touch target');
+      pb.click();
+      ev('module-play-click', 'onPlay calls=' + played);
+      if (played !== 1) problem('bug', 'onPlay was not called once by the Play button');
+    }
+    if (t.state().payoff) problem('bug', 'payoff card appeared in loader mode');
+    t.teardown();
+    await sleep(300);
+    var left = scratch.children.length;
+    ev('module-teardown', 'children left=' + left + ', running=' + t.state().running + ', errors=' + errs);
+    if (left) problem('bug', 'teardown left ' + left + ' nodes in the box');
+    if (t.state().running) problem('bug', 'toy still runs after teardown');
+    scratch.remove();
+    window.removeEventListener('error', onErr);
+    if (errs) problem('bug', errs + ' console errors during the module run');
+    run.metrics.consoleErrors = errs;
+    var T = window.sickofitToy;
+    if (T) {
+      ev('hero-toy-untouched', 'hero toy tornDown=' + T.state().tornDown + ', running=' + T.state().running);
+      if (T.state().tornDown) problem('bug', 'tearing down the scratch toy also tore down the hero toy');
+    }
     finish('done');
   }
 
@@ -578,14 +886,16 @@
     version: 1, product: 'sickofit',
     scenarios: function () { return [
       { id: 'smoke', title: 'Game/: smoke (same as game-start)', seconds: 180, tags: ['smoke'], description: 'Alias of game-start for product playtests named smoke.' },
-      { id: 'game-start', title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play', seconds: 180, tags: ['smoke'], description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.' },
-      { id: 'game-fail', title: 'Game/?playtest=fail-load: loader simulates a failed build fetch and shows the error', seconds: 45, tags: ['smoke'], description: 'Requires ?playtest=fail-load (or game-fail): the page loads a missing loader and the scenario photographs the failure banner.' },
+      { id: 'game-start', title: 'Game/: dodge in the load toy within 5 s, then one Play unlocks audio with no second Tap to play', seconds: 180, tags: ['smoke'], description: 'Touches the load toy within 5 s, waits for Play on the toy above #hawkes-tap, taps Play once, checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.' },
+      { id: 'game-fail', title: 'Game/?playtest=fail-load: Retry on the running load toy after a forced fetch failure', seconds: 45, tags: ['smoke'], description: 'Requires ?playtest=fail-load (or game-fail): the toy keeps running and shows Retry.' },
       { id: 'toy', title: 'Rewind toy: drag the hero, bullets fly within a second, a hit flashes, hold R or the button to rewind (meter, whoosh, resume), stops off-screen, no page shift', seconds: 25, tags: [] },
-      { id: 'toy-wrap', title: 'Hero toy wrap: hint fades on move, dodge counter, payoff card with PLAY NOW and Try again, PLAY NOW beside toy, no sideways scroll, clip fallback', seconds: 35, tags: ['full'], starts: ['play', 'clip'] },
+      { id: 'toy-wrap', title: 'Hero toy wrap (390x844 touch): hint holds until the first drag, payoff card after a touch rewind / 3 hits / 15 s, no sideways scroll, reduced motion shows the clip, module mount/progress/Play/teardown', seconds: 35, tags: ['full'], starts: ['play', 'clip', 'reduced', 'module'] },
       { id: 'hero', title: 'Landing hero: premise, looping muted rewind clip, Play above the fold; pauses off-screen; no layout shift', seconds: 15, tags: ['smoke'] },
       { id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
       { id: 'descent', title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion', seconds: 30, tags: ['full'] },
+      { id: 'hero-presence', title: 'Hero presence: live chip counts 0, 3, 8 (cap), 2 and goes quiet offline; ghosts enter, fade and pause off-screen; hero layout never moves', seconds: 20, tags: ['full'], starts: ['live', 'offline'] },
+      { id: 'pages', title: 'Pages (390x844 touch and 1280x720): landing hero, trailer, story, FAQ and Game page; lists overflows and tap targets under 44 px; trailer iframe only after a tap on the poster', seconds: 40, tags: ['smoke'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }]; },
     start: async function (id, options) {
@@ -613,7 +923,7 @@
         }, 20);
         return new Promise(function () {});
       }
-      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, about, descent, share, descent-assets)');
+      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, hero-presence, pages, about, descent, share, descent-assets)');
       var reqAt = String(options.at || q.get('at') || '');
       if (run && !run.done && run.id === id && String(run.at || '') === reqAt) return;
       t0 = performance.now();
@@ -625,7 +935,9 @@
         else if (id === 'toy-wrap') await toyWrap(options);
         else if (id === 'about') await about();
         else if (id === 'descent') await descent();
+        else if (id === 'hero-presence') await heroPresence();
         else if (id === 'share') await share();
+        else if (id === 'pages') await pages();
         else await play();
       } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },

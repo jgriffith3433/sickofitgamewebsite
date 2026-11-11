@@ -1,64 +1,22 @@
-// Rewind toy: a tiny dependency-free bullet-dodger for the landing hero. Drag (relative, so a finger never covers the
-// hero) or arrows/WASD. Every fixed step is written into a ring buffer (last ~5 s); hold Rewind or R to play it backwards.
+// Rewind toy: a tiny dependency-free bullet-dodger. Drag (relative, so a finger never covers the hero) or arrows/WASD.
+// Every fixed step is written into a ring buffer (last ~5 s); hold Rewind or R to play it backwards.
 // First-second hint, dodge counter, and a payoff card after ~15 s / 3 hits / a real rewind. Runs rAF only while the
-// arena is on screen and the tab is visible. Prefers-reduced-motion or no canvas: leave the looping clip instead.
+// arena is on screen and the tab is visible.
+//
+// Reusable module: SickOfItToy.mount(box, opts) -> toy | null (no canvas). The toy has state(), reset(), teardown(),
+// and a load-progress mode (opts.progress or toy.setProgress(0-100) / showPlay() / onPlay(fn)) so the same toy can run
+// as the Game page's loading screen: a thin bar fills along the ledge, then a Play button appears; no payoff card there.
+// The landing hero mounts it below (data-rewind-toy) and publishes it as window.sickofitToy, exactly as before.
+// Prefers-reduced-motion or no canvas on the hero: leave the looping clip instead.
 (function () {
-  var box = document.querySelector('[data-rewind-toy]');
-  var heroEl = document.querySelector('[data-hero]') || (box && box.closest('.hero'));
-  var q = new URLSearchParams(location.search);
-  var forceClip = q.get('hero') === 'clip' || q.get('at') === 'clip';
-  var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function setMode(mode) {
-    if (heroEl) heroEl.setAttribute('data-hero-mode', mode);
-    document.documentElement.setAttribute('data-hero-mode', mode);
-    var v = document.querySelector('[data-hero-loop]');
-    if (!v) return;
-    if (mode === 'clip') {
-      v.removeAttribute('hidden');
-      if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
-      }
-    } else {
-      v.pause();
-    }
-  }
-
-  window.sickofitHero = {
-    mode: function () { return (heroEl && heroEl.getAttribute('data-hero-mode')) || 'clip'; },
-    setMode: function (m) {
-      if (m === 'clip') {
-        setMode('clip');
-        if (box) box.setAttribute('hidden', '');
-        if (window.sickofitToy && window.sickofitToy._stop) window.sickofitToy._stop();
-      } else if (m === 'play' && box) {
-        box.removeAttribute('hidden');
-        setMode('play');
-      }
-    }
-  };
-
-  if (!box) {
-    setMode('clip');
-    return;
-  }
-
-  if (rm || forceClip) {
-    box.setAttribute('hidden', '');
-    setMode('clip');
-    return;
-  }
-
+  function mount(box, opts) {
+  opts = opts || {};
+  var cleanups = [], tornDown = false;
+  function on(t, type, fn, o) { t.addEventListener(type, fn, o); cleanups.push(function () { t.removeEventListener(type, fn, o); }); }
   var cv = document.createElement('canvas');
   var ctx = cv.getContext && cv.getContext('2d');
-  if (!ctx) {
-    box.setAttribute('hidden', '');
-    setMode('clip');
-    return;
-  }
+  if (!ctx) return null;
 
-  setMode('play');
   cv.tabIndex = 0;
   cv.setAttribute('role', 'img');
   cv.setAttribute('aria-label', 'Mini game: drag or use arrow keys to dodge the bullets with the hero');
@@ -77,6 +35,8 @@
   var RATE = 1.5, DRAIN = 1 / 3.5, REFILL = 1 / 6;
   var meter = 1, rewinding = false, holdBtn = false, holdKey = false, racc = 0, rewound = 0, rewindFrames = 0, noise = 0;
   var holdRewound = 0;
+  var loader = !!opts.progress, loadPct = 0, playFn = null, climbN = 0;
+  var rumbleOsc = null, rumbleGain = null;
   var hint = 1, moved = false, payoff = false, payoffReason = '', payoffDelay = 0;
   // Near-miss dodge radius; gem is a second verb (touch a diamond from the village sack).
   var NEAR = HERO_R + 18;
@@ -85,7 +45,7 @@
   for (var ei = 0; ei < 14; ei++) embers.push({ x: Math.random(), y: Math.random(), s: 0.4 + Math.random() * 1.2, sp: 0.15 + Math.random() * 0.35 });
 
   var img = new Image();
-  img.src = box.getAttribute('data-sprite') || 'blog/lore/img/hero.webp';
+  img.src = opts.sprite || box.getAttribute('data-sprite') || 'blog/lore/img/hero.webp';
 
   function size() {
     var r = box.getBoundingClientRect();
@@ -141,7 +101,7 @@
   function loadPayoffVo() {
     if (payoffLoading || payoffBuf || !actx) return;
     payoffLoading = true;
-    loadClip(box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
+    loadClip(opts.payoffVo || box.getAttribute('data-payoff-vo') || 'sounds/toy-payoff.wav').then(function (d) { payoffBuf = d; payoffLoading = false; });
   }
   function sayPayoff() {
     if (!unlocked || !soundOn || !actx) return;
@@ -155,7 +115,7 @@
   }
 
   function offerPayoff(reason) {
-    if (payoff) return;
+    if (payoff || loader) return;
     payoff = true;
     payoffReason = reason;
     holdBtn = false; holdKey = false;
@@ -321,6 +281,14 @@
     ctx.fillStyle = '#f0cdbf';
     ctx.fillText(label, 15, 12);
 
+    if (loader && loadPct < 100) {
+      ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(0, H - 6, W, 6);
+      ctx.fillStyle = '#ff9d2e'; ctx.fillRect(0, H - 6, W * loadPct / 100, 6);
+      ctx.font = '800 12px Arial,sans-serif';
+      var lt = 'Descending ' + Math.round(loadPct) + '%', ltw = ctx.measureText(lt).width;
+      ctx.fillStyle = 'rgba(10,4,5,.72)'; ctx.fillRect((W - ltw) / 2 - 7, 8, ltw + 14, 22);
+      ctx.fillStyle = '#ffd9a8'; ctx.fillText(lt, (W - ltw) / 2, 12);
+    }
     if (hint > 0.02) {
       var line1 = 'Drag to dodge.';
       var line2 = 'Hold to rewind.';
@@ -391,6 +359,20 @@
       return actx;
     } catch (e) { return null; }
   }
+  function startRumble() {
+    if (!loader || !actx || rumbleOsc || !soundOn) return;
+    try {
+      rumbleOsc = actx.createOscillator();
+      rumbleOsc.type = 'sine'; rumbleOsc.frequency.value = 42;
+      rumbleGain = actx.createGain(); rumbleGain.gain.value = 0.028;
+      rumbleOsc.connect(rumbleGain); rumbleGain.connect(actx.destination);
+      rumbleOsc.start();
+    } catch (e) { rumbleOsc = null; rumbleGain = null; }
+  }
+  function stopRumble() {
+    try { if (rumbleOsc) rumbleOsc.stop(); } catch (e) {}
+    rumbleOsc = null; rumbleGain = null;
+  }
   function unlock() {
     if (unlocked) return;
     unlocked = true; refreshSound();
@@ -398,6 +380,7 @@
       if (!ensureActx()) return;
       // Ready immediately so a hold-R right after the first tap still whooshes.
       wbuf = makeWhooshBuf();
+      startRumble();
       loading = true;
       // Prefer the bundled WAV (no network); optional file fetch can replace it; never wipe the buffer with null.
       var bundled = null;
@@ -408,7 +391,7 @@
           wbuf = d;
           if (rewinding) { if (wsrc) whoosh(false); whoosh(true); }
         }
-        return loadClip(box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav');
+        return loadClip(opts.whoosh || box.getAttribute('data-whoosh') || 'sounds/rewind-whoosh.wav');
       }).then(function (d) {
         if (d) {
           wbuf = d;
@@ -458,8 +441,8 @@
     snd.textContent = !unlocked ? '\uD83D\uDD07 Sound: tap to enable' : soundOn ? '\uD83D\uDD0A Sound on' : '\uD83D\uDD07 Sound off';
     snd.setAttribute('aria-pressed', unlocked && soundOn ? 'true' : 'false');
   }
-  document.addEventListener('pointerdown', unlock, true);
-  document.addEventListener('keydown', unlock, true);
+  on(document, 'pointerdown', unlock, true);
+  on(document, 'keydown', unlock, true);
 
   var btn = document.createElement('button');
   btn.type = 'button'; btn.setAttribute('aria-pressed', 'false');
@@ -471,7 +454,7 @@
   box.appendChild(btn);
   var snd = document.createElement('button');
   snd.type = 'button';
-  snd.style.cssText = 'position:absolute;left:8px;bottom:8px;min-height:32px;padding:4px 10px;border-radius:8px;border:1px solid #4a3a36;background:rgba(10,4,5,.7);color:#d9c3ba;font:700 12px Arial,sans-serif;cursor:pointer;z-index:2';
+  snd.style.cssText = 'position:absolute;left:8px;bottom:8px;min-height:44px;min-width:44px;padding:4px 10px;border-radius:8px;border:1px solid #4a3a36;background:rgba(10,4,5,.7);color:#d9c3ba;font:700 12px Arial,sans-serif;cursor:pointer;z-index:2';
   box.appendChild(snd); refreshSound();
   // Payoff card over the toy only (PLAY NOW beside the toy stays outside this box). Appended last so
   // querySelectorAll('button')[0] stays the Rewind control for the existing toy playtest.
@@ -520,6 +503,20 @@
       var ex = em.x * W, ey = ((em.y + time * em.sp) % 1) * H;
       ctx.fillStyle = 'rgba(255,' + Math.floor(100 + em.s * 40) + ',40,' + (0.35 + em.s * 0.2) + ')';
       ctx.beginPath(); ctx.arc(ex, ey, em.s, 0, 6.2832); ctx.fill();
+    }
+    // Load mode: distant climbers on the shaft when the lobby chip has a count (visible life, not only the number).
+    if (loader && climbN > 0) {
+      var nGhost = Math.min(climbN, 8);
+      for (var g = 0; g < nGhost; g++) {
+        var lane = [0.12, 0.88, 0.22, 0.78, 0.18, 0.82, 0.28, 0.72][g];
+        var gy = ground - 28 - ((time * (12 + g * 3) + g * 40) % (ground - 40));
+        var gx = W * lane + Math.sin(time * 0.7 + g) * 4;
+        ctx.globalAlpha = 0.22 + (g % 3) * 0.06;
+        ctx.fillStyle = '#3a2218';
+        ctx.beginPath(); ctx.arc(gx, gy - 6, 5, 0, 6.2832); ctx.fill();
+        ctx.fillRect(gx - 3.5, gy - 2, 7, 14);
+        ctx.globalAlpha = 1;
+      }
     }
   }
 
@@ -584,7 +581,7 @@
 
   function stopLoop() {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
-    holdKey = false; holdBtn = false; setRewinding(false); whoosh(false);
+    holdKey = false; holdBtn = false; setRewinding(false); whoosh(false); stopRumble();
   }
 
   cv.addEventListener('pointerdown', function (e) {
@@ -623,29 +620,198 @@
       if (down && e.key.indexOf('Arrow') === 0 && document.activeElement === cv) e.preventDefault();
     };
   }
-  document.addEventListener('keydown', key(true));
-  document.addEventListener('keyup', key(false));
-  window.addEventListener('blur', function () { keys = {}; holdKey = false; holdBtn = false; });
-  document.addEventListener('visibilitychange', update);
-  window.addEventListener('resize', size);
+  on(document, 'keydown', key(true));
+  on(document, 'keyup', key(false));
+  on(window, 'blur', function () { keys = {}; holdKey = false; holdBtn = false; });
+  on(document, 'visibilitychange', update);
+  on(window, 'resize', size);
 
+  var io = null, ro = null;
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) { onScreen = es[es.length - 1].isIntersecting; update(); }, { threshold: 0.1 }).observe(box);
+    io = new IntersectionObserver(function (es) { onScreen = es[es.length - 1].isIntersecting; update(); }, { threshold: 0.1 }); io.observe(box);
   } else { onScreen = true; update(); }
-  if (window.ResizeObserver) new ResizeObserver(size).observe(box);
+  if (window.ResizeObserver) { ro = new ResizeObserver(size); ro.observe(box); }
   size();
 
-  window.sickofitToy = {
+  // Load-progress mode: setProgress(0-100) fills the bar; showPlay() / showRetry() swap thumb-zone buttons;
+  // onPlay / onRetry hear the tap; setClimbing(n) shows "N climbing right now" when the lobby is up.
+  // Don't clobber an already-positioned host (Game/#guide-toy is absolute inset:0).
+  try {
+    var hostPos = (box.style && box.style.position) || (window.getComputedStyle && getComputedStyle(box).position) || '';
+    if (!hostPos || hostPos === 'static') box.style.position = 'relative';
+  } catch (e) { if (!box.style.position) box.style.position = 'relative'; }
+  if (!box.style.overflow) box.style.overflow = 'hidden';
+  var THUMB = 'position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:4;min-width:140px;min-height:44px;padding:10px 28px;border-radius:10px;border:2px solid #ff9d2e;background:#ff6a1a;color:#fff;font:900 18px Arial,sans-serif;letter-spacing:.06em;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent';
+  var playBtn = document.createElement('button');
+  playBtn.type = 'button'; playBtn.hidden = true; playBtn.setAttribute('data-toy-play', '');
+  if (loader) playBtn.id = 'guide-play';
+  playBtn.textContent = 'Play';
+  playBtn.style.cssText = THUMB;
+  box.appendChild(playBtn);
+  var retryBtn = document.createElement('button');
+  retryBtn.type = 'button'; retryBtn.hidden = true; retryBtn.setAttribute('data-toy-retry', '');
+  retryBtn.textContent = 'Retry';
+  retryBtn.style.cssText = THUMB.replace('#ff6a1a', '#c44a1a');
+  box.appendChild(retryBtn);
+  var climbChip = document.createElement('div');
+  climbChip.hidden = true; climbChip.setAttribute('data-toy-climbing', '');
+  climbChip.setAttribute('aria-live', 'polite');
+  climbChip.style.cssText = 'position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:3;padding:6px 12px;border-radius:999px;background:rgba(10,4,5,.78);border:1px solid rgba(255,157,46,.45);color:#f0cdbf;font:700 13px Arial,sans-serif;pointer-events:none;white-space:nowrap';
+  box.appendChild(climbChip);
+  var retryFn = null, playFired = false, retryTouch = false;
+  function firePlay() {
+    if (playFired || playBtn.hidden || !playFn) return;
+    playFired = true;
+    playFn();
+  }
+  function fireRetry() {
+    if (retryBtn.hidden || !retryFn) return;
+    retryFn();
+  }
+  on(playBtn, 'pointerdown', function (e) { if (e.pointerType === 'touch') return; firePlay(); });
+  on(playBtn, 'touchend', function (e) { e.preventDefault(); firePlay(); }, { passive: false });
+  on(playBtn, 'click', firePlay);
+  on(retryBtn, 'pointerdown', function (e) { if (e.pointerType === 'touch') return; fireRetry(); });
+  on(retryBtn, 'touchend', function (e) { e.preventDefault(); retryTouch = true; fireRetry(); }, { passive: false });
+  on(retryBtn, 'click', function () { if (retryTouch) { retryTouch = false; return; } fireRetry(); });
+  var progressSet = false;
+  function setProgress(p) {
+    loader = true; progressSet = true;
+    if (!playBtn.id) playBtn.id = 'guide-play';
+    p = Math.max(0, Math.min(100, Number(p) || 0));
+    loadPct = p;
+    retryBtn.hidden = true;
+    cv.setAttribute('aria-label', 'Loading the game, ' + Math.round(p) + ' percent. You can dodge while you wait.');
+    if (!raf) draw();
+  }
+  function showPlay() {
+    loader = true; loadPct = 100; playFired = false;
+    if (!playBtn.id) playBtn.id = 'guide-play';
+    retryBtn.hidden = true;
+    playBtn.hidden = false;
+    cv.setAttribute('aria-label', 'The game is ready. Press Play.');
+    if (!raf) draw();
+  }
+  function showRetry(msg) {
+    loader = true;
+    playBtn.hidden = true;
+    retryBtn.hidden = false;
+    cv.setAttribute('aria-label', (msg || 'The game did not load.') + ' You can keep dodging. Press Retry.');
+    if (!raf) draw();
+  }
+  function hideRetry() {
+    retryBtn.hidden = true;
+    if (!raf) draw();
+  }
+  function setClimbing(n) {
+    if (n == null || n <= 0) {
+      climbN = 0; climbChip.hidden = true; climbChip.textContent = '';
+      return;
+    }
+    climbN = n | 0;
+    climbChip.hidden = false;
+    climbChip.textContent = climbN + ' climbing right now';
+  }
+  function teardown() {
+    if (tornDown) return;
+    tornDown = true;
+    stopLoop();
+    if (io) io.disconnect();
+    if (ro) ro.disconnect();
+    for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) {} }
+    cleanups = [];
+    try { if (wsrc) wsrc.stop(); } catch (e) {}
+    wsrc = null;
+    if (actx && actx.close) { try { actx.close(); } catch (e) {} }
+    actx = null;
+    if (cv.parentNode === box) box.removeChild(cv);
+    [btn, snd, card, playBtn, retryBtn, climbChip].forEach(function (n) { if (n && n.parentNode === box) box.removeChild(n); });
+    onScreen = false;
+  }
+  if (loader) cv.setAttribute('aria-label', 'Loading the game. You can dodge while you wait.');
+
+  var api = {
     ring: function () { return { buffer: ring, stride: BSTRIDE, frames: FRAMES, head: head, filled: filled, maxBullets: MAXB }; },
     state: function () {
       return {
         running: !!raf, onScreen: onScreen, x: hero.x, y: hero.y, w: W, h: H, bullets: bn, hits: hits, flash: hero.flash,
         steps: steps, rewinding: rewinding, meter: meter, time: time, rewound: rewound, rewindFrames: rewindFrames,
         soundUnlocked: unlocked, soundOn: soundOn, whooshReady: !!wbuf, whooshes: whooshes, whooshing: !!wsrc, recorded: filled, dpr: dpr,
-        dodges: dodges, gems: gems, hint: hint, moved: moved, payoff: payoff, payoffReason: payoffReason, cardHidden: card.hidden
+        dodges: dodges, gems: gems, hint: hint, moved: moved, payoff: payoff, payoffReason: payoffReason, cardHidden: card.hidden,
+        progress: loadPct, playShown: !playBtn.hidden, retryShown: !retryBtn.hidden, climbing: climbN, loader: loader, tornDown: tornDown
       };
     },
     reset: resetToy,
+    setProgress: setProgress,
+    showPlay: showPlay,
+    showRetry: showRetry,
+    hideRetry: hideRetry,
+    setClimbing: setClimbing,
+    onPlay: function (fn) { playFn = typeof fn === 'function' ? fn : null; },
+    onRetry: function (fn) { retryFn = typeof fn === 'function' ? fn : null; },
+    teardown: teardown,
     _stop: stopLoop
   };
+  return api;
+  }
+
+  window.SickOfItToy = { mount: mount };
+
+
+  // ---- Landing hero: mounts the toy in [data-rewind-toy], or leaves the rewind clip ----
+  var box = document.querySelector('[data-rewind-toy]');
+  var heroEl = document.querySelector('[data-hero]') || (box && box.closest('.hero'));
+  var q = new URLSearchParams(location.search);
+  var forceClip = q.get('hero') === 'clip' || q.get('at') === 'clip';
+  var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setMode(mode) {
+    if (heroEl) heroEl.setAttribute('data-hero-mode', mode);
+    document.documentElement.setAttribute('data-hero-mode', mode);
+    var v = document.querySelector('[data-hero-loop]');
+    if (!v) return;
+    if (mode === 'clip') {
+      v.removeAttribute('hidden');
+      if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        var p = v.play();
+        if (p && p.catch) p.catch(function () {});
+      }
+    } else {
+      v.pause();
+    }
+  }
+
+  window.sickofitHero = {
+    mode: function () { return (heroEl && heroEl.getAttribute('data-hero-mode')) || 'clip'; },
+    setMode: function (m) {
+      if (m === 'clip') {
+        setMode('clip');
+        if (box) box.setAttribute('hidden', '');
+        if (window.sickofitToy && window.sickofitToy._stop) window.sickofitToy._stop();
+      } else if (m === 'play' && box) {
+        box.removeAttribute('hidden');
+        setMode('play');
+      }
+    }
+  };
+
+  if (!box) {
+    setMode('clip');
+    return;
+  }
+
+  if (rm || forceClip) {
+    box.setAttribute('hidden', '');
+    setMode('clip');
+    return;
+  }
+
+  setMode('play');
+  var toy = mount(box);
+  if (!toy) {
+    box.setAttribute('hidden', '');
+    setMode('clip');
+    return;
+  }
+  window.sickofitToy = toy;
 })();

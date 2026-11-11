@@ -4,7 +4,7 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence'];
   var playtestOn = false;
   try {
     playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest') || sessionStorage.getItem('hawkes.playtest'));
@@ -119,8 +119,10 @@
   };
 
   async function gameStart() {
+    // This scenario clicks Play itself: tell Game/index.html not to dismiss the toy when the build's own contract starts.
+    window.hawkesPageClicksPlay = true;
     var guide = document.getElementById('guide');
-    var play = document.getElementById('guide-play');
+    var stage = document.getElementById('guide-toy');
     var tapsToGame = 0;
     var secondTap = false;
     var progressLogs = 0;
@@ -128,6 +130,9 @@
     var playAt = 0;
     var introFirstFrameSec = null;
     var overlayAfterPlay = null;
+    var playBtn = function () {
+      return document.querySelector('[data-toy-play]') || document.getElementById('guide-play');
+    };
 
     var onProgress = function (e) {
       var p = typeof e.detail === 'number' ? e.detail : 0;
@@ -141,29 +146,62 @@
     };
     window.addEventListener('hawkes-unity-progress', onProgress);
 
-    run.state.scene = 'controls-card';
-    ev('scene', 'controls-card');
+    run.state.scene = 'load-toy';
+    ev('scene', 'load-toy');
     ev('viewport', window.innerWidth + 'x' + window.innerHeight);
-    await sleep(2500);
+    await sleep(400);
 
     if (!guide || !visible(guide)) {
-      problem('bug', 'controls card (#guide) is not visible on Game/');
+      problem('bug', 'load toy (#guide) is not visible on Game/');
+    }
+    var T = window.sickofitToy;
+    if (!T || !stage) {
+      problem('bug', 'load toy module did not mount');
     } else {
-      ev('controls-card', 'visible: ' + (document.getElementById('guide-sub') || {}).textContent);
+      ev('load-toy', 'mounted progress=' + round(T.state().progress) + ' running=' + T.state().running);
+      // Phone criterion: dodge in the toy within 5 s of opening Game/ (touch drag, no mouse).
+      var openAt = performance.now();
+      var cv = stage.querySelector('canvas');
+      if (cv) {
+        var r = cv.getBoundingClientRect();
+        var fire = function (type, x, y) {
+          cv.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y }));
+        };
+        var a = T.state(), sx = r.left + 30, sy = r.top + 30;
+        fire('pointerdown', sx, sy);
+        for (var i = 1; i <= 16; i++) { fire('pointermove', sx - i * 5, sy + i * 3); await sleep(20); }
+        fire('pointerup', sx - 80, sy + 48);
+        var b = T.state();
+        var dodgeSec = (performance.now() - openAt) / 1000;
+        ev('toy-dodge-within-5s', round(dodgeSec) + 's; hero ' + Math.round(a.x) + ',' + Math.round(a.y) + ' -> ' + Math.round(b.x) + ',' + Math.round(b.y));
+        run.metrics.toyDodgeSeconds = round(dodgeSec);
+        if (dodgeSec > 5) problem('bug', 'first dodge took ' + round(dodgeSec) + 's (over 5)');
+        if (Math.abs(b.x - a.x) < 15 && Math.abs(b.y - a.y) < 15) problem('bug', 'touch drag did not move the hero in the load toy');
+      } else {
+        problem('bug', 'load toy has no canvas');
+      }
+      // Hold rewind briefly so rewind responds to touch while loading.
+      var rb = Array.prototype.slice.call(stage.querySelectorAll('button')).filter(function (btn) { return /Rewind/i.test(btn.textContent || ''); })[0];
+      if (rb) {
+        rb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+        await sleep(400);
+        ev('toy-rewind-touch', 'rewinding=' + T.state().rewinding);
+        rb.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, pointerType: 'touch', isPrimary: true, bubbles: true }));
+      }
     }
     // Play must be reachable without dismissing Tap to play first (guide sits above #hawkes-tap).
     var cx = Math.floor(window.innerWidth / 2), cy = Math.floor(window.innerHeight / 2);
     var topBefore = topAt(cx, cy);
     ev('top-at-center-before-play', topBefore);
     if (/#hawkes-tap/.test(topBefore)) {
-      problem('bug', 'Tap to play is above the controls card; Play is not the single gesture');
+      problem('bug', 'Tap to play is above the load toy; Play is not the single gesture');
     }
     ev('tap-prompt-dom', tapPromptUp() ? 'hawkes-tap in DOM (should sit under #guide)' : 'no hawkes-tap');
 
-    beat(0.2, 'waiting for Unity ready');
+    beat(0.25, 'waiting for Unity ready');
     // Unity is ~33 MB; tick progress while waiting so the run is not stuck.
     var readyWait = performance.now();
-    while (!(window.hawkesGuide && window.hawkesGuide.isReady()) && !(play && !play.disabled && /play/i.test(play.textContent || ''))) {
+    while (!(window.hawkesGuide && window.hawkesGuide.isReady()) && !(playBtn() && !playBtn().hidden)) {
       if (performance.now() - readyWait > 150000) throw new Error('timed out waiting for Unity ready / Play');
       beat(Math.min(0.55, 0.2 + ((performance.now() - readyWait) / 150000) * 0.35), 'waiting Unity');
       await sleep(500);
@@ -171,19 +209,23 @@
     ev('unity-ready', 'Play enabled after ' + progressLogs + ' progress events');
     run.metrics.unityProgressEvents = progressLogs;
     beat(0.6, 'ready');
-    await sleep(2000);
-    ev('scene', 'controls-card-ready');
-    run.state.scene = 'controls-card-ready';
-    await sleep(2500);
+    await sleep(1500);
+    ev('scene', 'load-toy-ready');
+    run.state.scene = 'load-toy-ready';
+    await sleep(1000);
 
-    if (!play || play.disabled) {
+    var play = playBtn();
+    if (!play || play.hidden) {
       problem('bug', 'Play button is not ready after Unity load');
       finish('error');
       window.removeEventListener('hawkes-unity-progress', onProgress);
       return;
     }
+    var playRect = play.getBoundingClientRect();
+    ev('play-thumb-zone', Math.round(playRect.width) + 'x' + Math.round(playRect.height) + ' at y=' + Math.round(playRect.top));
+    if (playRect.height < 44 || playRect.width < 44) problem('bug', 'Play is under 44 px');
 
-    // One Play tap only: unlocks audio, dismisses Tap to play, clears overlays (no prior Tap to play press).
+    // One Play tap only: unlocks audio, dismisses Tap to play, tears down the toy, clears overlays.
     playAt = performance.now();
     realClick(play);
     tapsToGame++;
@@ -192,19 +234,51 @@
 
     await until(function () {
       return (window.hawkesGuide && window.hawkesGuide.isStarted()) || (guide && guide.hidden) || document.body.classList.contains('hawkes-playing');
-    }, 10000, 'controls card to hide after Play');
+    }, 10000, 'load toy to hide after Play');
 
     run.state.scene = 'after-play';
     ev('scene', 'after-play');
-    await sleep(1500);
+    await sleep(800);
+
+    // Toy must be torn down the moment the game starts (AC3: costs the game nothing).
+    var toyAfter = window.sickofitToy;
+    var toyState = toyAfter && toyAfter.state ? toyAfter.state() : null;
+    ev('toy-after-play', toyState ? ('tornDown=' + toyState.tornDown + ' running=' + toyState.running) : 'null (torn down)');
+    run.metrics.toyTornDown = (!toyAfter || (toyState && toyState.tornDown) || (toyState && !toyState.running)) ? 1 : 0;
+    if (toyState && !toyState.tornDown && toyState.running) problem('bug', 'load toy still running after Play');
+    if (window.hawkesGuide && window.hawkesGuide.toy && window.hawkesGuide.toy()) problem('bug', 'hawkesGuide still holds a live toy after Play');
+
+    // Page spectator must stay closed so the build's own chip owns the count.
+    var C = window.hawkesClimbers;
+    if (C && C.close && !C.closed()) C.close();
+    await sleep(1600);
+    ev('climbers-after-play', C ? ('closed=' + (C.closed && C.closed()) + ' connected=' + C.connected()) : 'missing');
+    if (C && C.closed && !C.closed()) problem('bug', 'page climbers spectator did not stay closed after Play');
+    if (C && C.connected && C.connected()) problem('bug', 'page climbers spectator reconnected after Play');
+    run.metrics.climbersClosedAfterPlay = (C && C.closed && C.closed() && !C.connected()) ? 1 : 0;
 
     overlayAfterPlay = overlayBlocksGame();
     ev('overlay-after-play', overlayAfterPlay ? ('BLOCKING ' + overlayAfterPlay) : 'none blocking');
     ev('top-at-center-after-play', topAt(cx, cy));
     if (overlayAfterPlay) problem('bug', 'overlay blocks the game after Play: ' + overlayAfterPlay);
 
+    // Sample page rAF fps for ~10 s after Play (paired no-toy control is judged on beta against this metric).
+    var frames = 0, fpsT0 = performance.now(), fpsRaf = 0;
+    await new Promise(function (resolve) {
+      var end = fpsT0 + 10000;
+      function tick(now) {
+        frames++;
+        if (now < end) fpsRaf = requestAnimationFrame(tick);
+        else resolve();
+      }
+      fpsRaf = requestAnimationFrame(tick);
+    });
+    var fps = frames / ((performance.now() - fpsT0) / 1000);
+    ev('fps-after-play-10s', round(fps) + ' (toy torn down; beta compares within 2 of a no-toy run)');
+    run.metrics.fpsAfterPlay10s = round(fps);
+
     // Watch for a second Tap to play after Play (should not reappear).
-    var watchEnd = performance.now() + 8000;
+    var watchEnd = performance.now() + 4000;
     while (performance.now() < watchEnd) {
       if (tapPromptUp()) { secondTap = true; break; }
       var midBlock = overlayBlocksGame();
@@ -223,7 +297,7 @@
           ev('intro-first-frame', round(introFirstFrameSec) + 's after Play');
         }
       }
-      beat(0.8, 'watching after Play');
+      beat(0.85, 'watching after Play');
       await sleep(200);
     }
     if (introFirstFrameSec == null) {
@@ -235,7 +309,6 @@
     ev('orientation-check', 'forcing portrait then landscape probe via resize events');
     var prevW = window.innerWidth, prevH = window.innerHeight;
     try {
-      // Soft probe: re-run the page's orientation logic by dispatching resize; overlays must stay clear.
       window.dispatchEvent(new Event('resize'));
       window.dispatchEvent(new Event('orientationchange'));
       await sleep(400);
@@ -295,29 +368,34 @@
     run.state.scene = 'failure';
     ev('scene', 'failure');
     ev('viewport', window.innerWidth + 'x' + window.innerHeight);
-    ev('setup-shortcut', 'playtest=fail-load forces a missing loader fetch');
-    await sleep(1500);
+    ev('setup-shortcut', 'playtest=fail-load forces a missing loader fetch; Retry stays on the running toy');
+    await sleep(800);
 
-    // Tap prompt may cover the page; dismiss so the failure banner can be photographed.
-    if (tapPromptUp()) {
-      var tapBtn = document.querySelector('#hawkes-tap button') || document.getElementById('hawkes-tap');
-      realClick(tapBtn) || (window.hawkesSound && window.hawkesSound.tap && window.hawkesSound.tap());
-      await sleep(500);
-    }
     var guide = document.getElementById('guide');
-    if (guide) guide.hidden = true;
+    var T = window.sickofitToy;
+    if (!guide || !visible(guide)) problem('bug', 'load toy is not visible during forced fail');
+    if (!T) problem('bug', 'load toy did not mount for fail-load');
 
     await until(function () {
-      var warn = document.getElementById('unity-warning');
-      return !!(warn && warn.children && warn.children.length > 0);
-    }, 30000, 'unity load error banner');
+      var retry = document.querySelector('[data-toy-retry]');
+      return !!(retry && !retry.hidden) || (T && T.state && T.state().retryShown);
+    }, 30000, 'Retry on the load toy');
 
-    var warn = document.getElementById('unity-warning');
-    var msg = warn && warn.textContent ? warn.textContent.trim().replace(/\s+/g, ' ') : '';
-    ev('failure-banner', msg || 'error banner present');
+    var retry = document.querySelector('[data-toy-retry]');
+    ev('retry-visible', retry && !retry.hidden ? 'Retry on toy' : 'missing');
+    if (!retry || retry.hidden) problem('bug', 'forced load failure did not show Retry on the toy');
+
+    // Toy must keep running while Retry is up.
+    var s0 = T && T.state ? T.state().steps : 0;
+    await sleep(700);
+    var s1 = T && T.state ? T.state().steps : 0;
+    ev('toy-still-running', 'steps ' + s0 + ' -> ' + s1 + ', running=' + (T && T.state && T.state().running));
+    if (!T || !T.state().running || s1 <= s0) problem('bug', 'toy stopped after load failure; Retry should keep the toy running');
+
     run.metrics.loadFailed = 1;
-    beat(0.9, 'failure visible');
-    await sleep(2500);
+    run.metrics.retryShown = 1;
+    beat(0.9, 'failure + retry on toy');
+    await sleep(1500);
     finish('done');
   }
 
@@ -335,10 +413,10 @@
         },
         {
           id: 'game-start',
-          title: 'Game/: one Play unlocks audio, no second Tap to play, no overlay after Play',
+          title: 'Game/: dodge in the load toy within 5 s, then one Play unlocks audio with no second Tap to play',
           seconds: 180,
           tags: ['smoke'],
-          description: 'Waits for #guide above #hawkes-tap, taps Play once (no prior Tap to play), checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.'
+          description: 'Touches the load toy within 5 s, waits for Play on the toy above #hawkes-tap, taps Play once, checks tapsToGame=1, secondTapToPlay, overlayBlockedAfterPlay, introFirstFrameSeconds, audioContextRunning.'
         },
         {
           id: 'climbers',
@@ -349,10 +427,10 @@
         },
         {
           id: 'game-fail',
-          title: 'Game/?playtest=fail-load: loader simulates a failed build fetch and shows the error',
+          title: 'Game/?playtest=fail-load: Retry on the running load toy after a forced fetch failure',
           seconds: 45,
           tags: ['smoke'],
-          description: 'Requires ?playtest=fail-load (or game-fail): the page loads a missing loader and the scenario photographs the failure banner.'
+          description: 'Requires ?playtest=fail-load (or game-fail): the toy keeps running and shows Retry.'
         },
         {
           id: 'toy',
@@ -390,6 +468,13 @@
           title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion',
           seconds: 30,
           tags: ['full']
+        },
+        {
+          id: 'hero-presence',
+          title: 'Hero presence: live chip counts 0, 3, 8 (cap), 2 and goes quiet offline; ghosts enter, fade and pause off-screen; hero layout never moves',
+          seconds: 20,
+          tags: ['full'],
+          starts: ['live', 'offline']
         },
         {
           id: 'share',
@@ -440,7 +525,7 @@
       }
       id = resolveId(id);
       if (id !== 'game-start' && id !== 'game-fail' && id !== 'climbers') {
-        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, descent-assets)');
+        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, hero-presence, descent-assets)');
       }
       if (run && !run.done && run.id === id) return;
       t0 = performance.now();
