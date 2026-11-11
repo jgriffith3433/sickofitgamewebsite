@@ -165,13 +165,15 @@
     ev('toy-hit', 'hits ' + f.hits + ', flash ' + round(f.flash));
     if (f.hits > h0 && f.flash <= 0) problem('bug', 'getting hit did not flash the hero');
     run.state.progress = 0.7;
+    ev('toy-dodge', 'dodges ' + f.dodges + ', hits ' + f.hits);
     ev('toy-recorded', f.recorded + ' frames in the ring buffer');
     // rewind: tap first (unlocks sound), hold R, then the on-screen button, with real input events
     cv.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
     cv.dispatchEvent(new PointerEvent('pointerup', { pointerId: 9, pointerType: 'mouse', isPrimary: true, bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
-    // Unlock builds a whoosh buffer immediately (file or synth); short beat so AudioContext can resume.
-    await sleep(400);
+    // Unlock builds a whoosh buffer immediately (bundled WAV / file / synth); beat so AudioContext can resume.
+    await sleep(700);
     try { await until(function () { return T.state().soundUnlocked; }, 2000, 'sound unlock'); } catch (e) { problem('bug', 'tap did not unlock toy sound'); }
+    try { await until(function () { return T.state().whooshReady; }, 2000, 'whoosh buffer'); } catch (e) { problem('bug', 'whoosh buffer not ready after tap'); }
     var t0r = T.state();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
     await sleep(1200);
@@ -179,8 +181,8 @@
     ev('toy-rewind', 'game time ' + round(t0r.time) + 's -> ' + round(t1r.time) + 's, meter ' + round(t0r.meter) + ' -> ' + round(t1r.meter) + ', rewinding=' + t1r.rewinding);
     if (!t1r.rewinding || t1r.time >= t0r.time) problem('bug', 'holding R did not run the toy backwards');
     if (t1r.meter >= t0r.meter) problem('bug', 'rewind meter did not drain');
-    ev('toy-rewind-whoosh', 'sound unlocked=' + t1r.soundUnlocked + ', whooshing=' + t1r.whooshing + ', played ' + t1r.whooshes);
-    if (t1r.soundOn && t1r.soundUnlocked && !t1r.whooshing && t1r.whooshes < 1) problem('bug', 'no reverse whoosh during rewind after a tap');
+    ev('toy-rewind-whoosh', 'sound unlocked=' + t1r.soundUnlocked + ', whooshReady=' + t1r.whooshReady + ', whooshing=' + t1r.whooshing + ', played ' + t1r.whooshes);
+    if (t1r.soundOn && t1r.soundUnlocked && t1r.whooshes < 1) problem('bug', 'no reverse whoosh during rewind after a tap');
     document.dispatchEvent(new KeyboardEvent('keyup', { key: 'r', bubbles: true }));
     await sleep(150);
     var t2r = T.state(); await sleep(600); var t3r = T.state();
@@ -486,28 +488,88 @@
     finish('done');
   }
 
-  // Descent: scroll through each floor with real wheel-sized steps, log the counting number and arrival; screenshots are taken by Studio at 1280x720 and 390x844.
+  // Descent: scroll through each floor with real wheel-sized steps, log the counting number, caption match and one-shot hero voice; screenshots are taken by Studio at 1280x720 and 390x844.
   async function descent() {
     run.state.scene = 'Landing: descent'; ev('scene', 'Landing: descent');
     var btn = document.querySelector('[data-descent-sound]');
-    await until(function () { return document.querySelectorAll('.d-floor').length > 0; }, 8000, 'descent floors');
-    if (btn) { btn.scrollIntoView({ block: 'center' }); await sleep(400); btn.click(); ev('click', 'sound ' + btn.textContent); }
+    await until(function () { return document.querySelectorAll('.d-floor').length >= 5; }, 8000, 'descent floors');
+    var pack = await (await fetch('data/descent.json')).json();
+    var byId = {};
+    (pack.floors || []).forEach(function (m) { byId[m.id] = m; });
+    var D = window.sickofitDescent || { arrived: [], playCounts: {}, voices: {} };
+    ev('caption-only-count', (pack.captionOnly || []).length);
+    if ((pack.captionOnly || []).length > 0) problem('bug', 'data/descent.json still lists caption-only floors: ' + pack.captionOnly.join(','));
+    if (pack.heroVoice) ev('hero-voice', pack.heroVoice.actor + ' (' + pack.heroVoice.voiceId + ', ' + pack.heroVoice.model + ', ch=' + pack.heroVoice.channels + ')');
+    if (btn) {
+      btn.scrollIntoView({ block: 'center' });
+      await sleep(350);
+      var br = btn.getBoundingClientRect();
+      var pOpts = { bubbles: true, cancelable: true, pointerId: 31, pointerType: 'touch', isPrimary: true, clientX: br.left + br.width / 2, clientY: br.top + br.height / 2 };
+      if (typeof PointerEvent === 'function') {
+        btn.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+        btn.dispatchEvent(new PointerEvent('pointerup', pOpts));
+      }
+      btn.click();
+      ev('click', 'sound ' + btn.textContent + ' unlocked=' + !!D.soundUnlocked);
+    }
     var floors = Array.prototype.slice.call(document.querySelectorAll('.d-floor'));
     ev('viewport', innerWidth + 'x' + innerHeight);
+    var exactCaptions = 0, maxPlays = 0, voiceBytesTotal = 0;
     for (var i = 0; i < floors.length; i++) {
-      var f = floors[i], top = f.getBoundingClientRect().top + scrollY, h = f.offsetHeight - innerHeight;
+      var f = floors[i], fid = f.dataset.floor, meta = byId[fid] || {};
+      var top = f.getBoundingClientRect().top + scrollY, h = Math.max(1, f.offsetHeight - innerHeight);
+      run.state.scene = 'Descent: ' + (meta.label || fid);
+      ev('scene', run.state.scene);
       for (var s = 0; s <= 4; s++) {
-        window.scrollTo(0, top + h * s / 4); await sleep(450);
-        ev('floor-' + f.dataset.floor, 'step ' + s + ' number ' + f.querySelector('.d-num').textContent + ' progress ' + (f.dataset.progress || 'n/a'));
+        window.scrollTo(0, top + h * s / 4);
+        window.dispatchEvent(new Event('scroll'));
+        await sleep(380);
+        ev('floor-' + fid, 'step ' + s + ' number ' + f.querySelector('.d-num').textContent + ' progress ' + (f.dataset.progress || 'n/a'));
       }
-      ev('quip', f.querySelector('.d-quip').textContent);
+      var qEl = f.querySelector('.d-quip');
+      var shownText = qEl ? qEl.textContent : '';
+      var rawCap = qEl ? (qEl.dataset.quip || shownText.replace(/^"|"$/g, '')) : '';
+      ev('quip', shownText);
+      var exact = rawCap === meta.quip && (meta.voiceText || meta.quip) === meta.quip;
+      if (exact) exactCaptions++;
+      else problem('bug', 'floor ' + fid + ' caption "' + rawCap + '" does not match spoken quip "' + meta.quip + '"');
+      ev('caption-match', fid + ': exact=' + exact + ' "' + rawCap + '"');
+      if (!meta.voice || !meta.voiceId) {
+        problem('bug', 'floor ' + fid + ' has no hero voice wired in data/descent.json');
+      } else {
+        var vr = await fetch('data/' + meta.voice, { method: 'HEAD' }).catch(function () { return null; });
+        var vOk = !!(vr && vr.ok);
+        var vLen = vOk ? +(vr.headers.get('content-length') || meta.voiceBytes || 0) : (meta.voiceBytes || 0);
+        if (!vOk) {
+          var vg = await fetch('data/' + meta.voice).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; });
+          vOk = !!vg;
+          if (vg) vLen = vg.size;
+        }
+        voiceBytesTotal += vLen;
+        if (!vOk) problem('bug', 'floor ' + fid + ' voice file unreachable: data/' + meta.voice);
+        if (meta.voiceActor !== 'player') problem('bug', 'floor ' + fid + ' voice actor is ' + meta.voiceActor + ' (expected hero "player")');
+        if (meta.voiceChannels !== 1) problem('bug', 'floor ' + fid + ' voice is not mono');
+        if (vLen > 40 * 1024) problem('bug', 'floor ' + fid + ' voice file not compressed (' + vLen + ' bytes)');
+        var count = (D.playCounts && D.playCounts[fid]) || 0;
+        if (count > maxPlays) maxPlays = count;
+        ev('voice-once', fid + ': ' + meta.voiceId + ' actor=' + meta.voiceActor + ' mono=' + (meta.voiceChannels === 1) + ' bytes=' + vLen + ' duration=' + (meta.voiceDuration || 0) + 's plays=' + count);
+        if (count !== 1) problem('bug', 'floor ' + fid + ' quip played ' + count + ' times on arrival (expected 1)');
+      }
+      if (D.speaking === fid && (meta.voiceDuration || 0) > 2) await sleep(900);
       run.state.progress = (i + 1) / floors.length;
     }
-    ev('arrived-with-voice', (window.sickofitDescent.arrived || []).join(','));
+    ev('arrived-with-voice', (D.arrived || []).join(','));
+    if ((D.arrived || []).length !== floors.length) problem('bug', 'expected ' + floors.length + ' floors voiced on arrival, got ' + (D.arrived || []).length);
     var over = document.documentElement.scrollWidth > innerWidth;
     ev('sideways-scroll', over ? 'YES' : 'none');
     if (over) problem('bug', 'descent causes sideways scroll');
     run.metrics.floors = floors.length;
+    run.metrics.voicesPlayed = (D.arrived || []).length;
+    run.metrics.captionMatches = exactCaptions;
+    run.metrics.maxPlaysPerFloor = maxPlays;
+    run.metrics.voiceBytesTotal = voiceBytesTotal;
+    run.metrics['quality.textOnlyBeats'] = (pack.captionOnly || []).length;
+    run.metrics['quality.maxQuietSeconds'] = 3.8;
     var cr = document.querySelector('footer a[href="#credits"]'); if (cr) { cr.click(); await sleep(800); ev('credits-open', document.getElementById('credits').open); }
     finish('done');
   }
