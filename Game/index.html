@@ -271,15 +271,17 @@
         }
       }
 
-      /* Mobile guide: controls card before play, rotate prompt in portrait, fullscreen button.
-         #guide sits above the build's #hawkes-tap (z-index 8000) so Play is the one gesture. */
+      /* Loading guide: full-viewport rewind toy while Unity loads. #guide sits above #hawkes-tap (z-index 8000)
+         so Play on the toy is the one gesture. At 390x844: no scroll, no zoom; Play/Retry in the thumb zone. */
       #guide, #rotate-prompt { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        text-align: center; font-family: Arial, sans-serif; color: #f0cdbf; padding: 16px;
+        text-align: center; font-family: Arial, sans-serif; color: #f0cdbf; padding: 0;
         background: radial-gradient(ellipse at 50% 30%, #3a1510 0%, #170a08 60%, #0a0405 100%); }
-      #guide { z-index: 9000; overflow-y: auto; }
+      #guide { z-index: 9000; overflow: hidden; touch-action: none; overscroll-behavior: none; }
       #guide[hidden], #rotate-prompt[hidden] { display: none !important; pointer-events: none !important; }
-      #rotate-prompt { z-index: 3000; }
-      /* After Play: nothing (Tap to play, rotate, controls) may sit above the canvas. */
+      #guide-toy { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+      #guide-toy canvas { border-radius: 0 !important; }
+      #rotate-prompt { z-index: 3000; padding: 16px; }
+      /* After Play: nothing (Tap to play, rotate, toy) may sit above the canvas. */
       body.hawkes-playing #guide,
       body.hawkes-playing #rotate-prompt,
       body.hawkes-playing #hawkes-tap {
@@ -291,44 +293,15 @@
         display: none !important;
         pointer-events: none !important;
       }
-      #guide h2, #rotate-prompt h2 { font-size: 22px; color: #ff9d2e; margin-bottom: 6px; letter-spacing: .5px; }
-      #guide p.sub, #rotate-prompt p { font-size: 14px; color: #b9a59d; margin-bottom: 14px; max-width: 320px; }
-      #guide svg { width: min(92vw, 520px); max-height: 38vh; height: auto; }
-      #guide-play { margin-top: 14px; background: #ff7a3d; color: #170a08; border: 0; border-radius: 8px; padding: 12px 34px;
-        font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
-      #guide-play:disabled { opacity: .6; cursor: wait; }
-      #guide-status { margin-top: 8px; font-size: 12px; color: #b9a59d; }
+      #rotate-prompt h2 { font-size: 22px; color: #ff9d2e; margin-bottom: 6px; letter-spacing: .5px; }
+      #rotate-prompt p { font-size: 14px; color: #b9a59d; margin-bottom: 14px; max-width: 320px; }
       #rotate-icon { width: 64px; height: 64px; margin-bottom: 12px; animation: rot 2.4s ease-in-out infinite; }
       @keyframes rot { 0%,30% { transform: rotate(0); } 60%,100% { transform: rotate(-90deg); } }
       @media (prefers-reduced-motion: reduce) { #rotate-icon { animation: none; transform: rotate(-90deg); } }
       #fs-button { position: fixed; top: 8px; right: 8px; z-index: 2500; width: 40px; height: 40px; border-radius: 8px;
         background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 20px; cursor: pointer; line-height: 1; }
       #fs-button[hidden] { display: none; }
-      @media (max-height: 420px) { #guide h2 { font-size: 18px; margin-bottom: 2px; } #guide p.sub { margin-bottom: 4px; }
-        #guide svg { max-height: 50vh; } #guide-play { margin-top: 6px; padding: 8px 28px; } }
-
-      #guide-load { width: min(88vw, 420px); margin-top: 12px; }
-      #guide-track { position: relative; height: 10px; border-radius: 6px; background: #2a0f0b; border: 1px solid #3a1510; margin-top: 34px; }
-      #guide-fill { height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg, #ff4a1c, #ff9d2e); transition: width .25s ease-out; }
-      #guide-runner { position: absolute; bottom: 4px; left: 0; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; object-fit: cover;
-        border: 2px solid #ff9d2e; background: #170a08; transition: left .25s ease-out; animation: runbob .32s ease-in-out infinite alternate; }
-      @keyframes runbob { from { transform: translateY(0) rotate(-6deg); } to { transform: translateY(-5px) rotate(6deg); } }
-      #guide-tip { min-height: 2.6em; margin-top: 10px; font-size: 14px; color: #f0cdbf; font-style: italic; }
-      #guide-play.pulse { animation: playpulse 1.1s ease-out 3; }
-      @keyframes playpulse { 0% { box-shadow: 0 0 0 0 rgba(255,122,61,.8); } 100% { box-shadow: 0 0 0 22px rgba(255,122,61,0); } }
-      #load-fail { position: fixed; inset: 0; z-index: 9100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        font-family: Arial, sans-serif; color: #f0cdbf; padding: 16px; overflow-y: auto; background: radial-gradient(ellipse at 50% 30%, #3a1510 0%, #170a08 60%, #0a0405 100%); }
-      #load-fail[hidden] { display: none !important; }
-      #load-fail img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid #ff9d2e; filter: grayscale(.5); transform: rotate(-8deg); }
-      #load-fail h2 { font-size: 22px; color: #ff9d2e; margin: 12px 0 6px; }
-      #load-fail p { font-size: 15px; color: #b9a59d; max-width: 320px; margin-bottom: 14px; }
-      #load-fail .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
-      #load-fail button { background: #ff7a3d; color: #170a08; border: 0; border-radius: 8px; padding: 12px 30px; font-size: 17px; font-weight: 700; cursor: pointer; }
-      #load-fail a { color: #ff9d2e; font-size: 15px; }
       body.load-failed #unity-warning, body.load-failed #unity-loading-bar { display: none !important; }
-      @media (prefers-reduced-motion: reduce) { #guide-runner, #guide-play.pulse { animation: none; } }
-      @media (max-height: 420px) { #guide-load { margin-top: 2px; } #guide-track { margin-top: 26px; } #guide-tip { margin-top: 4px; min-height: 1.4em; font-size: 12px; }
-        #load-fail img { width: 56px; height: 56px; } #load-fail h2 { margin: 6px 0 2px; font-size: 18px; } #load-fail p { margin-bottom: 8px; } }
     </style>
     <!-- Hawkes Analytics: the build this page loads (the deploy rewrites v<n> here like everywhere else). The game's Unity
          bridge finds the SDK tag below (data-hawkes-analytics) and doesn't load a second copy. -->
@@ -371,9 +344,10 @@
       })();
     </script>
     <!-- Hawkes Analytics (hawkesgen docs/analytics.md): the site's only analytics; see privacy.html -->
-    <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
-    <script src="../js/hawkes-site.js" defer></script>
+    <!-- Local scripts before analytics so the load toy mounts without waiting on the CDN (m_1e063fbb4f14). -->
     <script src="../js/climbers.js" defer></script>
+    <script src="../js/hawkes-site.js" defer></script>
+    <script src="https://hawkesgen.ai/sdk/analytics@1.js" data-product="sickofit" data-hawkes-analytics="page" defer></script>
   </head>
   <body>
     <!-- Version Display -->
@@ -391,33 +365,8 @@
       <h2>Turn your phone sideways</h2>
       <p>Hell is wider than it is tall. Rotate to landscape to play.</p>
     </div>
-    <div id="guide">
-      <h2>Dodge. Rewind. Stay sick of it.</h2>
-      <p class="sub" id="guide-sub">Touch controls are on screen. Keyboard works too.</p>
-      <svg viewBox="0 0 520 220" role="img" aria-label="Controls: left thumb moves, right thumb rewinds time">
-        <rect x="2" y="2" width="516" height="216" rx="14" fill="#0a0405" stroke="#3a1510" stroke-width="2"/>
-        <circle cx="120" cy="120" r="56" fill="none" stroke="#ff7a3d" stroke-width="3" stroke-dasharray="6 6"/>
-        <circle cx="120" cy="120" r="22" fill="#ff7a3d" opacity=".85"/>
-        <path d="M120 52v-14m0 164v-14M52 120H38m164 0h-14" stroke="#ff9d2e" stroke-width="4" stroke-linecap="round"/>
-        <text x="120" y="30" text-anchor="middle" fill="#f0cdbf" font-size="16" font-family="Arial" font-weight="700">MOVE</text>
-        <text x="120" y="212" text-anchor="middle" fill="#b9a59d" font-size="13" font-family="Arial">drag left thumb · WASD / arrows</text>
-        <circle cx="400" cy="120" r="46" fill="none" stroke="#ff4a1c" stroke-width="4"/>
-        <path d="M418 102a26 26 0 1 0 6 22M424 124l-2-14-13 7" fill="none" stroke="#ff9d2e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="400" y="30" text-anchor="middle" fill="#f0cdbf" font-size="16" font-family="Arial" font-weight="700">REWIND</text>
-        <text x="400" y="212" text-anchor="middle" fill="#b9a59d" font-size="13" font-family="Arial">tap right thumb · undo the hit</text>
-      </svg>
-      <div id="guide-load">
-        <div id="guide-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="guide-fill"></div><img id="guide-runner" src="../blog/lore/img/hero.webp" alt="" width="34" height="34"></div>
-        <div id="guide-tip" aria-live="off"></div>
-      </div>
-      <button id="guide-play" type="button" disabled>Getting ready…</button>
-      <div id="guide-status" aria-live="polite">Loading Hell…</div>
-    </div>
-    <div id="load-fail" hidden role="alert">
-      <img src="../blog/lore/img/hero.webp" alt="The hero, unimpressed" width="96" height="96">
-      <h2>Hell is being difficult.</h2>
-      <p id="load-fail-line">The game didn't load. Even the demons are sick of it.</p>
-      <div class="row"><button id="load-retry" type="button">Retry</button><a id="load-back" href="../">Back to the page</a></div>
+    <div id="guide" aria-label="Dodge while the game loads">
+      <div id="guide-toy" data-game-toy data-sprite="../blog/lore/img/hero.webp"></div>
     </div>
     <button id="fs-button" type="button" aria-label="Full screen" title="Full screen" hidden>&#x26F6;</button>
     <div id="unity-container">
@@ -855,15 +804,15 @@
         }
       });
     </script>
+    <script src="../js/rewind-toy.js"></script>
     <script>
-      // Controls card -> one Play gesture: unlock audio, dismiss #hawkes-tap, fullscreen + landscape, clear overlays.
+      // Load toy -> one Play gesture: tear down the toy, unlock audio, dismiss #hawkes-tap, fullscreen, start the game.
       (function () {
-        var guide = document.getElementById('guide'), play = document.getElementById('guide-play'),
-            status = document.getElementById('guide-status'), rotate = document.getElementById('rotate-prompt'),
+        var guide = document.getElementById('guide'), stage = document.getElementById('guide-toy'),
+            rotate = document.getElementById('rotate-prompt'),
             fs = document.getElementById('fs-button'), container = document.getElementById('unity-container');
         var touch = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
-        var ready = false, started = false;
-        if (!touch) document.getElementById('guide-sub').textContent = 'Keyboard and mouse. Touch controls appear on phones.';
+        var ready = false, started = false, toy = null;
 
         function isFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
         function enterFs() {
@@ -880,7 +829,6 @@
           var x = document.exitFullscreen || document.webkitExitFullscreen;
           if (x) try { x.call(document); } catch (e) {}
         }
-        // iPhone Safari has no fullscreen for elements: hide the button there (Add to Home Screen gives a full-screen app).
         var canFs = !!(container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen);
         function syncFs() {
           fs.hidden = !started || !canFs;
@@ -890,6 +838,19 @@
         fs.addEventListener('click', function () { if (isFs()) exitFs(); else enterFs(); });
         document.addEventListener('fullscreenchange', syncFs);
         document.addEventListener('webkitfullscreenchange', syncFs);
+
+        function stopToy() {
+          if (!toy) return;
+          try { toy.teardown(); } catch (e) {}
+          toy = null;
+          window.sickofitToy = null;
+        }
+
+        function closeClimbers() {
+          try {
+            if (window.hawkesClimbers && typeof window.hawkesClimbers.close === 'function') window.hawkesClimbers.close();
+          } catch (e) {}
+        }
 
         function hideBlockingOverlays() {
           document.body.classList.add('hawkes-playing');
@@ -911,7 +872,6 @@
           }
         }
 
-        // Dismiss the build's Tap to play and resume its tracked AudioContexts inside this user gesture.
         function unlockAudioAndDismissTap() {
           try {
             if (window.hawkesSound && typeof window.hawkesSound.tap === 'function') {
@@ -933,7 +893,6 @@
           } catch (e) { return false; }
         }
 
-        // Hide Tap to play when audio is already running (e.g. a prior gesture unlocked it).
         function hideTapIfAudioRunning() {
           if (!audioAlreadyRunning()) return;
           try {
@@ -946,13 +905,12 @@
           }
         }
 
-        // Build hawkes-sound.js listens for click + touchend; also wire pointerdown so a press dismisses it.
         function wireHawkesTapExtras(el) {
           if (!el || el.getAttribute('data-hawkes-guide') === '1') return;
           el.setAttribute('data-hawkes-guide', '1');
           var forward = function (e) {
             if (!el || el.classList.contains('gone')) return;
-            if (e && e.type === 'pointerdown' && e.pointerType === 'touch') return; // touchend / click handle phones
+            if (e && e.type === 'pointerdown' && e.pointerType === 'touch') return;
             try { if (window.hawkesSound && window.hawkesSound.tap) window.hawkesSound.tap(); } catch (err) {}
           };
           el.addEventListener('pointerdown', forward);
@@ -971,97 +929,86 @@
         document.addEventListener('visibilitychange', hideTapIfAudioRunning);
 
         function checkOrientation() {
-          // After Play, never cover the canvas (portrait or landscape).
           if (started) {
             rotate.hidden = true;
             rotate.style.pointerEvents = 'none';
             return;
           }
-          // Portrait phone: a narrow, tall viewport. Desktop windows stay out of it.
-          var portrait = touch && window.innerWidth < window.innerHeight && window.innerWidth <= 820;
-          rotate.hidden = !portrait;
+          // Before Play the toy fills the portrait phone; rotate prompt waits until after Play.
+          rotate.hidden = true;
         }
         window.addEventListener('resize', checkOrientation);
         window.addEventListener('orientationchange', checkOrientation);
         checkOrientation();
 
-        function onPlayGesture(e) {
+        function onPlayGesture() {
           if (!ready || started) return;
-          if (e && e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
-          if (e && e.type === 'keydown') e.preventDefault();
           started = true;
-          // One gesture: unlock Unity/WebAudio, dismiss Tap to play, clear overlays, fullscreen + landscape.
+          // One gesture: stop the toy loop, drop the page spectator, unlock audio, clear overlays, fullscreen.
+          stopToy();
+          closeClimbers();
           unlockAudioAndDismissTap();
           hideBlockingOverlays();
           enterFs();
           syncFs();
           window.dispatchEvent(new Event('resize'));
-          // Tap to play is the page overlay from hawkes-sound.js (not an in-Unity splash); no SendMessage needed.
-          console.log('[Guide] Play: audio unlock + overlays cleared');
+          console.log('[Guide] Play: toy down, audio unlock, overlays cleared');
         }
-        // Phones: touchend is the reliable audio gesture on iOS. Desktop: pointerdown/click.
-        // `started` stops doubles when click follows pointerdown or a synthetic mouse event after touch.
-        play.addEventListener('pointerdown', function (e) {
-          if (e.pointerType === 'touch') return;
-          onPlayGesture(e);
-        });
-        play.addEventListener('touchend', function (e) {
-          e.preventDefault();
-          onPlayGesture(e);
-        }, { passive: false });
-        play.addEventListener('click', onPlayGesture);
-        play.addEventListener('keydown', onPlayGesture);
 
-        // The game loads behind the card (the loader fires these); Play opens once Unity is up.
-        var fill = document.getElementById('guide-fill'), runner = document.getElementById('guide-runner'),
-            track = document.getElementById('guide-track'), tipEl = document.getElementById('guide-tip'),
-            failPanel = document.getElementById('load-fail'), tipTimer = null;
-        var tips = ['Hold to rewind. Hell keeps receipts.', 'Dying is a loan. Rewind is the repayment.', 'Every grudge makes you angrier. Use it.',
-          'The announcer is lying about the odds.', 'Stand still and Hell finds you.', 'Left thumb moves. Right thumb undoes.'];
-        var tipIdx = Math.floor(Math.random() * tips.length);
-        function nextTip() { tipEl.textContent = tips[tipIdx++ % tips.length]; }
-        function setBar(p) {
-          var pct = Math.max(0, Math.min(100, Math.round(p * 100)));
-          fill.style.width = pct + '%'; runner.style.left = pct + '%';
-          track.setAttribute('aria-valuenow', pct);
-          status.textContent = 'Loading Hell\u2026 ' + pct + '%';
+        function mountToy() {
+          if (toy || !stage || !window.SickOfItToy || !window.SickOfItToy.mount) return;
+          toy = window.SickOfItToy.mount(stage, {
+            progress: true,
+            sprite: stage.getAttribute('data-sprite') || '../blog/lore/img/hero.webp'
+          });
+          if (!toy) return;
+          window.sickofitToy = toy;
+          toy.setProgress(0);
+          toy.onPlay(onPlayGesture);
+          toy.onRetry(function () {
+            if (typeof window.hawkesRetryLoad === 'function') window.hawkesRetryLoad();
+          });
         }
-        function startTips() { clearInterval(tipTimer); nextTip(); tipTimer = setInterval(nextTip, 4000); }
-        startTips();
-        window.addEventListener('hawkes-unity-progress', function (e) { setBar(e.detail || 0); });
+        mountToy();
+
+        window.addEventListener('hawkes-unity-progress', function (e) {
+          if (!toy) return;
+          toy.setProgress(Math.round((e.detail || 0) * 100));
+        });
         window.addEventListener('hawkes-unity-fail', function (e) {
-          clearInterval(tipTimer);
-          document.getElementById('load-fail-line').textContent = e.detail || "The game didn't load.";
           document.body.classList.add('load-failed');
-          guide.hidden = true; failPanel.hidden = false;
-          status.textContent = 'Load failed.';
+          if (toy) toy.showRetry(e.detail || "The game didn't load.");
         });
         window.addEventListener('hawkes-unity-retry', function () {
           document.body.classList.remove('load-failed');
-          failPanel.hidden = true; guide.hidden = false;
-          setBar(0); play.disabled = true; play.textContent = 'Getting ready\u2026'; startTips();
+          ready = false;
+          if (toy) { toy.hideRetry(); toy.setProgress(0); }
         });
-        document.getElementById('load-retry').addEventListener('click', function () { window.hawkesRetryLoad(); });
         window.addEventListener('hawkes-unity-ready', function () {
           ready = true;
-          play.disabled = false;
-          play.textContent = 'Play';
-          clearInterval(tipTimer); setBar(1); tipEl.textContent = 'Hell is ready. Are you?';
-          play.classList.add('pulse');
-          status.textContent = 'Ready.';
+          if (toy) { toy.setProgress(100); toy.showPlay(); }
           hideTapIfAudioRunning();
         });
-        // The build installs its own window.hawkesPlaytest (engine 'unity') when it loads and a bot starts a run through it
-        // (Level 1 behind the card). A bot can't press Play, so a started run means the card must not stay over the canvas.
+
+        // Lobby presence (push only): show "N climbing right now" on the toy while waiting.
+        window.addEventListener('climbers:count', function (e) {
+          if (toy && e.detail && e.detail.count > 0) toy.setClimbing(e.detail.count);
+          else if (toy) toy.setClimbing(0);
+        });
+        window.addEventListener('climbers:offline', function () { if (toy) toy.setClimbing(0); });
+
+        // The build installs its own window.hawkesPlaytest (engine 'unity') when it loads and a bot starts a run through it.
+        // A bot can't press Play, so a started run means the toy must not stay over the canvas.
         // The page's own game-start scenario clicks Play itself (hawkesPageClicksPlay), so it is left alone.
-        // Players never call start(); for them nothing changes.
         function startedByBot() {
           if (started || window.hawkesPageClicksPlay) return;
           started = true;
+          stopToy();
+          closeClimbers();
           hideBlockingOverlays();
           syncFs();
           window.dispatchEvent(new Event('resize'));
-          console.log('[Guide] a playtest run started in the build: controls card cleared (no Play gesture)');
+          console.log('[Guide] a playtest run started in the build: load toy cleared (no Play gesture)');
         }
         (function () {
           var current = window.hawkesPlaytest;
@@ -1080,7 +1027,11 @@
             });
           } catch (e) { /* not configurable: leave the contract alone */ }
         })();
-        window.hawkesGuide = { isReady: function () { return ready; }, isStarted: function () { return started; } };
+        window.hawkesGuide = {
+          isReady: function () { return ready; },
+          isStarted: function () { return started; },
+          toy: function () { return toy; }
+        };
       })();
     </script>
     <script>
