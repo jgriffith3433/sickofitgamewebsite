@@ -5,7 +5,7 @@
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
   if (/^climbers=\d+$/.test(which || '')) which = 'hero-presence';
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence'];
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence', 'pages'];
   var GAME_IDS = ['smoke', 'game-start', 'game-fail', 'fail-load'];
   var playtestOn = false;
   try {
@@ -116,6 +116,120 @@
     ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore);
     if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
     ev('hero-play-href', play ? play.getAttribute('href') : 'MISSING');
+    finish('done');
+  }
+
+  // Pages: screenshots of the landing hero, trailer, story and FAQ and of the Game page (shown full-viewport in a
+  // same-size iframe) at whatever viewport Studio opens (1280x720 and 390x844), listing every element that overflows
+  // the viewport and every button or link under 44 px with where it is, and proving the trailer iframe only appears
+  // after a tap on the poster.
+  function where(el, win) {
+    var r = el.getBoundingClientRect(), d = el.ownerDocument;
+    var id = el.id ? '#' + el.id : el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).join('.') : '');
+    var txt = (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30);
+    return id + ' "' + txt + '" at x=' + Math.round(r.left) + ',y=' + Math.round(r.top + win.scrollY) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height);
+  }
+  function visible(el, win) {
+    var r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return false;
+    for (var n = el; n && n.nodeType === 1; n = n.parentElement) {
+      if (n.hidden || n.getAttribute('aria-hidden') === 'true') return false;
+      var cs = win.getComputedStyle(n);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    }
+    return true;
+  }
+  function clipped(el, win) {
+    for (var n = el.parentElement; n && n !== win.document.body && n !== win.document.documentElement; n = n.parentElement) {
+      var cs = win.getComputedStyle(n);
+      if (cs.overflowX !== 'visible' && cs.overflowX !== '') { var pr = n.getBoundingClientRect(); if (pr.left >= -1 && pr.right <= win.innerWidth + 1) return true; }
+    }
+    return false;
+  }
+  function audit(win, label) {
+    var doc = win.document, vw = win.innerWidth, small = [], over = [];
+    var sw = doc.documentElement.scrollWidth - vw;
+    Array.prototype.forEach.call(doc.querySelectorAll('a[href], button, summary, [role="button"]'), function (el) {
+      if (!visible(el, win)) return;
+      var r = el.getBoundingClientRect();
+      if (r.width < 43.5 || r.height < 43.5) small.push(where(el, win));
+    });
+    Array.prototype.forEach.call(doc.querySelectorAll('body *'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0 || (r.right <= vw + 1 && r.left >= -1)) return;
+      if (/^(script|style|link|meta|source)$/i.test(el.tagName) || !visible(el, win) || clipped(el, win)) return;
+      var cs = win.getComputedStyle(el);
+      if (cs.position === 'fixed' && r.left >= -1 && r.right <= vw + 1) return;
+      over.push(where(el, win));
+    });
+    ev(label + '-sideways-scroll', 'scrollWidth - innerWidth = ' + sw + ' at ' + vw + 'x' + win.innerHeight);
+    ev(label + '-overflows', over.length + (over.length ? ': ' + over.slice(0, 12).join(' | ') : ''));
+    ev(label + '-small-targets', small.length + (small.length ? ': ' + small.slice(0, 20).join(' | ') : ''));
+    over.forEach(function (o) { problem('bug', label + ': overflows the ' + vw + ' px viewport: ' + o); });
+    if (sw > 1) problem('bug', label + ': scrolls sideways by ' + sw + ' px');
+    small.forEach(function (o) { problem('bug', label + ': tap target under 44 px: ' + o); });
+    run.metrics[label + 'Overflows'] = over.length + (sw > 1 ? 1 : 0);
+    run.metrics[label + 'SmallTargets'] = small.length;
+  }
+  async function pages() {
+    var vw = window.innerWidth, vh = window.innerHeight, tag = vw + 'x' + vh;
+    var jump = async function (el, scene, p) { run.state.scene = scene; ev('scene', scene + ' ' + tag); el.scrollIntoView({ block: 'start' }); await sleep(1200); run.state.progress = p; };
+    ev('viewport', tag);
+    // Hero: art, one-line pitch and Play inside the first screen
+    window.scrollTo(0, 0);
+    run.state.scene = 'Landing: hero'; ev('scene', 'Landing: hero ' + tag);
+    await sleep(1800);
+    var premise = document.querySelector('.hero .premise'), play = document.getElementById('start-button');
+    var art = document.querySelector('[data-rewind-toy]'), clip = document.querySelector('[data-hero-loop]');
+    var artEl = art && art.getBoundingClientRect().height > 0 ? art : clip;
+    var bottom = function (el) { return el ? Math.round(el.getBoundingClientRect().bottom) : -1; };
+    ev('hero-fold', 'art bottom ' + bottom(artEl) + ', pitch bottom ' + bottom(premise) + ', Play bottom ' + bottom(play) + ' of ' + vh);
+    if (!artEl || bottom(artEl) > vh) problem('bug', 'hero art is not inside the first ' + vh + ' px');
+    if (!premise || bottom(premise) > vh) problem('bug', 'one-line pitch is not inside the first ' + vh + ' px');
+    if (!play || bottom(play) > vh) problem('bug', 'Play button bottom edge is below ' + vh + ' px');
+    run.metrics.playBottom = bottom(play);
+    run.state.progress = 0.1;
+    await sleep(600);
+    // Trailer: no iframe until the poster is tapped
+    var box = document.getElementById('trailer-box'), btn = document.getElementById('trailer-play');
+    await jump(document.getElementById('trailer'), 'Landing: trailer', 0.2);
+    var before = document.querySelectorAll('#trailer iframe, iframe[src*="youtube"]').length;
+    ev('trailer-iframes-before-tap', before);
+    if (before) problem('bug', 'trailer iframe is in the DOM before the poster is tapped');
+    var br = btn.getBoundingClientRect(), cx = br.left + br.width / 2, cy = br.top + br.height / 2;
+    var ptr = function (type) { btn.dispatchEvent(new PointerEvent(type, { pointerId: 31, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: cx, clientY: cy })); };
+    ptr('pointerdown'); await sleep(60); ptr('pointerup');
+    await sleep(500);
+    ev('trailer-iframes-right-after-pointer-up-before-click', document.querySelectorAll('#trailer iframe').length);
+    btn.click(); ev('trailer-tap', 'poster tapped');
+    try { await until(function () { return document.querySelector('#trailer iframe'); }, 6000, 'trailer iframe after the tap'); } catch (e) { problem('bug', 'trailer iframe did not appear after the poster was tapped'); }
+    var f = document.querySelector('#trailer iframe');
+    ev('trailer-iframes-after-tap', document.querySelectorAll('#trailer iframe').length + (f ? ' ' + f.src : ''));
+    run.metrics.trailerIframeAfterTap = f ? 1 : 0;
+    await sleep(800);
+    // Story and FAQ
+    await jump(document.getElementById('story'), 'Landing: story', 0.4);
+    var faq = document.getElementById('faq');
+    await jump(faq, 'Landing: FAQ', 0.5);
+    var sum = faq.querySelector('summary');
+    if (sum) { sum.click(); await sleep(500); ev('faq-open', sum.parentElement.open ? 'first answer open' : 'closed'); }
+    audit(window, 'landing');
+    run.state.progress = 0.6;
+    // Game page: a same-size iframe laid over the viewport so the screenshot shows it
+    run.state.scene = 'Game page'; ev('scene', 'Game page ' + tag);
+    var fr = document.createElement('iframe');
+    fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
+    fr.style.cssText = 'position:fixed;left:0;top:0;width:' + vw + 'px;height:' + vh + 'px;border:0;z-index:2147483000;background:#0a0405';
+    fr.src = 'Game/index.html';
+    document.body.appendChild(fr);
+    try { await until(function () { try { return fr.contentDocument && fr.contentDocument.readyState === 'complete' && fr.contentDocument.getElementById('guide'); } catch (e) { return false; } }, 15000, 'Game page'); }
+    catch (e) { problem('bug', 'Game page did not load in the probe frame'); fr.remove(); finish('error'); return; }
+    await sleep(3000);
+    ev('game-play-button', fr.contentDocument.querySelector('[data-toy-play]') ? 'present' : 'not shown yet (still loading)');
+    audit(fr.contentWindow, 'game');
+    await sleep(800);
+    fr.src = 'about:blank'; fr.remove();
+    run.state.progress = 0.95;
     finish('done');
   }
 
@@ -781,6 +895,7 @@
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
       { id: 'descent', title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion', seconds: 30, tags: ['full'] },
       { id: 'hero-presence', title: 'Hero presence: live chip counts 0, 3, 8 (cap), 2 and goes quiet offline; ghosts enter, fade and pause off-screen; hero layout never moves', seconds: 20, tags: ['full'], starts: ['live', 'offline'] },
+      { id: 'pages', title: 'Pages (390x844 touch and 1280x720): landing hero, trailer, story, FAQ and Game page; lists overflows and tap targets under 44 px; trailer iframe only after a tap on the poster', seconds: 40, tags: ['smoke'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }]; },
     start: async function (id, options) {
@@ -808,7 +923,7 @@
         }, 20);
         return new Promise(function () {});
       }
-      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, hero-presence, about, descent, share, descent-assets)');
+      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, hero-presence, pages, about, descent, share, descent-assets)');
       var reqAt = String(options.at || q.get('at') || '');
       if (run && !run.done && run.id === id && String(run.at || '') === reqAt) return;
       t0 = performance.now();
@@ -822,6 +937,7 @@
         else if (id === 'descent') await descent();
         else if (id === 'hero-presence') await heroPresence();
         else if (id === 'share') await share();
+        else if (id === 'pages') await pages();
         else await play();
       } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
     },

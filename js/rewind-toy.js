@@ -454,7 +454,7 @@
   box.appendChild(btn);
   var snd = document.createElement('button');
   snd.type = 'button';
-  snd.style.cssText = 'position:absolute;left:8px;bottom:8px;min-height:32px;padding:4px 10px;border-radius:8px;border:1px solid #4a3a36;background:rgba(10,4,5,.7);color:#d9c3ba;font:700 12px Arial,sans-serif;cursor:pointer;z-index:2';
+  snd.style.cssText = 'position:absolute;left:8px;bottom:8px;min-height:44px;min-width:44px;padding:4px 10px;border-radius:8px;border:1px solid #4a3a36;background:rgba(10,4,5,.7);color:#d9c3ba;font:700 12px Arial,sans-serif;cursor:pointer;z-index:2';
   box.appendChild(snd); refreshSound();
   // Payoff card over the toy only (PLAY NOW beside the toy stays outside this box). Appended last so
   // querySelectorAll('button')[0] stays the Rewind control for the existing toy playtest.
