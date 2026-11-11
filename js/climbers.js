@@ -17,7 +17,7 @@
   function visible() { return document.visibilityState === 'visible'; }
   function climbers(n) {
     var c = 0;
-    n.peers.forEach(function (p) { if (p.role !== 'spectator') c++; });
+    if (n && n.peers && n.peers.forEach) n.peers.forEach(function (p) { if (p && p.role !== 'spectator') c++; });
     return c;
   }
   function setCount(n) { if (n !== count || !started) { count = n; started = true; emit('count', { count: n }); } }
@@ -53,15 +53,18 @@
       net = room;
       attempt = 0;
       setCount(climbers(room));
+      // Peers can arrive without a payload or a role: never read through undefined (f_eb312138e3ef).
       room.when('peer:join', function (e) {
-        if (mine !== session || e.peer.role === 'spectator') return;
+        var p = e && e.peer;
+        if (mine !== session || !p || p.role === 'spectator') return;
         setCount(climbers(room));
-        emit('join', { id: e.peer.id, name: e.peer.name, count: count });
+        emit('join', { id: p.id, name: p.name, count: count });
       });
       room.when('peer:leave', function (e) {
-        if (mine !== session || e.peer.role === 'spectator') return;
+        var p = e && e.peer;
+        if (mine !== session || !p || p.role === 'spectator') return;
         setCount(climbers(room));
-        emit('leave', { id: e.peer.id, name: e.peer.name, count: count });
+        emit('leave', { id: p.id, name: p.name, count: count });
       });
       room.when('status', function (e) {
         if (mine === session && (e.status === 'reconnecting' || e.status === 'closed')) fail(mine, new Error('connection lost'));
@@ -76,7 +79,18 @@
     else stop();
   }
 
+  // Playtest only: ?playtest=climbers=N (or &climbers=N) fakes N live climbers with no network, and
+  // hawkesClimbers.fake(n) changes the number with real join/leave events.
+  var fakeM = /[?&](?:playtest=)?climbers=(\d+)|[?&]playtest=hero-presence\b/.exec(location.search), fakeOn = !!fakeM, fakeIds = [], fakeSeq = 0;
+  function fake(n) {
+    n = Math.max(0, Math.min(99, n | 0));
+    while (fakeIds.length < n) { var id = 'fake-' + (++fakeSeq); fakeIds.push(id); count = fakeIds.length; started = true; emit('join', { id: id, name: 'climber ' + fakeSeq, count: count }); emit('count', { count: count }); }
+    while (fakeIds.length > n) { var gone = fakeIds.shift(); count = fakeIds.length; emit('leave', { id: gone, name: 'climber', count: count }); emit('count', { count: count }); }
+    if (n === 0 && !started) { started = true; emit('count', { count: 0 }); }
+  }
+
   function begin() {
+    if (fakeOn) { fake(parseInt(fakeM[1] || '0', 10)); return; }
     document.addEventListener('visibilitychange', onVisibility);
     if (visible()) connect();
   }
@@ -87,5 +101,5 @@
   if (document.readyState === 'complete') whenIdle();
   else window.addEventListener('load', whenIdle);
 
-  window.hawkesClimbers = { count: function () { return count; }, connected: function () { return !!net; } };
+  window.hawkesClimbers = { count: function () { return count; }, connected: function () { return !!net || fakeOn; }, fake: function (n) { if (fakeOn) fake(n); }, fakeMode: function () { return fakeOn; } };
 })();
