@@ -4,7 +4,8 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
+  if (/^climbers=\d+$/.test(which || '')) which = 'hero-presence';
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence'];
   var GAME_IDS = ['smoke', 'game-start', 'game-fail', 'fail-load'];
   var playtestOn = false;
   try {
@@ -115,6 +116,76 @@
     ev('layout-shift', shifts + ' shifts, score ' + run.metrics.layoutShiftScore);
     if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore + ' (over 0.1)');
     ev('hero-play-href', play ? play.getAttribute('href') : 'MISSING');
+    finish('done');
+  }
+
+  // Hero presence: the live chip and ghost climbers follow climbers:* events (faked, no network, by ?playtest=hero-presence
+  // or ?playtest=climbers=N): 0 -> 3 -> 8 -> 10 (cap) -> 2 -> offline, with the hero layout measured the whole time.
+  async function heroPresence() {
+    var P = window.sickofitPresence, C = window.hawkesClimbers;
+    var hero = document.querySelector('[data-hero]'), play = document.getElementById('start-button'), chip = document.querySelector('[data-presence]');
+    run.state.scene = 'Landing: hero presence'; ev('scene', 'Landing: hero presence');
+    if (!P || !C || !chip) { problem('bug', 'hero presence chip is missing'); finish('error'); return; }
+    window.scrollTo(0, 0);
+    await sleep(1200);
+    var shifts = 0, shiftSum = 0;
+    try { new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { if (!e.hadRecentInput) { shifts++; shiftSum += e.value; } }); }).observe({ type: 'layout-shift', buffered: true }); } catch (e) {}
+    var box = function () { var a = hero.getBoundingClientRect(), b = play.getBoundingClientRect(), c = chip.getBoundingClientRect(); return [a.height, b.top, b.left, c.top].map(Math.round).join(','); };
+    var layout0 = box();
+    var rm = P.state().reducedMotion;
+    var at = q.get('at') || '';
+    var snap = function (label) { var s = P.state(); ev('presence-' + label, 'text="' + s.text + '" ghosts=' + s.ghostEls + ' paused=' + s.paused + ' state=' + s.state); return s; };
+    var setN = async function (n, label) { if (C.fakeMode()) C.fake(n); else problem('bug', 'not in fake mode (open with ?playtest=hero-presence)'); await sleep(1500); return snap(label); };
+    var s = snap('start');
+    if (/Quiet down there\. Be the first\./.test(s.text) === false) problem('bug', 'quiet chip text is wrong: ' + s.text);
+    if (s.ghostEls) problem('bug', 'ghosts show with nobody climbing');
+    run.state.progress = 0.2;
+    if (at === 'offline') {
+      window.dispatchEvent(new CustomEvent('climbers:offline', { detail: { attempt: 1, retryIn: 2000 } }));
+      await sleep(800);
+      s = snap('offline');
+      if (s.state !== 'offline' || s.text.indexOf('Quiet down there') < 0) problem('bug', 'offline chip does not show the friendly message');
+      if (s.ghostEls) problem('bug', 'ghosts remain while offline');
+    } else {
+      s = await setN(3, 'three');
+      if (s.text.indexOf('3 climbing right now') !== 0) problem('bug', 'chip does not read "3 climbing right now": ' + s.text);
+      if (!rm && s.ghostEls !== 3) problem('bug', 'expected 3 ghosts, saw ' + s.ghostEls);
+      if (rm && s.ghostEls) problem('bug', 'ghosts show with reduced motion');
+      run.state.progress = 0.4;
+      s = await setN(8, 'eight');
+      if (s.text.indexOf('8 climbing') !== 0) problem('bug', 'chip does not read 8: ' + s.text);
+      if (!rm && s.ghostEls !== 8) problem('bug', 'expected 8 ghosts, saw ' + s.ghostEls);
+      s = await setN(10, 'ten');
+      if (s.text.indexOf('10 climbing') !== 0) problem('bug', 'chip does not read 10: ' + s.text);
+      if (s.ghostEls > 8) problem('bug', 'ghosts exceed the cap of 8: ' + s.ghostEls);
+      run.state.progress = 0.6;
+      s = await setN(2, 'two');
+      if (!rm && s.ghostEls !== 2) problem('bug', 'ghosts did not fade when climbers left: ' + s.ghostEls);
+      var far = document.getElementById('trailer') || document.body;
+      window.scrollTo(0, far.getBoundingClientRect().top + window.scrollY + 200);
+      await sleep(800);
+      s = snap('scrolled-away');
+      if (!rm && !s.paused) problem('bug', 'ghosts keep drifting while the hero is off-screen');
+      window.scrollTo(0, 0); await sleep(800);
+      s = snap('scrolled-back');
+      if (!rm && s.paused) problem('bug', 'ghosts did not resume on return');
+      await setN(0, 'zero');
+      s = P.state();
+      if (s.text.indexOf('Quiet down there') < 0) problem('bug', 'chip does not return to the quiet message at 0');
+      window.dispatchEvent(new CustomEvent('climbers:offline', { detail: { attempt: 1, retryIn: 2000 } }));
+      await sleep(600);
+      s = snap('offline');
+      if (s.state !== 'offline') problem('bug', 'offline event did not put the chip in the offline state');
+    }
+    var layout1 = box();
+    ev('hero-layout', layout0 + ' -> ' + layout1 + ' (hero height, PLAY top, PLAY left, chip top)');
+    if (layout0 !== layout1) problem('bug', 'hero layout moved while presence changed: ' + layout0 + ' -> ' + layout1);
+    var overflow = document.documentElement.scrollWidth - window.innerWidth;
+    run.metrics.horizontalOverflow = overflow;
+    ev('hero-width', 'inner=' + window.innerWidth + ' overflow=' + overflow);
+    if (overflow > 1) problem('bug', 'sideways scroll (' + overflow + 'px)');
+    run.metrics.layoutShifts = shifts; run.metrics.layoutShiftScore = Math.round(shiftSum * 1000) / 1000;
+    if (shiftSum > 0.1) problem('bug', 'layout shift score ' + run.metrics.layoutShiftScore);
     finish('done');
   }
 
@@ -586,6 +657,7 @@
       { id: 'trailer', title: 'Landing page: poster, play click, Watch on YouTube link', seconds: 20, tags: ['smoke'] },
       { id: 'about', title: 'Landing about: click About, FAQ and Credits; story word count, FAQ answers (free, account, phone support), team credits', seconds: 15, tags: ['smoke'] },
       { id: 'descent', title: 'Descent: scroll each floor, counting number, quip, sound toggle plays voice once, no sideways scroll, credits in accordion', seconds: 30, tags: ['full'] },
+      { id: 'hero-presence', title: 'Hero presence: live chip counts 0, 3, 8 (cap), 2 and goes quiet offline; ghosts enter, fade and pause off-screen; hero layout never moves', seconds: 20, tags: ['full'], starts: ['live', 'offline'] },
       { id: 'share', title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist', seconds: 12, tags: [] },
       { id: 'descent-assets', title: 'Descent asset pack: layered art, quips, voice and ambience for Shaft + Floors 1000–997', seconds: 45, tags: ['full'] }]; },
     start: async function (id, options) {
@@ -613,7 +685,7 @@
         }, 20);
         return new Promise(function () {});
       }
-      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, about, descent, share, descent-assets)');
+      if (LANDING_IDS.indexOf(id) < 0) throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, trailer, hero, toy, toy-wrap, hero-presence, about, descent, share, descent-assets)');
       var reqAt = String(options.at || q.get('at') || '');
       if (run && !run.done && run.id === id && String(run.at || '') === reqAt) return;
       t0 = performance.now();
@@ -625,6 +697,7 @@
         else if (id === 'toy-wrap') await toyWrap(options);
         else if (id === 'about') await about();
         else if (id === 'descent') await descent();
+        else if (id === 'hero-presence') await heroPresence();
         else if (id === 'share') await share();
         else await play();
       } catch (e) { problem('bug', 'bot error: ' + (e && e.message || e)); finish(/timed out/.test(String(e && e.message)) ? 'stuck' : 'error'); }
