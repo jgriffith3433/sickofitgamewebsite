@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Rewind toy: module test | Sick of It</title>
+  <style>
+    html,body{margin:0;background:#0a0405;color:#f0cdbf;font:16px/1.4 Arial,sans-serif}
+    main{width:min(420px,calc(100% - 24px));margin:0 auto;padding:16px 0 32px}
+    h1{font-size:20px;margin:0 0 4px}
+    p{margin:0 0 12px;color:#c9aea3;font-size:14px}
+    #stage{position:relative;width:100%;height:240px;overflow:hidden;margin:0 0 12px;border-radius:12px;background:#140708}
+    .row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+    button.t{min-height:44px;padding:6px 14px;border-radius:10px;border:1px solid #6a4a40;background:#2a1210;color:#f0cdbf;font:700 14px Arial,sans-serif}
+    button.t:disabled{opacity:.4}
+    #log{margin:0;padding:10px;border-radius:8px;background:#000;color:#9fd0ff;font:12px/1.5 monospace;white-space:pre-wrap;min-height:90px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Rewind toy: module test</h1>
+  <p>Mounts the toy as the Game page's loading screen would: progress bar, then Play, then teardown. Add <code>?auto=1</code> to run it by itself.</p>
+  <div id="stage" data-toy-test-stage></div>
+  <div class="row">
+    <button class="t" id="b-mount" type="button">Mount</button>
+    <button class="t" id="b-progress" type="button" disabled>Progress +25%</button>
+    <button class="t" id="b-100" type="button" disabled>Progress 100% + Play</button>
+    <button class="t" id="b-down" type="button" disabled>Teardown</button>
+  </div>
+  <pre id="log" role="log" aria-live="polite"></pre>
+</main>
+<script src="js/rewind-toy.js"></script>
+<script>
+(function () {
+  var stage = document.getElementById('stage'), logEl = document.getElementById('log');
+  var toy = null, pct = 0, errors = 0;
+  function log(m) { logEl.textContent += m + '\n'; }
+  window.addEventListener('error', function (e) { errors++; log('ERROR: ' + e.message); });
+  function btns() {
+    document.getElementById('b-mount').disabled = !!toy;
+    ['b-progress', 'b-100', 'b-down'].forEach(function (id) { document.getElementById(id).disabled = !toy; });
+  }
+  function mount() {
+    if (toy) return;
+    toy = window.SickOfItToy.mount(stage, { progress: true });
+    pct = 0;
+    if (!toy) { log('mount: no canvas support'); return; }
+    toy.onPlay(function () { log('onPlay: Play pressed'); });
+    toy.setProgress(0);
+    log('mounted, progress 0');
+    btns();
+  }
+  function progress(p) { pct = Math.min(100, p); toy.setProgress(pct); log('progress ' + pct); }
+  function done() { progress(100); toy.showPlay(); log('showPlay'); }
+  function down() {
+    toy.teardown(); toy = null;
+    log('teardown: stage children=' + stage.children.length + ', errors=' + errors);
+    btns();
+  }
+  document.getElementById('b-mount').addEventListener('click', mount);
+  document.getElementById('b-progress').addEventListener('click', function () { progress(pct + 25); });
+  document.getElementById('b-100').addEventListener('click', done);
+  document.getElementById('b-down').addEventListener('click', down);
+  window.toyTest = { mount: mount, progress: progress, done: done, teardown: down, errors: function () { return errors; }, toy: function () { return toy; } };
+  if (/[?&]auto=1/.test(location.search)) {
+    mount();
+    var i = 0, t = setInterval(function () {
+      i++; progress(i * 25);
+      if (i >= 4) { clearInterval(t); done(); setTimeout(down, 1500); }
+    }, 500);
+  }
+})();
+</script>
+</body>
+</html>
