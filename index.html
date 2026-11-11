@@ -115,7 +115,7 @@
       .d-layer.mid{mix-blend-mode:screen;opacity:.8}
       .d-layer.far{filter:brightness(.7)}
       .d-streaks{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(255,200,140,.35) 14px 16px,transparent 16px 40px);background-size:100% 400px;filter:blur(1px)}
-      .d-info{position:absolute;left:0;right:0;bottom:0;padding:48px 20px 28px;background:linear-gradient(transparent,rgba(11,6,5,.92) 40%)}
+      .d-info{position:absolute;left:0;right:0;bottom:0;padding:48px 20px calc(28px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(11,6,5,.92) 40%)}
       .d-num{font:900 clamp(48px,14vw,120px)/1 Arial,sans-serif;color:#ff9d2e;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px #000}
       .d-label{letter-spacing:.12em;text-transform:uppercase;color:#b9a59d;font-size:13px}
       .d-quip{font-size:clamp(18px,4.5vw,28px);font-style:italic;color:#fff;max-width:720px;margin-top:6px;transition:opacity .4s}
@@ -134,7 +134,7 @@
       footer nav-links a{margin:0 10px}
       footer .links a{margin:0 10px;color:#b9a59d;text-decoration:none}
       .hawkes-credit{margin:.8rem 0 0;font:12px/1.5 Arial,sans-serif;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.45)}.hawkes-credit a{display:inline-block;white-space:nowrap;color:rgba(255,255,255,.6);text-decoration:none}.hawkes-credit a:hover{color:#fff}.hawkes-credit strong{font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}.hawkes-credit-sep{margin:0 .6em}
-      @media(max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit a{display:block;margin-top:2px}.btn.big{padding:18px 40px;font-size:22px}nav .wrap{gap:12px}}
+      @media(max-width:480px){.hawkes-credit-sep{display:none}.hawkes-credit a{display:block;margin-top:2px}.btn.big{padding:18px 40px;font-size:22px}nav .wrap{gap:12px}.d-info{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}.hawkes-credit-pinned{position:static;left:auto;right:auto;bottom:auto;z-index:auto;padding:12px 16px}}
       @media(max-width:390px){.hero{padding:48px 0 40px}.hero-stage{width:calc(100% - 16px);gap:12px}.rewind-toy{height:150px;flex-basis:100%}.btn.big{padding:16px 28px;font-size:20px}}
       #install-banner{position:fixed;top:0;left:0;width:100%;background:rgba(30,30,30,.98);padding:12px 20px;display:none;align-items:center;justify-content:center;z-index:5000;opacity:0;transition:opacity .5s;gap:15px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)}
       #install-banner.show{display:flex;opacity:1}
