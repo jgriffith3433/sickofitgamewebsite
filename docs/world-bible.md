@@ -31,3 +31,11 @@ fades once the visitor moves; a near-miss dodge counter ticks while they play. A
 speaks in the hero's sardonic register — "Now do it for 1,000 floors." — with PLAY NOW into `Game/` (optional VO at
 `sounds/toy-payoff.wav` when Gen has imported it). With prefers-reduced-motion or no canvas, the looping rewind clip
 stands in for the toy.
+
+## Game page load (site)
+
+Opening `Game/` puts the visitor straight into the same Floor 1000 taste as a full-viewport load toy while the Unity
+build downloads: dodge and rewind with no menu text, a thin "Descending N%" ledge bar, and — when Hawkes Net is up —
+"N climbing right now" from the page spectator. When the build is ready, Play sits in the thumb zone; one tap tears
+the toy down, unlocks sound, and drops into the real game with no second Tap to play. If the load fails or stalls,
+Retry stays on the running toy. The page spectator closes the moment Play starts so the game's own chip owns the count.
