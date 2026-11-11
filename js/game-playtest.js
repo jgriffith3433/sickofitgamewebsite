@@ -119,6 +119,8 @@
   };
 
   async function gameStart() {
+    // This scenario clicks Play itself: tell Game/index.html not to dismiss the card when the build's own contract starts.
+    window.hawkesPageClicksPlay = true;
     var guide = document.getElementById('guide');
     var play = document.getElementById('guide-play');
     var tapsToGame = 0;
