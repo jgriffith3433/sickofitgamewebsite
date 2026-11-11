@@ -4,7 +4,7 @@
 (function () {
   var q = new URLSearchParams(location.search);
   var which = q.get('playtest');
-  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share'];
+  var LANDING_IDS = ['trailer', 'hero', 'toy', 'toy-wrap', 'about', 'descent', 'share', 'hero-presence'];
   var playtestOn = false;
   try {
     playtestOn = !!(navigator.webdriver || q.has('playtest') || q.has('hawkesPlaytest') || sessionStorage.getItem('hawkes.playtest'));
@@ -470,6 +470,13 @@
           tags: ['full']
         },
         {
+          id: 'hero-presence',
+          title: 'Hero presence: live chip counts 0, 3, 8 (cap), 2 and goes quiet offline; ghosts enter, fade and pause off-screen; hero layout never moves',
+          seconds: 20,
+          tags: ['full'],
+          starts: ['live', 'offline']
+        },
+        {
           id: 'share',
           title: 'Share cards: og title and image load; press page offers logo and screenshot downloads that exist',
           seconds: 12,
@@ -518,7 +525,7 @@
       }
       id = resolveId(id);
       if (id !== 'game-start' && id !== 'game-fail' && id !== 'climbers') {
-        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, descent-assets)');
+        throw new Error('no playtest scenario "' + id + '" (have: smoke, game-start, game-fail, toy, toy-wrap, hero, trailer, about, descent, share, hero-presence, descent-assets)');
       }
       if (run && !run.done && run.id === id) return;
       t0 = performance.now();
