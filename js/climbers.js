@@ -9,7 +9,7 @@
 (function () {
   var PROJECT = 'sickofit', ROOM = 't-lobby', BACKOFF = [2000, 5000, 10000, 30000];
   var SDK = 'https://net.hawkesgen.ai/sdk/hawkes-net@1.mjs';
-  var net = null, sdk = null, timer = null, attempt = 0, session = 0, count = 0, started = false;
+  var net = null, sdk = null, timer = null, attempt = 0, session = 0, count = 0, started = false, closed = false;
   var down = /[?&]playtest=net-down\b/.test(location.search);
   var endpoint = function () { return window.HAWKES_NET_ENDPOINT || 'https://net.hawkesgen.ai'; };
 
@@ -30,19 +30,19 @@
   }
 
   function fail(mine, err) {
-    if (mine !== session) return;
+    if (mine !== session || closed) return;
     var n = net; net = null;
     if (n) { try { n.leave('failed'); } catch (e) {} }
     var wait = attempt < BACKOFF.length ? BACKOFF[attempt] : null;
     attempt++;
     console.warn('[climbers] lobby unreachable (' + (err && err.message || err || 'closed') + ')' + (wait ? '; retrying in ' + wait / 1000 + ' s' : '; giving up until this tab is visible again'));
     emit('offline', { attempt: attempt, retryIn: wait });
-    if (wait != null) timer = setTimeout(connect, wait);
+    if (wait != null && !closed) timer = setTimeout(connect, wait);
   }
 
   async function connect() {
     timer = null;
-    if (!visible() || net) return;
+    if (closed || !visible() || net) return;
     var mine = ++session;
     try {
       if (down) throw new Error('net-down playtest');
@@ -75,6 +75,7 @@
   }
 
   function onVisibility() {
+    if (closed) return;
     if (visible()) { attempt = 0; if (!net && !timer) connect(); }
     else stop();
   }
@@ -90,16 +91,34 @@
   }
 
   function begin() {
+    if (closed) return;
     if (fakeOn) { fake(parseInt(fakeM[1] || '0', 10)); return; }
     document.addEventListener('visibilitychange', onVisibility);
     if (visible()) connect();
   }
   function whenIdle() {
+    if (closed) return;
     if ('requestIdleCallback' in window) requestIdleCallback(begin, { timeout: 4000 });
     else setTimeout(begin, 1500);
   }
   if (document.readyState === 'complete') whenIdle();
   else window.addEventListener('load', whenIdle);
 
-  window.hawkesClimbers = { count: function () { return count; }, connected: function () { return !!net || fakeOn; }, fake: function (n) { if (fakeOn) fake(n); }, fakeMode: function () { return fakeOn; } };
+  // close(): drop the page spectator for good (Game page calls this when Play starts so the build's own chip owns the count).
+  // A late idle/visibility callback must not rejoin after Play.
+  function close() {
+    closed = true;
+    fakeOn = false;
+    document.removeEventListener('visibilitychange', onVisibility);
+    stop();
+  }
+  window.hawkesClimbers = {
+    count: function () { return count; },
+    connected: function () { return !closed && (!!net || fakeOn); },
+    closed: function () { return closed; },
+    fake: function (n) { if (fakeOn && !closed) fake(n); },
+    fakeMode: function () { return fakeOn; },
+    close: close,
+    stop: close
+  };
 })();
