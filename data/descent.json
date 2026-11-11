@@ -7,11 +7,13 @@
     "story": "sickofitgame-unity Docs/Story.md (level beats table)",
     "levels": "Assets/GameConfig/levels/Floor{1000,999,998,997}.json",
     "art": "Shaft band/meadow/marker WebPs from Tools/Web/site-images.sh; press-kit village shots and character art already on this site",
-    "audio": "Assets/Audio/Generated/*.mp3 from the Unity repo, compressed to 24 kHz 48 kbps mono MP3 (no new GPU generation)"
+    "audio": "Unity Assets/Audio/Generated/*.mp3 for VO ids vo_shaft_great / vo_landing_intro / vo_landing_999 / vo_f998_taken / vo_imprun_ours (exact caption text from Floor JSON / shaft heroVoice); compressed to 24 kHz 48 kbps mono. Same Gen player voice DzkD7I4tf5i3KSaB4cz5. No new Gen takes — no caption-only floors remain.",
+    "captionMatch": "Quip text equals Unity showText/heroVoice line for each floor; voiceText mirrors quip."
   },
   "heroVoice": {
     "actor": "player",
     "voiceId": "DzkD7I4tf5i3KSaB4cz5",
+    "name": "Sick Of It - player",
     "model": "eleven_v3",
     "channels": 1,
     "sampleRate": 24000,

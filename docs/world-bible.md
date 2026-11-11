@@ -17,9 +17,11 @@ Package: `data/descent.json` with media under `data/descent/{shaft,1000,999,998,
 | 997 | Imp Run | "Those are ours." (`vo_imprun_ours`) | Imps haul his village's diamonds. Same sack, every loop. |
 
 Quips are the hero's opening voiced line from each floor's Unity level JSON, not the warm-grey Story.md beats
-(those stay unvoiced narration in-game). Every floor in this pack has a voice clip copied from
-`Assets/Audio/Generated/`; `captionOnly` in the JSON stays empty until a later floor lacks VO.
-Preview / playtest: `data/descent/preview.html?playtest=descent-assets`.
+(those stay unvoiced narration in-game). Every floor in this pack has a mono hero voice clip (Unity
+`Assets/Audio/Generated/` VO ids, compressed to 24 kHz 48 kbps); `voiceText` mirrors the caption exactly.
+Hero voice: ElevenLabs `DzkD7I4tf5i3KSaB4cz5` ("Sick Of It - player") — tired, dry, deadpan. `captionOnly`
+stays empty until a later floor lacks VO. Landing playtest: `?playtest=descent`. Preview:
+`data/descent/preview.html?playtest=descent-assets`.
 
 ## Landing hero (site)
 

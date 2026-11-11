@@ -129,7 +129,11 @@
     var p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
     if (!still) {
       ls.forEach(function (l) { l.style.transform = 'translate3d(0,' + ((0.5 - p) * l.dataset.parallax * 160).toFixed(1) + 'px,0)'; });
-      var base = f.floor || 1001, n = Math.round(base + (1 - Math.min(1, p * 2.5)) * (f.floor ? 1 : 9));
+      // Numbered floors always show the caption's floor (label and big number agree when the quip plays).
+      // Shaft alone counts down through the fall (1001→1010 band) before Floor 1000.
+      var n = f.floor != null
+        ? f.floor
+        : Math.round(1001 + (1 - Math.min(1, p * 2.5)) * 9);
       num.textContent = fmt(n);
       var drop = Math.max(0, 1 - p * 6);
       streaks.style.opacity = drop.toFixed(2);
